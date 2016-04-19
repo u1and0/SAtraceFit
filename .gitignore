@@ -12,3 +12,5 @@
 *.pptx
 *.log
 confidential.py
+/old/
+/__pycache__/
