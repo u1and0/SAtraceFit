@@ -10,5 +10,5 @@
 
 *.csv
 *.pptx
-.*log
+*.log
 confidential.py

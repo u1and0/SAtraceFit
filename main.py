@@ -1,31 +1,42 @@
 '''
-main.py ver2.3
-<UPDATE2.3>
-外部に出したくない情報は別ファイルに格納(confidential.py)
-<INTRODUCTION>
-各モジュールを動かすメインファイル
-<ACTION>
-引数:なし(confidential.pyから変数を持ってくる)
-戻り値:なし(CSVファイルに書き込む)
-+ datelistにより、フィッティングを行う最初の日付から最後の日付までのリストを抽出する。
-	コンソールに出力
-+ (oldcsv,newcsv)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
-rawdataPathで、データの位置を指定する(日付)
-+ confidentialにより、rootディレクトリとfittingに必要な周波数を指定する。
-+ CSV_IOにより、CSVを読み込む。
-+ fittingDivにより、fittingを行う。
-+ CSV_IOにより、CSVを書き込む。
+## main.py ver2.3
 
-<USAGE>
+### UPDATE2.3
+外部に出したくない情報は別ファイルに格納(confidential.py)
+
+### INTRODUCTION
+各モジュールを動かすメインファイル
+
+### ACTION
+引数:
+dateFirst, dateLast : コーンソールから入力、テストの際はコード内で書き換える
+oldcsv, newcsv : コード内で書き換える
+
+戻り値:なし(CSVファイルに書き込む)
+
+1. datelistにより、フィッティングを行う最初の日付から最後の日付までのリストを抽出する。
+コンソールに出力
+2. (oldcsv,newcsv)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
+rawdataPathで、データの位置を指定する(日付)
+3. confidentialにより、rootディレクトリとfittingに必要な周波数を指定する。
+4. CSV_IOにより、CSVを読み込む。
+5. fittingDivにより、fittingを行う。
+6. CSV_IOにより、CSVを書き込む。
+
+
+### USAGE
 コマンドライン上にて
 python main.py <最初の日付> <最後の日付>
 フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
-<PLAN>
-プログラムを途中で止めるとこれまでの計算結果が記録されない
->>>writeメソッドが走るのはfor文の最後だから
-read, writeメソッドが走るタイミングを調整する
-read, writeメソッドを1つの関数に収めた
+CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
 	fitting>read>translate>update>translate>writeの流れは1セット
+
+### PLAN
+プログラムを途中で止めるとこれまでの計算結果が記録されない
+	>>>writeメソッドが走るのはfor文の最後だから
+	read, writeメソッドが走るタイミングを調整する
+二重起動すると強制終了される
+	マルチプロセスかができない
 '''
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 
@@ -41,7 +52,7 @@ dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリスト�
 print('\ndateList\n',dateList)
 
 ## __READ DATA FROM OLD CSV__________________________
-(oldcsv,newcsv)=('./SN160408.csv','./SN160408.csv')
+(oldcsv,newcsv)=('./160419.csv','./160419.csv')
 fittingResult={}
 from confidential import freq
 freqWave=freq()
