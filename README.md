@@ -1,5 +1,5 @@
 # SAtraceFit
-SAtraceによって収集された5分間隔のファイルを集計するPythonコードの説明を行う。
+SAtraceによって収集されたファイルを集計するPythonコードの説明
 
 
 
@@ -41,14 +41,14 @@ SAtraceによって収集された5分間隔のファイルを集計するPython
 ## main.py ver2.3
 
 __UPDATE2.3__
-外部に出したくない情報は別ファイルに格納(confidential.py)
+データファイルの場所と注目すべき周波数はconfidential.pyに記載
 
 __INTRODUCTION__
 各モジュールを動かすメインファイル
 
 __ACTION__
 引数:
-dateFirst, dateLast : コーンソールから入力、テストの際はコード内で書き換える
+dateFirst, dateLast : コンソールから入力、テストの際はコード内で書き換える
 oldcsv, newcsv : コード内で書き換える
 
 戻り値:なし(CSVファイルに書き込む)
@@ -75,8 +75,6 @@ __PLAN__
 > read, writeメソッドが走るタイミングを調整する
 + 二重起動すると強制終了される
 > マルチプロセスかができない
-
-
 
 
 
