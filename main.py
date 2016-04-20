@@ -1,13 +1,13 @@
 '''
 ## main.py ver2.3
 
-### UPDATE2.3
+__UPDATE2.3__
 外部に出したくない情報は別ファイルに格納(confidential.py)
 
-### INTRODUCTION
+__INTRODUCTION__
 各モジュールを動かすメインファイル
 
-### ACTION
+__ACTION__
 引数:
 dateFirst, dateLast : コーンソールから入力、テストの際はコード内で書き換える
 oldcsv, newcsv : コード内で書き換える
@@ -24,19 +24,18 @@ rawdataPathで、データの位置を指定する(日付)
 6. CSV_IOにより、CSVを書き込む。
 
 
-### USAGE
-コマンドライン上にて
-python main.py <最初の日付> <最後の日付>
-フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
-CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
-	fitting>read>translate>update>translate>writeの流れは1セット
+__USAGE__
++ コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
+	+ フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
++ CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
+	+ fitting>read>translate>update>translate>writeの流れは1セット
 
-### PLAN
-プログラムを途中で止めるとこれまでの計算結果が記録されない
-	>>>writeメソッドが走るのはfor文の最後だから
-	read, writeメソッドが走るタイミングを調整する
-二重起動すると強制終了される
-	マルチプロセスかができない
+__PLAN__
++ プログラムを途中で止めるとこれまでの計算結果が記録されない
+> writeメソッドが走るのはfor文の最後だから
+> read, writeメソッドが走るタイミングを調整する
++ 二重起動すると強制終了される
+> マルチプロセスかができない
 '''
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 

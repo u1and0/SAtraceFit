@@ -1,18 +1,23 @@
 """csv_dict_test ver0
-<INTRODUCTION>
+
+__INTRODUCTION__
 テストコード
 csvから読み込み
 ディクショナリ in ディクショナリ形式にして更新・ソート
-<ACTION>
-BLOCK1:各モジュールのインポートインポートする
+
+__ACTION__
+BLOCK1:各モジュールのインポート
 BLOCK2:csvの読み込みとデータ変換
 BLOCK3:データの追加
 BLOCK4:データ変換をしてcsvデータに書き込み
-<USAGE>
+
+__USAGE__
 JUST BUILD
-<UPDATE 0>
+
+__UPDATE 0__
 None
-<MODIFY PLAN>
+
+__PLAN__
 BLOCK3にフィッティングを行う機構を組み入れる
 もしくはBLOCK3以外をフィッティングするモジュールに組み入れ？
 datetime関数を使う

@@ -1,21 +1,21 @@
 '''
 ## datelist.py ver1.0
 
-### INTRODUCTION
+__INTRODUCTION__
 main.pyから2つの値が渡される
 2つの間の日付のリストを返す
 
-### ACTION
+__ACTION__
 yymmdd形式の6桁をdatetime関数で日付にする
 ddate1,2に代入する
 ddate1がddate2になるまで(while)
 ddate1を1日ずつ足して、リストに追加する(append)
 
-### USAGE
+__USAGE__
 引数 : 最初の日付yymmdd形式、最後の日付yymmdd形式
 戻り値 : 最初の日付から最後の日付を入れたリストyymmdd形式
 
-### UPDATE1.0
+__UPDATE1.0__
 first commit
 
 ## PLAN
