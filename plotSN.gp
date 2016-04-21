@@ -1,15 +1,15 @@
 ## -----------------------------------------------------------------------
-# plotSN.gp ver2.0
-# <INTRODUCTION>
-# SN比の時間推移を記録したSN.csvをプロットするgp
-# <ACTION>
+## plotSN.gp ver2.0
+# __UPDATE2.0__
+# awkコマンドを用いてcsvの見出し行を取得する
+# __INTRODUCTION__
+# SN比の時間推移を記録したSN.csvをプロットするgnuplotファイル
+# __ACTION__
 # x軸を時間軸にする
 # set datafile separator ","でデータ区切りをコンマにする(csvファイルなので。)
 # awkコマンドを用いてcsvの見出し行を取得する
-# <USAGE>
+# __USAGE__
 # JUST BUILD
-# <UPDATE2.0>
-# awkコマンドを用いてcsvの見出し行を取得する
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceGraph'
 file='160419.csv'
