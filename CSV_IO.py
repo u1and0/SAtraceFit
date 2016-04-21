@@ -16,19 +16,22 @@ from datetime import datetime
 def readCSV(filename):
 	'''
 	## readCSV.py ver1.1
-	__INTRODUCTION__
-	csvファイルの中身をディクショナリに入れるpy
-	引数：ファイル名
-	戻り値：ディクショナリ'mydict
-	__ACTION__
-	filenameにいれた名前のファイルを開く
-	リスト'reader'に格納する
-	リスト'reader'に対して0要素目をキーに、1要素目以降(リスト形式)を値にしたディクショナリ'mydict'を作成する
+
 	__UPDATE1.1__
 	クラス'csv.DictReader()'を使ってディクショナリ形式でcsvを取り出す。
 	キーは見出し(csvの1行目)
 	行を読むたびリスト'dictList'へ追加する
 	dictListを返す
+	
+	__INTRODUCTION__
+	csvファイルの中身をディクショナリに入れるpy
+	引数：ファイル名
+	戻り値：ディクショナリ`dictList`
+
+	__ACTION__
+	filenameにいれた名前のファイルを開く
+	リスト'reader'に格納する
+	リスト'reader'に対して0要素目をキーに、1要素目以降(リスト形式)を値にしたディクショナリ`dictList`を作成する
 	'''
 	if not os.path.isfile(filename):    #ファイルが存在しなければ
 		open(filename, "w").write("")    #空のファイルを作成する
