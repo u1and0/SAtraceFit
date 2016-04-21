@@ -1,28 +1,41 @@
 '''
-fittingDiv.py ver0.3.8
+## fittingDiv.py ver0.3.8
 
-<INTRODUCTION>
+__UPDATE0.3.8__
+datayとyyを比較することでS/N比が大体どれくらいか見積もることでfittingにかけるべきか否かわかる
+>fittingかけなくてすめば時間短縮
+>何故かfittingされちゃう1.0e+8みたいなデータもなくなる
+
+__INTRODUCTION__
 タイムスタンプを引数にフィッティング結果を返すpy
 
-<ACTION>
-引数:filebasename
-	タイムスタンプのこと。例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
-戻り値:ディクショナリ in ディクショナリ形式のフィッティング結果{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}}
+__ACTION__
+引数:
+
++ rawdata_directory
+>生データ置き場
+>rootディレクトリ+日付(yymmdd形式)
+>>SAtraceGraphで作成されたディレクトリ
++ filebasename
+> 拡張子を除いたファイル名
+> SAtraceによってタイムスタンプとされている
+> 例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
++ freqWave
+> フィッティングする周波数
+
+戻り値:フィッティング結果(ディクショナリ in ディクショナリ形式{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}})
 
 1. データをテキスト形式で読み込みdataにリストとして読み込み
 2. freqで指定した周波数の分だけfittingを行い
 3. データとフィッティング曲線をプロットする
 4. fittingする
 5. 表示するかしないか判断
-# 6. プロットして表示
+6. プロットして表示(オプション)
 7. ログを吐き出す
 8. ディクショナリ in ディクショナリを返す
 
-<UPDATE0.3.8>
-datayとyyを比較することでS?N比が大体どれくらいか見積もることでfittingにかけるべきか否かわかる
->>>fittingかけなくてすめば時間短縮
->>>何故かfittingされちゃう1.0e+8みたいなデータもなくなる
-<PLAN>
+__PLAN__
+None
 '''
 
 import numpy as np
@@ -50,6 +63,7 @@ def fitting(rawdata_directory,filebasename,freqWave):
 		return aa*np.exp(-(x-mu)**2/2/si**2)+yy
 
 	def logout(file,text):
+		'''ログファイルと標準出力にログを吐き出す'''
 		sys.stdout=open(file, "a")   #fileに上書き(a)で書き込む
 		print(text)
 		sys.stdout.close()
@@ -107,6 +121,7 @@ def fitting(rawdata_directory,filebasename,freqWave):
 
 
 # #__PLOT SSETTING__________________________
+# '''グラフ表示'''
 # 	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
 # 	plt.legend(loc='best',fancybox=True,fontsize='small')
 # 	plt.xlabel('Frequency[kHz]')
