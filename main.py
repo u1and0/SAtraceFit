@@ -59,13 +59,14 @@ print('\ndateList\n',dateList)
 ## __READ DATA FROM OLD CSV__________________________
 (oldcsv,newcsv)=('./160422_1.csv','./160422_1.csv')
 fittingResult={}
-from confidential import freq
-freqWave=freq()
+from confidential import freqWave
+from confidential import freqCarrier
+freqFreq=freqWave()+freqCarrier()
 from confidential import root
 rootPath=root()
 
 import CSV_IO as c
-c.editCSV(oldcsv,newcsv,fittingResult,freqWave)
+c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
 	#oldcsvを読み込んでnewcsvに入れる
 	#fittingResultは空なのでoldcsvがnewcsvにコピーされるだけ
 
@@ -86,9 +87,9 @@ for datedir in dateList:
 
 	# __FITTING__________________________
 	for fitfile in filebasename[165:180] :
-		from fittingDiv391 import fitting
-		fittingResult.update(fitting(rawdataPath,fitfile,freqWave))    #fittingを行い、結果をfittingResultに貯める
+		from fittingDiv392 import fitting
+		fittingResult.update(fitting(rawdataPath,fitfile,freqWave(),freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
 
-		c.editCSV(newcsv,newcsv,fittingResult,freqWave)    #newcsvにフィッティング結果を書き込む
+		c.editCSV(newcsv,newcsv,fittingResult,freqFreq)    #newcsvにフィッティング結果を書き込む
 		fittingResult={}    #fittingResultのリセット

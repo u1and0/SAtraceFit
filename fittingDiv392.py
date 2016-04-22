@@ -1,8 +1,10 @@
 '''
-fittingDiv.py ver0.3.9.1
+fittingDiv.py ver0.3.9.2
 
-<UPDATE0.3.9.1>
-fittingの結果(パラメータ0)がSN比
+<UPDATE0.3.9.2>
+SN抽出対象をWaveとCarrierに分けた
+	Wave: 帯域持つのでfitする
+	Carrier: 帯域持たず、fitすると異常に高い値が出ることがあるので、fitせず、その点の値をSNとする。
 
 <INTRODUCTION>
 タイムスタンプを引数にフィッティング結果を返すpy
@@ -31,7 +33,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-def fitting(rawdata_directory,filebasename,freqWave):
+def fitting(rawdata_directory,filebasename,freqWave,freqCarrier):
 	dataname=rawdata_directory+'\\'+filebasename+'.txt'
 	## __DATA__________________________
 	data=np.loadtxt(dataname)   #load text data as array
@@ -75,36 +77,65 @@ def fitting(rawdata_directory,filebasename,freqWave):
 
 	fittingDict={}
 	for freqFit in freqWave:   #freqWaveの周波数を片っ端からfit
-		SNratio=datay[freq2pnt(freqFit)]-yy
-		if SNratio>0:    #SN比が0以上ならfittingする
-			print(freqFit,'kHz SNratio=',SNratio,'fitting now...')
-		## __FITTING RANGE__________________________
-			fitrange=0.2
-			dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
-			datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
+		# SNratio=datay[freq2pnt(freqFit)]-yy
+		# if SNratio>0:    #SN比が0以上ならfittingする
+		# 	print(freqFit,'kHz SNratio might be about',SNratio,'\nFit now...')
+		## __FIT__________________________
+		fitrange=0.2
+		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
+		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 
-			parameter_initial=[0,freq2pnt(freqFit),0.3]    #aa,mu,si
-			paramater_optimal, covariance = optimize.curve_fit(gauss, dataxRange, datayRange, p0=parameter_initial, maxfev = 100000000)   #±200Hzをフィッティングする
-			fity= gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2])   #fitting結果を反映したfinnting関数
-			# SNratio=paramater_optimal[0]
-			fittingFreqFit=pnt2freq(paramater_optimal[1])
-			waveWidth=abs(paramater_optimal[2])
+		parameter_initial=[0,freq2pnt(freqFit),0.3]    #fitting初期値aa,mu,si
+		paramater_optimal, covariance = optimize.curve_fit(gauss, dataxRange, datayRange, p0=parameter_initial, maxfev = 100000000)
+		fity= gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2])   #fitting結果を反映したfinnting関数
+		SNratio=paramater_optimal[0]
+		fittingFreqFit=pnt2freq(paramater_optimal[1])
+		waveWidth=abs(paramater_optimal[2])
 
 		## __INDICATE CONDITION__________________________
-			if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-				plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
+		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
+			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
 
 			## __FITTING LOG__________________________
-				print('\tOK! Plot as fit data...')
+			print('\tOK! Plot as fit data...')
 			## __OUTPUT__________________________
-				SNTrue=paramater_optimal[0]
-				fittingDict[str(freqFit)+'kHz']=SNTrue  #周波数をキー、SN比を値にしてfittngDictへ入れる
-				# fittingDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
-				# fittingDict[str(freqFit)+'kHz']=list(paramater_optimal)[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			else : print('\tNG! Wave is too broad, narrow or out of range...')
-			print('\tSNratio=',SNratio,'waveWidth=',waveWidth)
-			logout('./FittingLog3.log',"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
+			fittingDict[str(freqFit)+'kHz']=list(paramater_optimal)[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
+		else : print('\tNG! Wave is too broad, narrow or out of range...')
+		print('\tSNratio=',SNratio,'waveWidth=',waveWidth)
+		logout('./FittingLog3.log',"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
+		# else : print(freqFit,'kHz SNratio might be about',SNratio,'pass to fit...')
+
+
+
+
+
+
+	for freqFit in freqCarrier:   #freqCarrierの周波数を片っ端からfit
+		SNratio=datay[freq2pnt(freqFit)]-yy
+		if SNratio>10:    #SN10以上で信号ありとする
+			print(freqFit,'kHz SNratio=',SNratio,'fitting now...')
+		## __FIT__________________________
+			fitrange=0.2
+			dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
+			datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
+
+			parameter_initial=[0,freq2pnt(freqFit),0.3]    #fitting初期値aa,mu,si
+			paramater_optimal, covariance = optimize.curve_fit(gauss, dataxRange, datayRange, p0=parameter_initial, maxfev = 100000000)
+			fity= gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2])   #fitting結果を反映したfinnting関数
+			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
+
+			## __OUTPUT__________________________
+			fittingDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
+			print('\tSNratio=',SNratio)
 		else : print(freqFit,'kHz SNratio=',SNratio,'pass to fit...')
+
+
+
+
+
+				# fittingDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
+
+
 	outData={}
 	outData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=fittingDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
 	print('\nFitting Result\n',outData)
