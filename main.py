@@ -57,7 +57,7 @@ dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリスト�
 print('\ndateList\n',dateList)
 
 ## __READ DATA FROM OLD CSV__________________________
-(oldcsv,newcsv)=('./160422.csv','./160422.csv')
+(oldcsv,newcsv)=('./160422_1.csv','./160422_1.csv')
 fittingResult={}
 from confidential import freq
 freqWave=freq()
@@ -85,7 +85,7 @@ for datedir in dateList:
 
 
 	# __FITTING__________________________
-	for fitfile in filebasename :
+	for fitfile in filebasename[165:180] :
 		from fittingDiv391 import fitting
 		fittingResult.update(fitting(rawdataPath,fitfile,freqWave))    #fittingを行い、結果をfittingResultに貯める
 

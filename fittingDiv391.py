@@ -70,7 +70,7 @@ def fitting(rawdata_directory,filebasename,freqWave):
 	indicateCondition='((waveWidth<=15 and SNratio>10) or (15<waveWidth<50)) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
 	import datetime
 	d = datetime.datetime.today()
-	logout('./log/FittingLog1.log','\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
+	logout('./log/FittingLog3.log','\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
 
@@ -99,12 +99,13 @@ def fitting(rawdata_directory,filebasename,freqWave):
 			## __FITTING LOG__________________________
 				print('\tOK! Plot as fit data...')
 			## __OUTPUT__________________________
-				fittingDict[str(freqFit)+'kHz']=paramater_optimal[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
+				SNTrue=paramater_optimal[0]
+				fittingDict[str(freqFit)+'kHz']=SNTrue  #周波数をキー、SN比を値にしてfittngDictへ入れる
 				# fittingDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 				# fittingDict[str(freqFit)+'kHz']=list(paramater_optimal)[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			else : print('\tNG! Wave is too broad or narrow or out of alignment...')
+			else : print('\tNG! Wave is too broad, narrow or out of range...')
 			print('\tSNratio=',SNratio,'waveWidth=',waveWidth)
-			logout('./FittingLog1.log',"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
+			logout('./FittingLog3.log',"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
 		else : print(freqFit,'kHz SNratio=',SNratio,'pass to fit...')
 	outData={}
 	outData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=fittingDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
@@ -115,13 +116,13 @@ def fitting(rawdata_directory,filebasename,freqWave):
 
 
 #__PLOT SSETTING__________________________
-	# plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
-	# plt.legend(loc='best',fancybox=True,fontsize='small')
-	# plt.xlabel('Frequency[kHz]')
-	# plt.ylabel('Power[dBm]')
-	# plt.grid(True)
-	# plt.ylim(ymax=30)
-	# plt.show()
+	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
+	plt.legend(loc='best',fancybox=True,fontsize='small')
+	plt.xlabel('Frequency[kHz]')
+	plt.ylabel('Power[dBm]')
+	plt.grid(True)
+	plt.ylim(ymax=30)
+	plt.show()
 
 
 
