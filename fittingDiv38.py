@@ -90,7 +90,7 @@ def fitting(rawdata_directory,filebasename,freqWave):
 	fittingDict={}
 	for freqFit in freqWave:   #freqWaveの周波数を片っ端からfit
 		if datay[freq2pnt(freqFit)]-yy>5:    #SN比が5以上ならfittingする
-			print('周波数',freqFit,'のSN比が',abs(datay[freq2pnt(freqFit)]-yy),'なのでフィッティングします')
+			print('周波数',freqFit,'のSN比が',abs(datay[freq2pnt(freqFit)]-yy),'っぽいのでフィッティングします')
 		## __FITTING RANGE__________________________
 			fitrange=0.2
 			dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]

@@ -11,14 +11,14 @@
 # __USAGE__
 # JUST BUILD
 ## -----------------------------------------------------------------------
-cd 'C:/home/python/SAtraceGraph'
-file='160419.csv'
+cd 'C:/home/python/SAtraceFit'
+file='160422.csv'
 # file='SN160330_1.csv'
 
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-set xrange ["2016-1-1 00:00:00":"2016-1-19 23:59:59"]
+# set xrange ["2016-1-1 00:00:00":"2016-1-19 23:59:59"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 
