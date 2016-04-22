@@ -48,9 +48,14 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 ## __DATE LIST__________________________
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
+# if not (len(dateFirst)==6 or len(dateLast)==6):
+# 	print('Input as \'yymmdd\'')
+# 	print('Example >>> 2016/5/12')
+# 	print('You must type \'160512\'')
+# 	break
 ## ____________________________
-dateFirst='160110'
-dateLast='160110'
+dateFirst='160105'
+dateLast='160108'
 
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
