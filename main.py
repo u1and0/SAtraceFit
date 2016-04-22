@@ -86,7 +86,7 @@ for datedir in dateList:
 
 
 	# __FITTING__________________________
-	for fitfile in filebasename[165:180] :
+	for fitfile in filebasename :
 		from fittingDiv392 import fitting
 		fittingResult.update(fitting(rawdataPath,fitfile,freqWave(),freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 

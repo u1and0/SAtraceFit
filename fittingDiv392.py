@@ -70,40 +70,41 @@ def fitting(rawdata_directory,filebasename,freqWave,freqCarrier):
 	indicateCondition='((waveWidth<=15 and SNratio>10) or (15<waveWidth<50)) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
 	import datetime
 	d = datetime.datetime.today()
-	logout('./log/FittingLog3.log','\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
+	logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
+	logout(logfile,'\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
 
 
 	fittingDict={}
 	for freqFit in freqWave:   #freqWaveの周波数を片っ端からfit
-		# SNratio=datay[freq2pnt(freqFit)]-yy
-		# if SNratio>0:    #SN比が0以上ならfittingする
-		# 	print(freqFit,'kHz SNratio might be about',SNratio,'\nFit now...')
-		## __FIT__________________________
-		fitrange=0.2
-		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
-		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
+		SNratio=datay[freq2pnt(freqFit)]-yy
+		if SNratio>0:    #SN比が0以上ならfittingする
+			print(freqFit,'kHz SNratio might be about',SNratio,'\nFit now...')
+			## __FIT__________________________
+			fitrange=0.2
+			dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
+			datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 
-		parameter_initial=[0,freq2pnt(freqFit),0.3]    #fitting初期値aa,mu,si
-		paramater_optimal, covariance = optimize.curve_fit(gauss, dataxRange, datayRange, p0=parameter_initial, maxfev = 100000000)
-		fity= gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2])   #fitting結果を反映したfinnting関数
-		SNratio=paramater_optimal[0]
-		fittingFreqFit=pnt2freq(paramater_optimal[1])
-		waveWidth=abs(paramater_optimal[2])
+			parameter_initial=[0,freq2pnt(freqFit),0.3]    #fitting初期値aa,mu,si
+			paramater_optimal, covariance = optimize.curve_fit(gauss, dataxRange, datayRange, p0=parameter_initial, maxfev = 100000000)
+			fity= gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2])   #fitting結果を反映したfinnting関数
+			SNratio=paramater_optimal[0]
+			fittingFreqFit=pnt2freq(paramater_optimal[1])
+			waveWidth=abs(paramater_optimal[2])
 
-		## __INDICATE CONDITION__________________________
-		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
+			## __INDICATE CONDITION__________________________
+			if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
+				plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
 
-			## __FITTING LOG__________________________
-			print('\tOK! Plot as fit data...')
-			## __OUTPUT__________________________
-			fittingDict[str(freqFit)+'kHz']=list(paramater_optimal)[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		else : print('\tNG! Wave is too broad, narrow or out of range...')
-		print('\tSNratio=',SNratio,'waveWidth=',waveWidth)
-		logout('./FittingLog3.log',"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
-		# else : print(freqFit,'kHz SNratio might be about',SNratio,'pass to fit...')
+				## __FITTING LOG__________________________
+				print('\tOK! Plot as fit data...')
+				## __OUTPUT__________________________
+				fittingDict[str(freqFit)+'kHz']=list(paramater_optimal)[0]  #周波数をキー、SN比を値にしてfittngDictへ入れる
+			else : print('\tNG! Wave is too broad, narrow or out of range...')
+			print('\tSNratio=',SNratio,'waveWidth=',waveWidth)
+			logout(logfile,"paramater%s = %s" % (str(freqFit), paramater_optimal))   # fitting結果を書き込む
+		else : print(freqFit,'kHz SNratio might be about',SNratio,'pass to fit...')
 
 
 
@@ -145,13 +146,13 @@ def fitting(rawdata_directory,filebasename,freqWave,freqCarrier):
 
 
 #__PLOT SSETTING__________________________
-	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
-	plt.legend(loc='best',fancybox=True,fontsize='small')
-	plt.xlabel('Frequency[kHz]')
-	plt.ylabel('Power[dBm]')
-	plt.grid(True)
-	plt.ylim(ymax=30)
-	plt.show()
+	# plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
+	# plt.legend(loc='best',fancybox=True,fontsize='small')
+	# plt.xlabel('Frequency[kHz]')
+	# plt.ylabel('Power[dBm]')
+	# plt.grid(True)
+	# plt.ylim(ymax=30)
+	# plt.show()
 
 
 
