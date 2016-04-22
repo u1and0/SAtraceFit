@@ -50,7 +50,7 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # dateLast=input('Input Last Date>>> ')
 ## ____________________________
 dateFirst='160110'
-dateLast='160111'
+dateLast='160110'
 
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
@@ -86,7 +86,7 @@ for datedir in dateList:
 
 	# __FITTING__________________________
 	for fitfile in filebasename :
-		from fittingDiv38 import fitting
+		from fittingDiv391 import fitting
 		fittingResult.update(fitting(rawdataPath,fitfile,freqWave))    #fittingを行い、結果をfittingResultに貯める
 
 

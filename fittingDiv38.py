@@ -120,15 +120,15 @@ def fitting(rawdata_directory,filebasename,freqWave):
 
 
 
-# #__PLOT SSETTING__________________________
-# '''グラフ表示'''
-# 	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
-# 	plt.legend(loc='best',fancybox=True,fontsize='small')
-# 	plt.xlabel('Frequency[kHz]')
-# 	plt.ylabel('Power[dBm]')
-# 	plt.grid(True)
-# 	plt.ylim(ymax=30)
-# 	plt.show()
+#__PLOT SSETTING__________________________
+	'''グラフ表示'''
+	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
+	plt.legend(loc='best',fancybox=True,fontsize='small')
+	plt.xlabel('Frequency[kHz]')
+	plt.ylabel('Power[dBm]')
+	plt.grid(True)
+	plt.ylim(ymax=30)
+	plt.show()
 
 
 

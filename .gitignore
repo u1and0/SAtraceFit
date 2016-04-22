@@ -14,4 +14,5 @@
 *.pdf
 confidential.py
 /old/
+/log/
 /__pycache__/

@@ -18,7 +18,7 @@ file='160422.csv'
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-# set xrange ["2016-1-1 00:00:00":"2016-1-19 23:59:59"]
+set xrange ["2016-1-10 00:00:00":"2016-1-10 23:59:59"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 
@@ -28,4 +28,4 @@ set datafile separator ","
 
 ## __MULTIPLOT__________________________
 lastrow=system(sprintf('awk -F, "NR==1{print NF}" %s',file))
-p for[i=2:4] file u 1:i w lp ps 0.5 pt 7 title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
+p for[i=2:lastrow] file u 1:i w lp ps 0.5 pt 7 title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
