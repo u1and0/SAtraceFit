@@ -14,8 +14,8 @@ def dataglob(directory):
 	return dataname
 
 
-## __TEST__________________________
-# rawdata_directory=('C:\\home\\gnuplot\\SAout\\151201\\rawdata\\trace')   #データの入ったディレクトリ
-# print(dataglob(rawdata_directory))
-# print('First of list',dataglob(rawdata_directory)[1])
-# print('Last 3 of list',dataglob(rawdata_directory)[285:])
+# __TEST__________________________
+rawdata_directory=('C:\\home\\gnuplot\\SAout\\151201\\rawdata\\trace')   #データの入ったディレクトリ
+print(dataglob(rawdata_directory))
+print('First of list',dataglob(rawdata_directory)[1])
+print('Last 3 of list',dataglob(rawdata_directory)[285:])

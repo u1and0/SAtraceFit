@@ -18,7 +18,7 @@ file='160422_1.csv'
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-set xrange ["2016-1-1 00:00:00":"2016-1-10 23:59:59"]
+# set xrange ["2016-1-1 00:00:00":"2016-1-10 23:59:59"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 

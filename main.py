@@ -1,5 +1,9 @@
 '''
-## main.py ver2.3
+## main.py ver2.4
+
+__UPDATE2.4__
+ファイル名はフルパスで受ける
+globname.pyを新規作成
 
 __UPDATE2.3__
 データファイルの場所と注目すべき周波数はconfidential.pyに記載
@@ -43,9 +47,36 @@ __PLAN__
 + GUI化する予定
 > TKinter
 '''
-from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
+
+
+## __READ DATA FROM OLD CSV__________________________
+(oldcsv,newcsv)=('./160422_1.csv','./160425.csv')
+fittingResult={}
+import confidential as co
+freqFreq=co.freqWave()+co.freqCarrier()
+rootPath=co.root()
+
+import CSV_IO as c
+c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
+	#oldcsvを読み込んでnewcsvに入れる
+	#fittingResultは空なのでoldcsvがnewcsvにコピーされるだけ
+
+## __FILE BASE NAME__________________________
+# for datedir in dateList:
+# 	import glob,os
+# 	rawdataPath=str(rootPath)+str(datedir)+'\\rawdata\\trace'
+# 	print(rawdataPath)
+# 	filename=glob.glob(rawdataPath+'\\*.txt')
+# 	filebasename=[os.path.basename(r)[:-4] for r in filename]    #filebasenameを取得
+# 	if filebasename:
+# 		print('\nfilebasename\n',filebasename)
+# 	else:
+# 		print('\nNo file in',rawdataPath,'!!!\n')
+
+
 
 ## __DATE LIST__________________________
+from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
 # if not (len(dateFirst)==6 or len(dateLast)==6):
@@ -54,47 +85,20 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # 	print('You must type \'160512\'')
 # 	break
 ## ____________________________
-dateFirst='160105'
-dateLast='160108'
-
+dateFirst='160121'
+dateLast='160121'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
-print('\ndateList\n',dateList)
+print('\nNow extracting from these dates.\n',dateList)
 
-## __READ DATA FROM OLD CSV__________________________
-(oldcsv,newcsv)=('./160422_1.csv','./160422_1.csv')
-fittingResult={}
-from confidential import freqWave
-from confidential import freqCarrier
-freqFreq=freqWave()+freqCarrier()
-from confidential import root
-rootPath=root()
+import globname as g
+filepath=g.globname(co.rootroot(),dateList)
 
-import CSV_IO as c
-c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
-	#oldcsvを読み込んでnewcsvに入れる
-	#fittingResultは空なのでoldcsvがnewcsvにコピーされるだけ
-
-## __FILE BASE NAME__________________________
-for datedir in dateList:
-	import glob,os
-	rawdataPath=str(rootPath)+str(datedir)+'\\rawdata\\trace'
-	print(rawdataPath)
-	filename=glob.glob(rawdataPath+'\\*.txt')
-	filebasename=[os.path.basename(r)[:-4] for r in filename]    #filebasenameを取得
-	if filebasename:
-		print('\nfilebasename\n',filebasename)
-	else:
-		print('\nNo file in',rawdataPath,'!!!\n')
+# __FITTING__________________________
+for fitfile in filepath[71:73] :
+	from fittingDiv393 import fitting
+	fittingResult.update(fitting(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
 
-
-
-	# __FITTING__________________________
-	for fitfile in filebasename :
-		from fittingDiv392 import fitting
-		fittingResult.update(fitting(rawdataPath,fitfile,freqWave(),freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
-
-
-		c.editCSV(newcsv,newcsv,fittingResult,freqFreq)    #newcsvにフィッティング結果を書き込む
-		fittingResult={}    #fittingResultのリセット
+	c.editCSV(newcsv,newcsv,fittingResult,freqFreq)    #newcsvにフィッティング結果を書き込む
+	fittingResult={}    #fittingResultのリセット
