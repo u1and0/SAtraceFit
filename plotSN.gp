@@ -12,7 +12,7 @@
 # JUST BUILD
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceFit'
-file='160422_1.csv'
+file='160425.csv'
 # file='SN160330_1.csv'
 
 set grid

@@ -50,7 +50,7 @@ __PLAN__
 
 
 ## __READ DATA FROM OLD CSV__________________________
-(oldcsv,newcsv)=('./160422_1.csv','./160425.csv')
+(oldcsv,newcsv)=('./160425.csv','./160425.csv')
 fittingResult={}
 import confidential as co
 freqFreq=co.freqWave()+co.freqCarrier()
@@ -85,8 +85,8 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # 	print('You must type \'160512\'')
 # 	break
 ## ____________________________
-dateFirst='160121'
-dateLast='160121'
+dateFirst='160112'
+dateLast='160112'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)
@@ -95,8 +95,11 @@ import globname as g
 filepath=g.globname(co.rootroot(),dateList)
 
 # __FITTING__________________________
-for fitfile in filepath[71:73] :
+for fitfile in filepath :
 	from fittingDiv393 import fitting
+	import numpy as np
+	data=np.loadtxt(fitfile)   #load text data as array
+	if not len(data):continue    #dataが空なら次のループ
 	fittingResult.update(fitting(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
 

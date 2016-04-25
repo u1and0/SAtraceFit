@@ -44,9 +44,6 @@ import sys
 def fitting(dataname,freqWave,freqCarrier):
 	## __DATA__________________________
 	data=np.loadtxt(dataname)   #load text data as array
-	if not data:
-		break
-
 	datax=data[:,0]   #各リストの0番目をdataxに代入
 	datay=data[:,2]
 
@@ -93,7 +90,7 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 	## __FITTING LOG__________________________
-	indicateCondition='(0<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
+	indicateCondition='SNratio>5 and (0<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
 	import datetime
 	d = datetime.datetime.today()
 	logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
@@ -141,7 +138,7 @@ def fitting(dataname,freqWave,freqCarrier):
 			## __OUTPUT__________________________
 			fittingDict[str(freqFit)+'kHz']=signaldiv  #周波数をキー、SN比を値にしてfittngDictへ入れる
 			print('\tS/N=',signaldiv)
-			logout(logfile,"Carrier  nofitting %s : %s" % (str(freqFit), [signaldiv,freqFit,'NoWidth']))   # S/Nを書き込む
+			logout(logfile,"Carrier nofitting %s : %s" % (str(freqFit), [signaldiv,freqFit,'NoWidth']))   # S/Nを書き込む
 		else : print(freqFit,'kHz S/N=',signaldiv,'pass to fit...')
 
 
@@ -154,21 +151,19 @@ def fitting(dataname,freqWave,freqCarrier):
 	outData={}
 	import globname as g
 	import os
-	outData[d.strptime(os.path.basename(dataname)[:-4],'%Y%m%d_%H%M%S')]=fittingDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
+	filebasename=os.path.basename(dataname)[:-4]
+	outData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=fittingDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
 	print('\nFitting Result\n',outData)
 
 
 
-
-
-##__PLOT SSETTING__________________________
-	# plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
-	# plt.legend(loc='best',fancybox=True,fontsize='small')
-	# plt.xlabel('Frequency[kHz]')
-	# plt.ylabel('Power[dBm]')
-	# plt.grid(True)
-	# plt.ylim(ymax=30)
-	# plt.show()
+	plt.title(d.strptime(filebasename,'%Y%m%d_%H%M%S'))
+	plt.legend(loc='best',fancybox=True,fontsize='small')
+	plt.xlabel('Frequency[kHz]')
+	plt.ylabel('Power[dBm]')
+	plt.grid(True)
+	plt.ylim(ymax=30)
+	plt.show()
 
 
 
@@ -191,3 +186,7 @@ freqWave=[22.2,23.4,24.0,24.25,24.8]   #帯域持った周波数
 freqWave+=[23.0,24.1,24.5,25.0,25.1,25.2,25.5]   #キャリアのみの周波数
 fitting(rawdata_directory,filebasename,freqWave)
 '''
+a='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/160112/rawdata/trace/20160112_132741.txt'
+b=[24.25]
+c=[]
+fitting(a,b,c)
