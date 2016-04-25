@@ -3,7 +3,7 @@
 
 __UPDATE0.3.9.3__
 failebasenameではなくglobで拾われるフルパスに変更
-
+indicateConditionにSNratio>5 を追加した(前処理で5以上と判断されても、fitしてみてS/N５以上とは限らないため)
 
 __UPDATE0.3.9.2__
 SN抽出対象をWaveとCarrierに分けた
@@ -180,13 +180,9 @@ def fitting(dataname,freqWave,freqCarrier):
 
 '''
 TEST
-rawdata_directory=('C:\\home\\gnuplot\\SAout\\151201\\rawdata\\trace')
-filebasename='20151201_000344'
-freqWave=[22.2,23.4,24.0,24.25,24.8]   #帯域持った周波数
-freqWave+=[23.0,24.1,24.5,25.0,25.1,25.2,25.5]   #キャリアのみの周波数
-fitting(rawdata_directory,filebasename,freqWave)
-'''
-a='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/160112/rawdata/trace/20160112_132741.txt'
+import confidential as co
+a=co.rootroot()+'20160112_132741.txt'
 b=[24.25]
 c=[]
 fitting(a,b,c)
+'''
