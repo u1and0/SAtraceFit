@@ -50,9 +50,9 @@ __PLAN__
 
 
 ## __READ DATA FROM OLD CSV__________________________
-(oldcsv,newcsv)=('./160425.csv','./160425.csv')
-fittingResult={}
 import confidential as co
+(oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
+fittingResult={}
 freqFreq=co.freqWave()+co.freqCarrier()
 rootPath=co.root()
 
@@ -79,14 +79,9 @@ c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
-# if not (len(dateFirst)==6 or len(dateLast)==6):
-# 	print('Input as \'yymmdd\'')
-# 	print('Example >>> 2016/5/12')
-# 	print('You must type \'160512\'')
-# 	break
 ## ____________________________
-dateFirst='160112'
-dateLast='160112'
+dateFirst='160302'
+dateLast='160302'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)

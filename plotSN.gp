@@ -12,13 +12,14 @@
 # JUST BUILD
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceFit'
-file='160425.csv'
+file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN.csv'
+# file='160425.csv'
 # file='SN160330_1.csv'
 
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-# set xrange ["2016-1-1 00:00:00":"2016-1-10 23:59:59"]
+set xrange ["2016-3-1 00:00:00":"2016-3-31 23:59:59"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 
@@ -28,4 +29,4 @@ set datafile separator ","
 
 ## __MULTIPLOT__________________________
 lastrow=system(sprintf('awk -F, "NR==1{print NF}" %s',file))
-p for[i=2:lastrow] file u 1:i w lp ps 0.5 pt 7 title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
+p for[i=2:lastrow] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))

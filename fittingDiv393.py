@@ -102,24 +102,19 @@ def fitting(dataname,freqWave,freqCarrier):
 	fittingDict={}
 	for freqFit in freqWave:   #freqWaveの周波数を片っ端からfit
 		signaldiv=datay[freq2pnt(freqFit)]-yy
+		print('\n')
 		if signaldiv>5:    #SN比が5以上ならfittingする
-			print(freqFit,'kHz S/N might be about',signaldiv,'\nFit now...')
+			print('%skHz S/N might be about'% freqFit,signaldiv,'\nFit now...' )
 			## __FIT__________________________
 			ttt=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(datax,datay,freqFit))
-
-
-			## __INDICATE CONDITION__________________________
 			if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-				plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
-
-				## __FITTING LOG__________________________
 				print('\tOK! Plot as fit data...')
-				## __OUTPUT__________________________
+				plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
 				fittingDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 			else : print('\tNG! Wave is too broad, narrow or out of range...')
 			print('\tS/N=',SNratio,'waveWidth=',waveWidth)
 			logout(logfile,"Wave fitting %s : %s" % (str(freqFit), ttt[1:4]))   # fitting結果を書き込む
-		else : print(freqFit,'kHz S/N might be about',signaldiv,'pass to fit...')
+		else : print('%skHz S/N might be about' % freqFit,signaldiv,'pass to fit...')
 
 
 
@@ -129,17 +124,21 @@ def fitting(dataname,freqWave,freqCarrier):
 	for freqFit in freqCarrier:   #freqCarrierの周波数を片っ端からfit
 		signaldiv=datay[freq2pnt(freqFit)]-yy
 		if signaldiv>10:    #SN10以上で信号ありとする
-			print(freqFit,'kHz S/N might be about',signaldiv,'\nFit now...')
+			print('%skHz S/N might be about' % freqFit,signaldiv,'\nFit now...')
+
 			## __FIT__________________________
 			# グラフ表示するだけ。csvには吐き出さない
 			ttt=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(datax,datay,freqFit))
-			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
-
-			## __OUTPUT__________________________
+			
+			## __INDICATE CONDITDION__________________________
+			if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
+				plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
+			else : print('\tNG! Wave is too broad, narrow or out of range...')
+			## plotするかどうかはconditionによるが、csv抽出はfittingの結果を反映させないので、if文関係なしなのでアンインデント
 			fittingDict[str(freqFit)+'kHz']=signaldiv  #周波数をキー、SN比を値にしてfittngDictへ入れる
 			print('\tS/N=',signaldiv)
 			logout(logfile,"Carrier nofitting %s : %s" % (str(freqFit), [signaldiv,freqFit,'NoWidth']))   # S/Nを書き込む
-		else : print(freqFit,'kHz S/N=',signaldiv,'pass to fit...')
+		else : print('%skHz S/N=' % freqFit ,signaldiv,'pass to fit...')
 
 
 
@@ -178,11 +177,11 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 
-'''
-TEST
-import confidential as co
-a=co.rootroot()+'20160112_132741.txt'
-b=[24.25]
-c=[]
-fitting(a,b,c)
-'''
+# '''
+# TEST
+# '''
+# import confidential as co
+# a=co.rootroot()+'20160112_132741.txt'
+# b=co.freqWave
+# c=co.freqCarrier
+# fitting(a,b,c)

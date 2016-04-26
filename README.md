@@ -336,8 +336,8 @@ ____________________________
 |v00|v10|v20 |... |v(n,0)|
 |v01|v11|v21 |... |v(n,1)|
 |v02|v12|v22 |... |v(n,2)|
-.
-.
+|.| | | | |
+|.| | | | |
 |v(0,m-1)|v(1,m-1)|v(2,m-1)|...v(n,m-1)|
 |v(0,m)|v(1,m)|v(2,m)|...v(n,m)|
 
@@ -551,3 +551,41 @@ set datafile separator ","でデータ区切りをコンマにする(csvファ�
 awkコマンドを用いてcsvの見出し行を取得する
 __USAGE__
 JUST BUILD
+
+
+
+
+
+
+
+
+
+
+## globname.py ver1.0
+
+__UPDATE1.0__
+first commit
+
+__USAGE__
+mainから呼び出す
+引数:
+	rootpath: 
+	dateFirst:最初の日付yymmdd形式
+	dateLast:最後の日付yymmdd形式
+戻り値:リストfilebesename
+ ~~イテレータでもいいな~~
+
+globのhelpによるとリストを返すらしい
+>    glob(pathname, *, recursive=False)
+>        Return a list of paths matching a pathname pattern.
+
+
+__INTRODUCTION__
+最初と最後の日付をもらって、その中のfilebasename(拡張子無しのファイル名)
+
+__ACTION__
+datetime関数で日付の形式に直して
+globの
+
+__PLAN__
+none

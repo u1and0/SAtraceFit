@@ -131,7 +131,7 @@ def editCSV(readcsv,writecsv,appendDict,freqWave):
 	dictdict=t.csvtodata(readed)    #csvからこれまでのフィッティング結果を読み込む
 
 ## __UPDATE DICTIONARY__________________________
-	print('\nAppend dictionary in dictionary\n',appendDict)
+	# print('\nAppend dictionary in dictionary\n',appendDict)
 	dictdict.update(appendDict)    #mainモジュール内で計算したフィッティングの結果と併せる
 
 ## __WRITE TO CSV__________________________

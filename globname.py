@@ -1,5 +1,5 @@
 '''
-## glob_basename.py ver1.0
+## globname.py ver1.0
 
 __UPDATE1.0__
 first commit
@@ -8,18 +8,15 @@ __USAGE__
 mainから呼び出す
 引数:
 	rootpath: 
-	dateFirst:最初の日付yymmdd形式
-	dateLast:最後の日付yymmdd形式
-戻り値:リストfilebesename
- ~~イテレータでもいいな~~
-
-globのhelpによるとリストを返すらしい
->    glob(pathname, *, recursive=False)
->        Return a list of paths matching a pathname pattern.
+	dateFirst:最初の日付yymmdd文字列が入ったリスト形式形式
+	dateLast:最後の日付yymmdd文字列が入ったリスト形式形式
+戻り値:
+	filebesename:リスト形式
 
 
 __INTRODUCTION__
-最初と最後の日付をもらって、その中のfilebasename(拡張子無しのファイル名)
+rootroot()下のファイルのフルパスを返す。
+ただし、最初と最後の日付をもらって、その間にある日付のファイルに限る
 
 __ACTION__
 datetime関数で日付の形式に直して
