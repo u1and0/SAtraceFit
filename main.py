@@ -77,11 +77,11 @@ c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
 
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-# dateFirst=input('Input First Date>>> ')
-# dateLast=input('Input Last Date>>> ')
+dateFirst=input('Input First Date>>> ')
+dateLast=input('Input Last Date>>> ')
 ## ____________________________
-dateFirst='160302'
-dateLast='160302'
+# dateFirst='160128'
+# dateLast='160128'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)
@@ -91,7 +91,7 @@ filepath=g.globname(co.rootroot(),dateList)
 
 # __FITTING__________________________
 for fitfile in filepath :
-	from fittingDiv393 import fitting
+	from fittingDiv394 import fitting
 	import numpy as np
 	data=np.loadtxt(fitfile)   #load text data as array
 	if not len(data):continue    #dataが空なら次のループ

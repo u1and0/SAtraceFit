@@ -12,6 +12,7 @@
 *.pptx
 *.log
 *.pdf
+*.tmp
 confidential.py
 /old/
 /doc/
