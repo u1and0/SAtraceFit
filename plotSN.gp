@@ -29,4 +29,4 @@ set datafile separator ","
 
 ## __MULTIPLOT__________________________
 lastrow=system(sprintf('awk -F, "NR==1{print NF}" %s',file))
-p for[i=2:3] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
+p for[i=3:5] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))

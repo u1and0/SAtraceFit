@@ -4,7 +4,7 @@
 __UPDATE1.0__
 ノイズフロア、power追加
 まだ0.3.9.4と中身同じ
-
+fittingDict作成される際に'NoiseFloor'をキーに値yy入れる
 
 
 __UPDATE0.3.9.4__
@@ -110,7 +110,7 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 
-	fittingDict={}
+	fittingDict={'NoiseFloor':yy}
 	f=[]
 	f=freqWave+freqCarrier
 	for freqFit in f:   #freqWaveの周波数を片っ端からfit

@@ -51,7 +51,10 @@ __PLAN__
 
 ## __READ DATA FROM OLD CSV__________________________
 import confidential as co
-(oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
+inp=input('Input File name>>> ')
+oldcsv=newcsv=co.root()+'SN'+inp
+# oldcsv,newcsv=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
+# (oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
 fittingResult={}
 freqFreq=co.freqWave()+co.freqCarrier()
 rootPath=co.root()
