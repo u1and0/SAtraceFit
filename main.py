@@ -30,29 +30,32 @@ rawdataPathで、データの位置を指定する(日付)
 
 __USAGE__
 
-+ コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
-	+ フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
-+ CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
-	+ fitting>read>translate>update>translate>writeの流れは1セット
+* コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
+	* フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
+* CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
+	* fitting>read>translate>update>translate>writeの流れは1セット
 
 __PLAN__
 
-+ プログラムを途中で止めるとこれまでの計算結果が記録されない
+* プログラムを途中で止めるとこれまでの計算結果が記録されない
 > writeメソッドが走るのはfor文の最後だから
 > read, writeメソッドが走るタイミングを調整する
-+ 二重起動すると強制終了される
+* 二重起動すると強制終了される
 > マルチプロセスかができない
-+ exe化する予定
+* exe化する予定
 > py2exe
-+ GUI化する予定
+* GUI化する予定
 > TKinter
+* ファイル名の指定
+>第一引数：作成するファイル名
+>第二引数：取り込み元のファイル名(オプション)
 '''
 
 
 ## __READ DATA FROM OLD CSV__________________________
 import confidential as co
 inp=input('Input File name>>> ')
-oldcsv=newcsv=co.root()+'SN'+inp
+oldcsv=newcsv=co.root()+inp+'.csv'
 # oldcsv,newcsv=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
 # (oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
 fittingResult={}
