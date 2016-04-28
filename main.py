@@ -1,5 +1,15 @@
 '''
-## main.py ver2.4
+## main.py ver3.0
+
+__UPDATE3.0__
+
+* fittingの廃止→SN_PowerSearchに変更
+* SN_PowerSearchに2つの関数
+	* SN, Power作成
+* csvは２つ吐き出す
+	* SN
+	* Power
+
 
 __UPDATE2.4__
 ファイル名はフルパスで受ける
@@ -54,10 +64,10 @@ __PLAN__
 
 ## __READ DATA FROM OLD CSV__________________________
 import confidential as co
-inp=input('Input File name>>> ')
-oldcsv=newcsv=co.root()+inp+'.csv'
-# oldcsv,newcsv=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
-# (oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
+# inp=input('Input File name>>> ')
+# oldcsv=newcsv=co.root()+inp+'.csv'
+## ____________________________
+(oldcsv,newcsv)=(co.root()+'\\SN.csv',co.root()+'\\SN.csv')
 fittingResult={}
 freqFreq=co.freqWave()+co.freqCarrier()
 rootPath=co.root()
@@ -67,27 +77,14 @@ c.editCSV(oldcsv,newcsv,fittingResult,freqFreq)
 	#oldcsvを読み込んでnewcsvに入れる
 	#fittingResultは空なのでoldcsvがnewcsvにコピーされるだけ
 
-## __FILE BASE NAME__________________________
-# for datedir in dateList:
-# 	import glob,os
-# 	rawdataPath=str(rootPath)+str(datedir)+'\\rawdata\\trace'
-# 	print(rawdataPath)
-# 	filename=glob.glob(rawdataPath+'\\*.txt')
-# 	filebasename=[os.path.basename(r)[:-4] for r in filename]    #filebasenameを取得
-# 	if filebasename:
-# 		print('\nfilebasename\n',filebasename)
-# 	else:
-# 		print('\nNo file in',rawdataPath,'!!!\n')
-
-
 
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-dateFirst=input('Input First Date>>> ')
-dateLast=input('Input Last Date>>> ')
+# dateFirst=input('Input First Date>>> ')
+# dateLast=input('Input Last Date>>> ')
 ## ____________________________
-# dateFirst='160128'
-# dateLast='160128'
+dateFirst='160128'
+dateLast='160128'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)
@@ -96,12 +93,12 @@ import globname as g
 filepath=g.globname(co.rootroot(),dateList)
 
 # __FITTING__________________________
-for fitfile in filepath :
-	from fittingDiv394 import fitting
+for fitfile in filepath[0:10] :
+	import SN_PowerSearch as s
 	import numpy as np
 	data=np.loadtxt(fitfile)   #load text data as array
 	if not len(data):continue    #dataが空なら次のループ
-	fittingResult.update(fitting(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
+	fittingResult.update(s.fitting(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
 
 	c.editCSV(newcsv,newcsv,fittingResult,freqFreq)    #newcsvにフィッティング結果を書き込む

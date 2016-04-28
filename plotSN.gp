@@ -12,14 +12,14 @@
 # JUST BUILD
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceFit'
-file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN2016_03.csv'
-set term png
-set output './doc/pic/pattern_compare.png'
+file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN2016_02.csv'
+# set term png
+# set output './doc/pic/pattern_compare.png'
 
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-set xrange ["2016-3-17 00:00:00":"2016-3-24 00:00:00"]
+set xrange ["2016-2-4 00:00:00":"2016-2-13 00:00:00"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 set ylabel 'S/N ratio[dBm]'
@@ -29,4 +29,4 @@ set ylabel 'S/N ratio[dBm]'
 
 ## __MULTIPLOT__________________________
 lastrow=system(sprintf('awk -F, "NR==1{print NF}" %s',file))
-p for[i=2:10:8] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
+p for[i=2:4:2] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
