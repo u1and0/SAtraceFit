@@ -1,5 +1,5 @@
 '''
-## fittingDiv.py ver1.0
+## SN_PowerSearch.py ver1.0
 
 __UPDATE1.0__
 gaussの調整

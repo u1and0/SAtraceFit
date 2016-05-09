@@ -12,7 +12,7 @@
 # JUST BUILD
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceFit'
-file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN.csv'
+file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SNfitting.csv'
 # set term png
 # set output './doc/pic/pattern_compare.png'
 
@@ -29,4 +29,4 @@ set ylabel 'S/N ratio[dBm]'
 
 ## __MULTIPLOT__________________________
 lastrow=system(sprintf('awk -F, "NR==1{print NF}" %s',file))
-p for[i=2:4:2] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
+p for[i =9:12] file u 1:i w l title system(sprintf('awk -F, "NR==1{print $%d}" %s',i,file))
