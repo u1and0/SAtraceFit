@@ -125,8 +125,8 @@ def fitting(dataname,freqWave,freqCarrier):
 
 	## __FITTING LOG__________________________
 	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
-	logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
-	logprint('\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
+	# logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
+	# logprint('\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
 
@@ -139,11 +139,11 @@ def fitting(dataname,freqWave,freqCarrier):
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			print("OK! Wave fitting %skHz : %s" % (freqFit, fitresult[1:4]))   # fitting結果を表示
+			# print("OK! Wave fitting %skHz : %s" % (freqFit, fitresult[1:4]))   # fitting結果を表示
 			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
 			SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 			powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		else: print('NG! %skHz is too too broad, narrow or out of range!'% freqFit)
+		# else: print('NG! %skHz is too too broad, narrow or out of range!'% freqFit)
 	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
 		sigrange=0.01
@@ -153,8 +153,8 @@ def fitting(dataname,freqWave,freqCarrier):
 			plt.plot(pnt2freq(dataxRange),datayRange,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
 			SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 			powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			print('OK! Carrier search %skHz : [%s]'% (freqFit,SNratio))
-		else: print('NG! %skHz is too weak!'% freqFit)
+			# print('OK! Carrier search %skHz : [%s]'% (freqFit,SNratio))
+		# else: print('NG! %skHz is too weak!'% freqFit)
 
 
 	SNData,powerData={},{}
@@ -163,7 +163,6 @@ def fitting(dataname,freqWave,freqCarrier):
 	SNData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=SNDict  #ファイル名(=タイムスタンプ)をキーに、SNDictを値にSNDataへ入れる
 	powerData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=powerDict  #ファイル名(=タイムスタンプ)をキーに、powerDictを値にpowerDataへ入れる
 	outData=[SNData,powerData]
-	print('\nFitting Result\n',outData)
 
 	# plotshowing(filebasename)
 

@@ -91,8 +91,8 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
 ## ____________________________
-dateFirst='151225'
-dateLast='151225'
+dateFirst='151228'
+dateLast='151228'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)
