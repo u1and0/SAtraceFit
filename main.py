@@ -1,5 +1,11 @@
 '''
-## main.py ver3.0
+## main.py ver4.0
+
+__UPDATE4.0__
+* やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)←まだ手つけてない
+* csvの書き込みは1ファイルのfitting後ごとに行う
+
+
 
 __UPDATE3.0__
 
@@ -103,11 +109,10 @@ for fitfile in filepath :
 	fittingResult.update(s.SNSearch(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 	powerResult.update(s.PowerSearch(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
-## __WRITEING__________________________
-## 書き込みは一回だけ
-print('Write to SN', fittingResult)
-print('Write to Power', powerResult)
+	## __WRITEING__________________________
+	print('Write to SN', fittingResult)
+	print('Write to Power', powerResult)
 
-c.editCSV(newcsvS,newcsvS,fittingResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-(fittingResult,powerResult)=({},{})    #fittingResultのリセット
+	c.editCSV(newcsvS,newcsvS,fittingResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	(fittingResult,powerResult)=({},{})    #fittingResultのリセット
