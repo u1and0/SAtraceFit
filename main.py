@@ -82,17 +82,17 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-# dateFirst=input('Input First Date>>> ')
-# dateLast=input('Input Last Date>>> ')
+dateFirst=input('Input First Date>>> ')
+dateLast=input('Input Last Date>>> ')
 ## ____________________________
-dateFirst='160129'
-dateLast='160130'
+# dateFirst='160129'
+# dateLast='160130'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates.\n',dateList)
 
 import globname as g
-filepath=g.globname(co.rootroot(),dateList)
+filepath=g.globname(co.rootroot(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 # __FITTING__________________________
 for fitfile in filepath :
@@ -103,6 +103,8 @@ for fitfile in filepath :
 	fittingResult.update(s.SNSearch(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 	powerResult.update(s.PowerSearch(fitfile,co.freqWave(),co.freqCarrier()))    #fittingを行い、結果をfittingResultに貯める
 
+## __WRITEING__________________________
+## 書き込みは一回だけ
 print('Write to SN', fittingResult)
 print('Write to Power', powerResult)
 

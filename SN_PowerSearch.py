@@ -175,7 +175,7 @@ def SNSearch(dataname,freqWave,freqCarrier):
 
 	## __FITTING LOG__________________________
 	indicateCondition='SNratio>5'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
-	logprint('\n# %s\n# Filename: %s.%s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,SNSearch,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
+	print('\n# %s\n# Filename: %s.%s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,SNSearch,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
 	rtnDict={}
@@ -190,13 +190,13 @@ def SNSearch(dataname,freqWave,freqCarrier):
 			# plotfit(dataxRange,datayRange,freqFit)
 			rtnDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 		else : print('\tNG! Wave is too weak...')
-		logprint("SNratio %skHz : %s" % (str(freqFit), SNratio))   # fitting結果を書き込む
+		# logprint("SNratio %skHz : %s" % (str(freqFit), SNratio))   # fitting結果を書き込む
 
 	outData={}
 	import os
 	filebasename=os.path.basename(dataname)[:-4]
 	outData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=rtnDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
-	logprint('\nResult\n%s'% outData)
+	# logprint('\nResult\n%s'% outData)
 	# plotshowing(filebasename)
 	return outData
 
@@ -210,7 +210,7 @@ def PowerSearch(dataname,freqWave,freqCarrier):
 
 	## __FITTING LOG__________________________
 	indicateCondition='SNratio>5'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
-	logprint('\n# %s\n# Filename: %s.%s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,SNSearch,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
+	print('\n# %s\n# Filename: %s.%s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,SNSearch,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
 	rtnDict={}
@@ -218,21 +218,22 @@ def PowerSearch(dataname,freqWave,freqCarrier):
 		SNratio=datay[freq2pnt(freqFit)]-yy
 		power=datay[freq2pnt(freqFit)]
 		if eval(indicateCondition):    #SN比が5以上ならウェーブとみなす
-			print('\tOK! Plot as fit data...')
+			# print('\tOK! Plot as fit data...')
 			fitrange=0.2
 			dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 			datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 
 			# plotfit(dataxRange,datayRange,freqFit)
 			rtnDict[str(freqFit)+'kHz']=power  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		else : print('\tNG! Wave is too weak...')
-		logprint("power %skHz : %s" % (str(freqFit), power))   # fitting結果を書き込む
+		else : 
+			# print('\tNG! Wave is too weak...')
+		# logprint("power %skHz : %s" % (str(freqFit), power))   # fitting結果を書き込む
 
 	outData={}
 	import os
 	filebasename=os.path.basename(dataname)[:-4]
 	outData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=rtnDict  #ファイル名(=タイムスタンプ)をキーに、fittngDictを値にoutDataへ入れる
-	logprint('\nResult\n%s'% outData)
+	# logprint('\nResult\n%s'% outData)
 	# plotshowing(filebasename)
 	return outData
 

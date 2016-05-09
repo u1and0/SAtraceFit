@@ -12,14 +12,14 @@
 # JUST BUILD
 ## -----------------------------------------------------------------------
 cd 'C:/home/python/SAtraceFit'
-file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN2016_02.csv'
+file='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/SN.csv'
 # set term png
 # set output './doc/pic/pattern_compare.png'
 
 set grid
 set xdata time
 set timefmt "%Y-%m-%d %H:%M:%S"
-set xrange ["2016-2-4 00:00:00":"2016-2-13 00:00:00"]
+# set xrange ["2016-2-4 00:00:00":"2016-2-13 00:00:00"]
 set format x "%m/%d\n%H:%M"
 set datafile separator ","
 set ylabel 'S/N ratio[dBm]'
