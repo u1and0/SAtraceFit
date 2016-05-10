@@ -15,7 +15,10 @@ from datetime import datetime
 
 def readCSV(filename):
 	'''
-	## readCSV.py ver1.1
+	## readCSV.py ver1.1.1
+
+	__UPDATE1.1.1__
+	print文コメントアウト
 
 	__UPDATE1.1__
 	クラス'csv.DictReader()'を使ってディクショナリ形式でcsvを取り出す。
@@ -41,7 +44,7 @@ def readCSV(filename):
 	for rows in reader:   #列のラベルにoutparamを追加
 		rows['DateTime']=datetime.strptime(rows['DateTime'],'%Y-%m-%d %H:%M:%S')    #キーがDateTimeの値を文字列から時間に変換
 		dictList.append(rows)
-	print('\nRead from',filename)
+	# print('\nRead from',filename)
 	# print('\nRead from',filename,'\n',dictList)
 	return dictList
 
@@ -59,24 +62,31 @@ def readCSV(filename):
 
 def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し行、ディクショナリ in リスト形式
 	'''
-	## writeCSV.py ver1.3
+	## writeCSV.py ver1.3.1
+
+	__UPDATE1.3.1__
+	print文コメントアウト
+
+	__UPDATE1.3__
+	周波数の指定は外部ファイルから渡されてくる周波数のリスト'outparam'
+	計算結果は外部ファイルから渡されてくる計算結果のリスト'cal_result'
+
 	__INTRODUCTION__
 	辞書の内容ををcsvファイルを書き込む
+
 	__ACTION__
 	引数として集合'outparam',辞書'cal_result'を渡す
 	戻り値なし
 	csvを返す
 	日付時間のキーは行のラベルにあたる
 	周波数のキーは列のラベルにあたる
+
 	__USAGE__
 	列のラベル'paramnames'を定義する
 	{日付時間,周波数1,周波数2,...}がディクショナリになった'fit_result'を定義する
 	csv_writer(引数1,引数2)を実行する
-	__UPDATE1.3__
-	周波数の指定は外部ファイルから渡されてくる周波数のリスト'outparam'
-	計算結果は外部ファイルから渡されてくる計算結果のリスト'cal_result'
-	__改造予定__
-	datetimeでソートしたい
+
+	__PLAN__
 	'''
 
 	outparam.sort()   #outparamを小さい順にソート
@@ -89,7 +99,7 @@ def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し�
 		dictList.insert(0,header)
 		writer = csv.DictWriter(f, paramnames, extrasaction='ignore',lineterminator='\n')
 		writer.writerows(dictList)
-		print('\nWriteing',outpath,'done!\n')
+		# print('\nWriteing',outpath,'done!\n')
 
 
 
