@@ -90,14 +90,19 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
+## ____________________________
+#'''コンソールから入力'''
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
 ## ____________________________
-# dateFirst='151229'
-# dateLast='151229'
-# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
+'''開発環境内でリストの最初と最後を指定'''
+dateFirst='151229'
+dateLast='151229'
+dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
-dateList=['151112','151201','151229','160102','160215','160304','160407','160509']
+# '''リストで指定'''
+# dateList=['151201']
+## ____________________________
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
@@ -114,8 +119,8 @@ for fitfile in filepath[0:] :
 	powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
 
 	## __WRITEING__________________________
-	# print('Write to SN', SNResult)
-	# print('Write to Power', powerResult)
+	print('Write to SN\n', SNResult)
+	print('Write to Power\n', powerResult)
 
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む

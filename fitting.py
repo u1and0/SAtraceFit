@@ -1,10 +1,17 @@
 '''
-## fitting.py ver1.1
+## fitting.py ver1.3
+
+__UPDATE1.3__
+ラベルに国名を表示
+
+__UPDATE1.2__
+データプロットを最前面にした
 
 __UPDATE1.1__
-loaddata プロットの太さを0.1>>>0.2変更
-取り出すシグナル強度をダイヤモンドマーカーで表示
-ノイズフロアの表示
+* loaddata プロットの太さを0.1>>>0.2変更
+* 取り出すシグナル強度をダイヤモンドマーカーで表示
+* ノイズフロアの表示
+* pngで保存も可能にした
 
 __UPDATE1.0__
 
@@ -65,6 +72,8 @@ import matplotlib.pyplot as plt
 import sys
 import datetime
 d = datetime.datetime.today()
+import confidential as co
+
 
 
 def freq2pnt(x):return (x*1000-22000)/4
@@ -90,11 +99,13 @@ def plotshowing(title,ext=None,dir='./'):
 	デフォルトはワーキングディレクトリ
 	'''
 	plt.title(d.strptime(title,'%Y%m%d_%H%M%S'))
-	plt.legend(loc='best',fancybox=True,fontsize='small')
+	# plt.legend(loc='best',fancybox=True,fontsize='small')
+	plt.legend(bbox_to_anchor=(0.5, -0.25), loc='center', borderaxespad=0,fontsize='small',ncol=4)
+	plt.subplots_adjust(bottom=0.25)
 	plt.xlabel('Frequency[kHz]')
 	plt.ylabel('Power[dBm]')
 	plt.grid(True)
-	plt.ylim(ymax=30)
+	plt.ylim(ymin=-120,ymax=0)
 	switch='plt.show()' if ext==None else 'plt.savefig(dir+title+"."+ext)'
 	eval(switch)
 	plt.close()
@@ -104,7 +115,6 @@ def loaddata(dataname):
 	また、データのプロットも行う(plotshowはしない)'''
 	data=np.loadtxt(dataname)   #load text data as array
 	r=(datax,datay)=(data[:,0],data[:,2])
-	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 	return r
 
 
@@ -134,28 +144,31 @@ def fitting(dataname,freqWave,freqCarrier):
 		return rtnvalue
 
 
-	## __FITTING LOG__________________________
-	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
-	# logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
-	# logprint('\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
-
 
 	def SNextract(x):
 		'''SNやシグナルのマーカーの表示'''
-		plt.plot(x,SNratio+yy,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+"kHz")   #fitting結果のプロット
+		plt.plot(x,SNratio+yy,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
 		SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
 		powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
 
 
+
+
+
+
+
+
+	plt.figure(figsize=(6,6))
+	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 	SNDict,powerDict={},{}
-	for freqFit in freqWave:   #freqWaveの周波数を片っ端からfit
+	for freqFit in freqWave:   #freqWaveの周波数をfit
 		## __FIT__________________________
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
+			plt.plot(pnt2freq(datax),fity,'-',lw=1,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
 			SNextract(fittingFreqFit)
 	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
@@ -169,11 +182,16 @@ def fitting(dataname,freqWave,freqCarrier):
 	SNData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=SNDict  #ファイル名(=タイムスタンプ)をキーに、SNDictを値にSNDataへ入れる
 	powerData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=powerDict  #ファイル名(=タイムスタンプ)をキーに、powerDictを値にpowerDataへ入れる
 	outData=[SNData,powerData]
-	print('SN: %s\npower: %s'% (SNData,powerData))
+	# print('SN: %s\npower: %s'% (SNData,powerData))
 
-	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=2,label=None,color='k')    #ノイズフロアを黒色で表示
-	import confidential as co
+
+
+	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=1,label=None,color='k')    #ノイズフロアを黒色で表示
+	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
+
+
 	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+
 
 	return outData
 
