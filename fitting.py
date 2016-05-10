@@ -1,5 +1,10 @@
 '''
-## fitting.py ver1.0
+## fitting.py ver1.1
+
+__UPDATE1.1__
+loaddata プロットの太さを0.1>>>0.2変更
+取り出すシグナル強度をダイヤモンドマーカーで表示
+ノイズフロアの表示
 
 __UPDATE1.0__
 
@@ -62,11 +67,9 @@ import datetime
 d = datetime.datetime.today()
 
 
-def freq2pnt(x):
-	return (x*1000-22000)/4
+def freq2pnt(x):return (x*1000-22000)/4
 
-def pnt2freq(x):
-	return (x*4+22000)/1000
+def pnt2freq(x):return (x*4+22000)/1000
 
 logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
 def logprint(text,file=logfile):
@@ -79,21 +82,29 @@ def logprint(text,file=logfile):
 	print(text)
 
 
-def plotshowing(title):
+def plotshowing(title,ext=None,dir='./'):
+	'''
+	ext(拡張子)を指定すると保存する拡張子を指定できる
+	デフォルトは標準出力(pyplot)
+	dir(ディレクトリ)を指定すると保存するディレクトリを指定できる
+	デフォルトはワーキングディレクトリ
+	'''
 	plt.title(d.strptime(title,'%Y%m%d_%H%M%S'))
 	plt.legend(loc='best',fancybox=True,fontsize='small')
 	plt.xlabel('Frequency[kHz]')
 	plt.ylabel('Power[dBm]')
 	plt.grid(True)
 	plt.ylim(ymax=30)
-	plt.show()
+	switch='plt.show()' if ext==None else 'plt.savefig(dir+title+"."+ext)'
+	eval(switch)
+	plt.close()
 
 def loaddata(dataname):
 	'''ファイル名を引数にデータをロードし、返す
 	また、データのプロットも行う(plotshowはしない)'''
 	data=np.loadtxt(dataname)   #load text data as array
 	r=(datax,datay)=(data[:,0],data[:,2])
-	plt.plot(pnt2freq(datax),datay,'-',lw=0.1,color='k')    #測定データのプロット
+	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 	return r
 
 
@@ -124,11 +135,16 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 	## __FITTING LOG__________________________
-	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.1'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが0.1kHz以内
+	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 	# logfile='./log/Log%s.log' % d.strftime("%Y%m%d")
 	# logprint('\n# %s\n# Filename: %s \n# Dataname: %s \n# Indicate condition: %s' % (d.strftime("%Y-%m-%d %H:%M:%S"),__file__,dataname,indicateCondition))   #ログファイルに時刻を打ち込む
 
 
+	def SNextract(x):
+		'''SNやシグナルのマーカーの表示'''
+		plt.plot(x,SNratio+yy,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+"kHz")   #fitting結果のプロット
+		SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
+		powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
 
 
 	SNDict,powerDict={},{}
@@ -139,22 +155,12 @@ def fitting(dataname,freqWave,freqCarrier):
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			# print("OK! Wave fitting %skHz : %s" % (freqFit, fitresult[1:4]))   # fitting結果を表示
 			plt.plot(pnt2freq(datax),fity,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
-			SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		# else: print('NG! %skHz is too too broad, narrow or out of range!'% freqFit)
+			SNextract(fittingFreqFit)
 	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
-		sigrange=0.01
-		dataxRange=datax[freq2pnt(freqFit-sigrange):freq2pnt(freqFit+sigrange)]   #±200Hzをフィッティングする
-		datayRange=datay[freq2pnt(freqFit-sigrange):freq2pnt(freqFit+sigrange)]
 		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
-			plt.plot(pnt2freq(dataxRange),datayRange,'-',lw=2,label=str(freqFit)+"kHz")   #fitting結果のプロット
-			SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			# print('OK! Carrier search %skHz : [%s]'% (freqFit,SNratio))
-		# else: print('NG! %skHz is too weak!'% freqFit)
+			SNextract(freqFit)
 
 
 	SNData,powerData={},{}
@@ -163,8 +169,11 @@ def fitting(dataname,freqWave,freqCarrier):
 	SNData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=SNDict  #ファイル名(=タイムスタンプ)をキーに、SNDictを値にSNDataへ入れる
 	powerData[d.strptime(filebasename,'%Y%m%d_%H%M%S')]=powerDict  #ファイル名(=タイムスタンプ)をキーに、powerDictを値にpowerDataへ入れる
 	outData=[SNData,powerData]
+	print('SN: %s\npower: %s'% (SNData,powerData))
 
-	# plotshowing(filebasename)
+	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=2,label=None,color='k')    #ノイズフロアを黒色で表示
+	import confidential as co
+	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 	return outData
 

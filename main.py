@@ -2,8 +2,8 @@
 ## main.py ver4.0
 
 __UPDATE4.0__
-* やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)←まだ手つけてない
-* csvの書き込みは1ファイルのfitting後ごとに行う
+* やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
+* やっぱりcsvの書き込みは1ファイルのfitting後ごとに行う
 
 
 
@@ -71,13 +71,15 @@ __PLAN__
 ## __READ DATA FROM OLD CSV__________________________
 import confidential as co
 # inp=input('Input File name>>> ')
-# oldcsvS=newcsvS=co.root()+inp+'.csv'
+# oldcsvS=newcsvS=co.out()+inp+'.csv'
 ## ____________________________
-(oldcsvS,newcsvS)=(co.root()+'\\SNfitting.csv',co.root()+'\\SNfitting.csv')
-(oldcsvP,newcsvP)=(co.root()+'\\Pfitting.csv',co.root()+'\\Pfitting.csv')
+(oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
+(oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
+print('Read from %s\nWrite to %s'% (oldcsvP,newcsvP))
 SNResult,powerResult={},{}
 freqFreq=co.freqWave()+co.freqCarrier()
-rootPath=co.root()
+outPath=co.out()
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
@@ -91,27 +93,29 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # dateFirst=input('Input First Date>>> ')
 # dateLast=input('Input Last Date>>> ')
 ## ____________________________
-dateFirst='151228'
-dateLast='151228'
-dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
-# dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
-print('\nNow extracting from these dates.\n',dateList)
+# dateFirst='151229'
+# dateLast='151229'
+# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
+## ____________________________
+dateList=['151112','151201','151229','160102','160215','160304','160407','160509']
+print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
-filepath=g.globname(co.rootroot(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 # __FITTING__________________________
-for fitfile in filepath :
+for fitfile in filepath[0:] :
 	import fitting as f
 	import numpy as np
 	data=np.loadtxt(fitfile)   #load text data as array
 	if not len(data):continue    #dataが空なら次のループ
-	SNResult.update(f.fitting(fitfile,co.freqWave(),co.freqCarrier())[0])    #fittingを行い、結果をSNResultに貯める
-	powerResult.update(f.fitting(fitfile,co.freqWave(),co.freqCarrier())[1])    #fittingを行い、結果をSNResultに貯める
+	fitRtn=f.fitting(fitfile,co.freqWave(),co.freqCarrier())
+	SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
+	powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
 
 	## __WRITEING__________________________
-	print('Write to SN', SNResult)
-	print('Write to Power', powerResult)
+	# print('Write to SN', SNResult)
+	# print('Write to Power', powerResult)
 
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
