@@ -1,5 +1,8 @@
 '''
-## fitting.py ver1.3
+## fitting.py ver1.4
+
+__UPDATE1.4__
+プロットするとき、ラベルはマーカーだけに限定
 
 __UPDATE1.3__
 ラベルに国名を表示
@@ -168,7 +171,7 @@ def fitting(dataname,freqWave,freqCarrier):
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			plt.plot(pnt2freq(datax),fity,'-',lw=1,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
+			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit)
 	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
@@ -186,7 +189,7 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 
-	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=1,label=None,color='k')    #ノイズフロアを黒色で表示
+	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=1,color='k')    #ノイズフロアを黒色で表示
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
 

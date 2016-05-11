@@ -1,5 +1,9 @@
 '''
-## main.py ver4.0
+## main.py ver5.0
+
+__UPDATE5.0__
+* ファイル名インプット形式
+
 
 __UPDATE4.0__
 * やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
@@ -46,8 +50,9 @@ rawdataPathで、データの位置を指定する(日付)
 
 __USAGE__
 
-* コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
-	* フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
+* コマンドライン上にて`python main.py`で起動
+	SN, powerを出力するcsvファイル名(ディレクトリパスと拡張子は抜き)の入力が求められる(例：ファイル名をhogehoge.csvとしたければ、`hogehoge`と入力する)
+	フィッティング対象のデータの日付の入力が求められる`<最初の日付> <最後の日付>`。フォーマットはyymmdd形式(例：2015年11月1日の日付からにしたいときは`151101`と打ちこむ)
 * CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
 	* fitting>read>translate>update>translate>writeの流れは1セット
 
@@ -68,36 +73,72 @@ __PLAN__
 '''
 
 
-## __READ DATA FROM OLD CSV__________________________
 import confidential as co
-# inp=input('Input File name>>> ')
-# oldcsvS=newcsvS=co.out()+inp+'.csv'
+## __CSV NAME__________________________
+'''
+コンソールからファイル名を指定
+新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+'''
+oldinpS=input('Input old SN file base name>>> ')
+oldinpP=input('Input old power file base name>>> ')
+
+print('新規にファイルを作成したいときは何も入力せずENTER')
+newinpS=input('Input new SN file base name>>> ')
+if not newinpS:newinpS=oldinpS
+print('新規にファイルを作成したいときは何も入力せずENTER')
+newinpP=input('Input new power file base name>>> ')
+if not newinpP:newinpP=oldinpP
+
+inplist=[oldinpS,oldinpP,newinpS,newinpP]
+csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+
+# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
 ## ____________________________
-(oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-(oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
-print('Read from %s\nWrite to %s'% (oldcsvP,newcsvP))
+# '''開発環境内であらかじめファイル名を指定'''
+# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
+# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
+## ____________________________
+print('SN value :\nRead from %s\nWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+
+
+
+
+
+##__MAKE CSV__________________________
+'''
+oldcsvSを読み込んでnewcsvSに入れる
+SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
+freqFreqで見出し行を作る
+'''
 SNResult,powerResult={},{}
 freqFreq=co.freqWave()+co.freqCarrier()
-outPath=co.out()
+outPath=co.out()    #ルートパス
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
 c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
-	#oldcsvSを読み込んでnewcsvSに入れる
-	#SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
+
+
+
+
 
 
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 ## ____________________________
 #'''コンソールから入力'''
-# dateFirst=input('Input First Date>>> ')
-# dateLast=input('Input Last Date>>> ')
+dateFirst=input('Input First Date>>> ')
+dateLast=input('Input Last Date>>> ')
+if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
+	dateLast=dateFirst
 ## ____________________________
 '''開発環境内でリストの最初と最後を指定'''
-dateFirst='151229'
-dateLast='151229'
+# dateFirst='151229'
+# dateLast='151229'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
 # '''リストで指定'''
