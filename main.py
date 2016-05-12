@@ -1,13 +1,20 @@
 '''
-## main.py ver5.0
+## main.py ver6.0
+
+
+__UPDATE6.0__
+例外により中断されたら実行するtry~finally文追加
+
 
 __UPDATE5.0__
-* ファイル名インプット形式
+ファイル名の指定(コンソールからインプットする)
+>第一引数：作成するファイル名
+>第二引数：取り込み元のファイル名(オプション)
 
 
 __UPDATE4.0__
-* やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
-* やっぱりcsvの書き込みは1ファイルのfitting後ごとに行う
+やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
+やっぱりcsvの書き込みは1ファイルのfitting後ごとに行う
 
 
 
@@ -61,15 +68,21 @@ __PLAN__
 * プログラムを途中で止めるとこれまでの計算結果が記録されない
 > writeメソッドが走るのはfor文の最後だから
 > read, writeメソッドが走るタイミングを調整する
+> keyboard interruptされたときにwriteメソッド機能するようにできる?
 * 二重起動すると強制終了される
-> マルチプロセスかができない
+> マルチプロセス化ができない
+> 書き込みが2重にくるからいけないんだと思う。
+> 仕様として、月々ごとにまとめろ、とある
+>> mainの親プロセスを作って、入力したら月々ごとにファイル名指定できるようにする？
 * exe化する予定
 > py2exe
 * GUI化する予定
 > TKinter
-* ファイル名の指定
->第一引数：作成するファイル名
->第二引数：取り込み元のファイル名(オプション)
+* csvの容量が大きくなるとプロセスの進行が遅れる
+> 読み込みに時間がかかる
+> 読み込みがfor文ごとにあるのがいけない
+>> for文終了後に一気に書き込みできるようにする
+>>> keyboard interruptされたときにwriteメソッド機能するようにしないと、プロセス中断すると計算結果がメモリとともに消えてしまう
 '''
 
 
@@ -149,20 +162,27 @@ print('\nNow extracting from these dates\n%s\n'% dateList)
 import globname as g
 filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
-# __FITTING__________________________
-for fitfile in filepath[0:] :
-	import fitting as f
-	import numpy as np
-	data=np.loadtxt(fitfile)   #load text data as array
-	if not len(data):continue    #dataが空なら次のループ
-	fitRtn=f.fitting(fitfile,co.freqWave(),co.freqCarrier())
-	SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
-	powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
+try:
+	# __FITTING__________________________
+	for fitfile in filepath[0:] :
+		import fitting as f
+		import numpy as np
+		data=np.loadtxt(fitfile)   #load text data as array
+		if not len(data):continue    #dataが空なら次のループ
+		fitRtn=f.fitting(fitfile,co.freqWave(),co.freqCarrier())
+		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
+		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
+		print('Write to SN\n', fitRtn[0])
+		print('Write to Power\n', fitRtn[1])
 
+except KeyboardInterrupt:
+	print('Why do you interrupt me!?')
+
+
+finally:
 	## __WRITEING__________________________
 	print('Write to SN\n', SNResult)
 	print('Write to Power\n', powerResult)
-
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-	SNResult,powerResult={},{}    #SNResultのリセット
+	# SNResult,powerResult={},{}    #SNResultのリセット
