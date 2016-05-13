@@ -181,12 +181,12 @@ def fitting(dataname):
 		'''
 		rtnvalueの要素
 		1. フィッティング結果(リスト)
-		2. SN比
-		3. フィッティング周波数
-		4. 帯域幅
-		5. SN比
-		6. フィッティング周波数
-		7. 帯域幅
+		2. SN比_0
+		3. フィッティング周波数_0
+		4. 帯域幅_0
+		5. SN比_1
+		6. フィッティング周波数_1
+		7. 帯域幅_1
 		'''
 		return rtnvalue
 		pass
@@ -196,8 +196,15 @@ def fitting(dataname):
 	def SNextract(x,y):
 		'''SNやシグナルのマーカーの表示'''
 		plt.plot(x,y+noisef,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
-		SNDict[str(freqFit)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		powerDict[str(freqFit)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+		if type(freqFit)!=float:
+			k=0
+			for i in freqFit:
+				SNDict[str(freqFit)+'_'+str(k)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
+				powerDict[str(freqFit)+'_'+str(k)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+				k+=1
+		else:
+			SNDict[str(freqFit)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
+			powerDict[str(freqFit)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
 
 
 
@@ -207,14 +214,15 @@ def fitting(dataname):
 
 
 	plt.figure(figsize=(6,6))
-	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 	SNDict,powerDict={},{}
 	for freqFit in co.freqWave():   #freqWaveの周波数をfit
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
-		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
+		if (SNratio>5 
+				and 1<waveWidth<100    #幅が0~100の間に入るとき(正常なガウシアン)
+				and abs(freqFit-fittingFreqFit)<0.05) :   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit,SNratio)
 	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
@@ -227,7 +235,13 @@ def fitting(dataname):
 		dataxRange=datax[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]
 		fitresult=[fity,SNratio0,fittingFreqFit0,waveWidth0,SNratio1,fittingFreqFit1,waveWidth1]=list(Mfit(dataxRange,datayRange,freqFit[0],freqFit[1]))
-		if (SNratio0>5 or SNratio1>5) and 1<waveWidth0<100 and 1<waveWidth1<100 and abs(freqFit[0]-fittingFreqFit0)<0.05 and (freqFit[0]-fittingFreqFit0)<0.05:   #indicateConditionにマッチしたウェーブだけをプロットする
+		print(fitresult)
+		if (SNratioEX0>5
+				and SNratioEX1>5    #両方の信号が5以上
+				# and abs(SNratio0-SNratio1)<5    #2つのシグナルの差が5以内
+				and (1<waveWidth0<100 or 1<waveWidth1<100)    #幅が0~100の間に入るとき(正常なガウシアン)
+				and abs(freqFit[0]-fittingFreqFit0)<0.1
+				and abs(freqFit[1]-fittingFreqFit1)<0.1):   #フィッティングされた周波数とフィッティングするはずの周波数のずれが100Hz以内
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(freqFit[0],SNratioEX0)
 			SNextract(freqFit[1],SNratioEX1)
@@ -244,12 +258,17 @@ def fitting(dataname):
 
 
 
-	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアを黒色で表示
+	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
 
-	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+
+
+	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+## ____________________________
 	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+## ____________________________
+	plotshowing(filebasename,ext='png',dir='C:/Users/ando/Pictures/s/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData

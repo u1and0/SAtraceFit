@@ -130,8 +130,12 @@ freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
 freqFreq=co.freqWave()+co.freqCarrier()
-freqFreq.append(*co.freqM())
-print(freqFreq)
+k=0
+for tpl in co.freqM():    #freqM()は2つ以上で1セットなので
+	for val in tpl:
+		freqFreq.append(str(tpl)+'_'+str(k))    #添え字つきでラベルにする
+		k+=1
+print('Search freaquency',freqFreq)
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
@@ -152,8 +156,8 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # 	dateLast=dateFirst
 ## ____________________________
 '''開発環境内でリストの最初と最後を指定'''
-dateFirst='160103'
-dateLast='160103'
+dateFirst='160203'
+dateLast='160206'
 ## ____________________________
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
@@ -162,27 +166,29 @@ print('\nNow extracting from these dates\n%s\n'% dateList)
 import globname as g
 filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
-# try:
+try:
 # __FITTING__________________________
-for fitfile in filepath[60:70] :
-	import fitting as f
-	import numpy as np
-	data=np.loadtxt(fitfile)   #load text data as array
-	if not len(data):continue    #dataが空なら次のループ
-	fitRtn=f.fitting(fitfile)
-	SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
-	powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
-	print('Write to SN\n', fitRtn[0])
-	print('Write to Power\n', fitRtn[1])
+	for fitfile in filepath[0:] :
+		import fitting as f
+		import numpy as np
+		data=np.loadtxt(fitfile)   #load text data as array
+		if not len(data):continue    #dataが空なら次のループ
+		fitRtn=f.fitting(fitfile)
+		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
+		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
+		print('Write to SN\n', fitRtn[0])
+		print('Write to Power\n', fitRtn[1])
 
 # except:
 # 	print('Why do you interrupt me!?')
 
 
-# finally:
-# 	## __WRITEING__________________________
-# 	print('Write to SN\n', SNResult)
-# 	print('Write to Power\n', powerResult)
-# 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-# 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-# 	# SNResult,powerResult={},{}    #SNResultのリセット
+finally:
+	## __WRITEING__________________________
+	# print('Write to SN\n', SNResult)
+	# print('Write to Power\n', powerResult)
+	print('Writeing all SN result to %s'% newcsvS)
+	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	print('Writeing all power result to %s'% newcsvP)
+	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	# SNResult,powerResult={},{}    #SNResultのリセット
