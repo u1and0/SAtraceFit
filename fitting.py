@@ -1,5 +1,13 @@
 '''
-## fitting.py ver1.4
+## fitting.py ver2.0
+
+__UPDATE2.0__
+Mfit：2周波数以上あるフィッティング
+周波数はこのモジュールfitting.pyから直接confidentialに問い合わせる形式にした(元々はmainから問い合わせて引数として渡す)
+
+Mfit関数
+dualgauss関数追加
+
 
 __UPDATE1.4__
 プロットするとき、ラベルはマーカーだけに限定
@@ -11,6 +19,7 @@ __UPDATE1.2__
 データプロットを最前面にした
 
 __UPDATE1.1__
+
 * loaddata プロットの太さを0.1>>>0.2変更
 * 取り出すシグナル強度をダイヤモンドマーカーで表示
 * ノイズフロアの表示
@@ -68,7 +77,7 @@ __ACTION__
 10. pngを吐き出す(オプションでプロットして表示)
 11. ディクショナリ in ディクショナリを返す
 
-__PLAN__
+__TODO__
 M-fitting:
 	fitting周波数が2つ
 	2つの周波数の重ね合わせ
@@ -120,8 +129,11 @@ def plotshowing(title,ext=None,dir='./'):
 	plt.close()
 
 def loaddata(dataname):
-	'''ファイル名を引数にデータをロードし、返す
-	また、データのプロットも行う(plotshowはしない)'''
+	'''
+	ファイル名を引数にデータをロードし、返す
+	また、データのプロットも行う(plotshowはしない)
+	**fitting ver1.0くらいから使っていない**
+	'''
 	data=np.loadtxt(dataname)   #load text data as array
 	r=(datax,datay)=(data[:,0],data[:,2])
 	return r
@@ -130,18 +142,18 @@ def loaddata(dataname):
 
 
 
-def fitting(dataname,freqWave,freqCarrier):
+def fitting(dataname):
 	(datax,datay)=loaddata(dataname)
 
-	yy=stats.scoreatpercentile(datay, 25)	#fix at 1/4median
-	def gauss(x,aa,mu,si):	#fitting function
-		return aa*np.exp(-(x-mu)**2/2/si**2)+yy
-
+	noisef=stats.scoreatpercentile(datay, 25)	#fix at 1/4median
+	def gauss(x,*param):	#fitting function
+		[aa,mu,si]=param
+		return aa*np.exp(-(x-mu)**2/2/si**2)+noisef
 
 	def gaussfit(x,y,mu):
 		parameter_initial=[0,freq2pnt(mu),0.3]    #fitting初期値aa,mu,si
 		paramater_optimal, covariance = optimize.curve_fit(gauss, x, y, p0=parameter_initial, maxfev = 100000000)
-		rtnvalue=(gauss(datax,paramater_optimal[0],paramater_optimal[1],paramater_optimal[2]),
+		rtnvalue=(gauss(datax,*paramater_optimal),
 			paramater_optimal[0],
 			pnt2freq(paramater_optimal[1]),
 			abs(paramater_optimal[2]))
@@ -152,13 +164,40 @@ def fitting(dataname,freqWave,freqCarrier):
 		4. 帯域幅'''
 		return rtnvalue
 
+	def dualgauss(x,*param):	#fitting function
+		[aa0,mu0,si0,aa1,mu1,si1]=param
+		return aa0*np.exp(-(x-mu0)**2/2/si0**2)+aa1*np.exp(-(x-mu1)**2/2/si1**2)+noisef
+
+	def Mfit(x,y,mu0,mu1):
+		parameter_initial=[0,freq2pnt(mu0),0.3,0,freq2pnt(mu1),0.3]    #fitting初期値aa,mu,si
+		paramater_optimal, covariance = optimize.curve_fit(dualgauss, x, y, p0=parameter_initial, maxfev = 100000000)
+		rtnvalue=(dualgauss(datax,*paramater_optimal),
+			paramater_optimal[0],
+			pnt2freq(paramater_optimal[1]),
+			abs(paramater_optimal[2]),
+			paramater_optimal[3],
+			pnt2freq(paramater_optimal[4]),
+			abs(paramater_optimal[5]))
+		'''
+		rtnvalueの要素
+		1. フィッティング結果(リスト)
+		2. SN比
+		3. フィッティング周波数
+		4. 帯域幅
+		5. SN比
+		6. フィッティング周波数
+		7. 帯域幅
+		'''
+		return rtnvalue
+		pass
 
 
-	def SNextract(x):
+
+	def SNextract(x,y):
 		'''SNやシグナルのマーカーの表示'''
-		plt.plot(x,SNratio+yy,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
-		SNDict[str(freqFit)+'kHz']=SNratio  #周波数をキー、SN比を値にしてfittngDictへ入れる
-		powerDict[str(freqFit)+'kHz']=SNratio+yy  #周波数をキー、SN比を値にしてfittngDictへ入れる
+		plt.plot(x,y+noisef,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
+		SNDict[str(freqFit)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
+		powerDict[str(freqFit)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
 
 
 
@@ -170,19 +209,29 @@ def fitting(dataname,freqWave,freqCarrier):
 	plt.figure(figsize=(6,6))
 	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 	SNDict,powerDict={},{}
-	for freqFit in freqWave:   #freqWaveの周波数をfit
-		## __FIT__________________________
+	for freqFit in co.freqWave():   #freqWaveの周波数をfit
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			SNextract(fittingFreqFit)
-	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
-		SNratio=datay[freq2pnt(freqFit)]-yy
+			SNextract(fittingFreqFit,SNratio)
+	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
+		SNratio=datay[freq2pnt(freqFit)]-noisef
 		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
-			SNextract(freqFit)
+			SNextract(freqFit,SNratio)
+	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
+		SNratioEX0,SNratioEX1=datay[freq2pnt(freqFit[0])]-noisef,datay[freq2pnt(freqFit[1])]-noisef
+		fitrange=0.2
+		dataxRange=datax[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]   #±200Hzをフィッティングする
+		datayRange=datay[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]
+		fitresult=[fity,SNratio0,fittingFreqFit0,waveWidth0,SNratio1,fittingFreqFit1,waveWidth1]=list(Mfit(dataxRange,datayRange,freqFit[0],freqFit[1]))
+		if (SNratio0>5 or SNratio1>5) and 1<waveWidth0<100 and 1<waveWidth1<100 and abs(freqFit[0]-fittingFreqFit0)<0.05 and (freqFit[0]-fittingFreqFit0)<0.05:   #indicateConditionにマッチしたウェーブだけをプロットする
+			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			SNextract(freqFit[0],SNratioEX0)
+			SNextract(freqFit[1],SNratioEX1)
+
 
 
 	SNData,powerData={},{}
@@ -195,11 +244,12 @@ def fitting(dataname,freqWave,freqCarrier):
 
 
 
-	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=1,color='k')    #ノイズフロアを黒色で表示
+	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアを黒色で表示
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
 
-	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData

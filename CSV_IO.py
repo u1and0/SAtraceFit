@@ -62,7 +62,10 @@ def readCSV(filename):
 
 def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し行、ディクショナリ in リスト形式
 	'''
-	## writeCSV.py ver1.3.1
+	## writeCSV.py ver1.4
+
+	__UPDATE1.4__
+	ソートコメントアウト
 
 	__UPDATE1.3.1__
 	print文コメントアウト
@@ -89,10 +92,10 @@ def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し�
 	__PLAN__
 	'''
 
-	outparam.sort()   #outparamを小さい順にソート
+	# outparam.sort()   #outparamを小さい順にソート
 	outparam=list(map(lambda n:str(n)+'kHz',outparam))   #freqWave各要素に文字列'kHz'追加
 	paramnames=['DateTime']+outparam   #列のラベルにoutparamを追加
-	header = dict([(val,val)for val in paramnames])
+	header = dict([(val,val) for val in paramnames])
 	if not os.path.isfile(outpath):    #ファイルが存在しなければ
 		open(outpath, "w").write("")    #空のファイルを作成する
 	with open(outpath, mode='w') as f:
