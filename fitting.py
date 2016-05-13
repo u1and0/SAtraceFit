@@ -1,5 +1,8 @@
 '''
-## fitting.py ver2.0
+## fitting.py ver2.1
+
+__UPDATE2.1__
+2周波数以上あるフィッティングは実際にそぐわないので、2宗派でキャリア見つける方式に変更
 
 __UPDATE2.0__
 Mfit：2周波数以上あるフィッティング
@@ -164,32 +167,31 @@ def fitting(dataname):
 		4. 帯域幅'''
 		return rtnvalue
 
-	def dualgauss(x,*param):	#fitting function
-		[aa0,mu0,si0,aa1,mu1,si1]=param
-		return aa0*np.exp(-(x-mu0)**2/2/si0**2)+aa1*np.exp(-(x-mu1)**2/2/si1**2)+noisef
+	# def dualgauss(x,*param):	#fitting function
+	# 	[aa0,mu0,si0,aa1,mu1,si1]=param
+	# 	return aa0*np.exp(-(x-mu0)**2/2/si0**2)+aa1*np.exp(-(x-mu1)**2/2/si1**2)+noisef
 
-	def Mfit(x,y,mu0,mu1):
-		parameter_initial=[0,freq2pnt(mu0),0.3,0,freq2pnt(mu1),0.3]    #fitting初期値aa,mu,si
-		paramater_optimal, covariance = optimize.curve_fit(dualgauss, x, y, p0=parameter_initial, maxfev = 100000000)
-		rtnvalue=(dualgauss(datax,*paramater_optimal),
-			paramater_optimal[0],
-			pnt2freq(paramater_optimal[1]),
-			abs(paramater_optimal[2]),
-			paramater_optimal[3],
-			pnt2freq(paramater_optimal[4]),
-			abs(paramater_optimal[5]))
-		'''
-		rtnvalueの要素
-		1. フィッティング結果(リスト)
-		2. SN比_0
-		3. フィッティング周波数_0
-		4. 帯域幅_0
-		5. SN比_1
-		6. フィッティング周波数_1
-		7. 帯域幅_1
-		'''
-		return rtnvalue
-		pass
+	# def Mfit(x,y,mu0,mu1):
+	# 	parameter_initial=[0,freq2pnt(mu0),0.3,0,freq2pnt(mu1),0.3]    #fitting初期値aa,mu,si
+	# 	paramater_optimal, covariance = optimize.curve_fit(dualgauss, x, y, p0=parameter_initial, maxfev = 100000000)
+	# 	rtnvalue=(dualgauss(datax,*paramater_optimal),
+	# 		paramater_optimal[0],
+	# 		pnt2freq(paramater_optimal[1]),
+	# 		abs(paramater_optimal[2]),
+	# 		paramater_optimal[3],
+	# 		pnt2freq(paramater_optimal[4]),
+	# 		abs(paramater_optimal[5]))
+	# 	'''
+	# 	rtnvalueの要素
+	# 	1. フィッティング結果(リスト)
+	# 	2. SN比_0
+	# 	3. フィッティング周波数_0
+	# 	4. 帯域幅_0
+	# 	5. SN比_1
+	# 	6. フィッティング周波数_1
+	# 	7. 帯域幅_1
+	# 	'''
+	# 	return rtnvalue
 
 
 
@@ -232,19 +234,21 @@ def fitting(dataname):
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
 		SNratioEX0,SNratioEX1=datay[freq2pnt(freqFit[0])]-noisef,datay[freq2pnt(freqFit[1])]-noisef
 		fitrange=0.2
-		dataxRange=datax[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]   #±200Hzをフィッティングする
-		datayRange=datay[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]
-		fitresult=[fity,SNratio0,fittingFreqFit0,waveWidth0,SNratio1,fittingFreqFit1,waveWidth1]=list(Mfit(dataxRange,datayRange,freqFit[0],freqFit[1]))
-		print(fitresult)
-		if (SNratioEX0>5
-				and SNratioEX1>5    #両方の信号が5以上
-				# and abs(SNratio0-SNratio1)<5    #2つのシグナルの差が5以内
-				and (1<waveWidth0<100 or 1<waveWidth1<100)    #幅が0~100の間に入るとき(正常なガウシアン)
-				and abs(freqFit[0]-fittingFreqFit0)<0.1
-				and abs(freqFit[1]-fittingFreqFit1)<0.1):   #フィッティングされた周波数とフィッティングするはずの周波数のずれが100Hz以内
-			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			SNextract(freqFit[0],SNratioEX0)
-			SNextract(freqFit[1],SNratioEX1)
+		# dataxRange=datax[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]   #±200Hzをフィッティングする
+		# datayRange=datay[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]
+		# fitresult=[fity,SNratio0,fittingFreqFit0,waveWidth0,SNratio1,fittingFreqFit1,waveWidth1]=list(Mfit(dataxRange,datayRange,freqFit[0],freqFit[1]))
+		# print(fitresult)
+		# if (SNratioEX0>5
+		# 		and SNratioEX1>5    #両方の信号が5以上
+		# 		# and abs(SNratio0-SNratio1)<5    #2つのシグナルの差が5以内
+		# 		and (1<waveWidth0<100 or 1<waveWidth1<100)    #幅が0~100の間に入るとき(正常なガウシアン)
+		# 		and abs(freqFit[0]-fittingFreqFit0)<0.1
+		# 		and abs(freqFit[1]-fittingFreqFit1)<0.1):   #フィッティングされた周波数とフィッティングするはずの周波数のずれが100Hz以内
+		if SNratioEX0>5:
+			if SNratioEX0*0.8<SNratioEX1<SNratioEX0*1.2:
+				# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+				SNextract(freqFit[0],SNratioEX0)
+				SNextract(freqFit[1],SNratioEX1)
 
 
 
@@ -268,7 +272,7 @@ def fitting(dataname):
 ## ____________________________
 	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir='C:/Users/ando/Pictures/s/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/TEST/Mfittest/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData

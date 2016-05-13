@@ -155,12 +155,13 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
 # 	dateLast=dateFirst
 ## ____________________________
-'''開発環境内でリストの最初と最後を指定'''
-dateFirst='160203'
-dateLast='160206'
+# '''開発環境内でリストの最初と最後を指定'''
+# dateFirst='151213'
+# dateLast='151213'
+# ## ____________________________
+# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
-dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
-## ____________________________
+dateList=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160513)]  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
