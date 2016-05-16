@@ -144,7 +144,6 @@ def loaddata(dataname):
 
 
 
-
 def fitting(dataname):
 	(datax,datay)=loaddata(dataname)
 
@@ -245,7 +244,7 @@ def fitting(dataname):
 		# 		and abs(freqFit[0]-fittingFreqFit0)<0.1
 		# 		and abs(freqFit[1]-fittingFreqFit1)<0.1):   #フィッティングされた周波数とフィッティングするはずの周波数のずれが100Hz以内
 		if SNratioEX0>5:
-			if SNratioEX0*0.8<SNratioEX1<SNratioEX0*1.2:
+			if SNratioEX0*0.6<SNratioEX1<SNratioEX0*1.4:
 				# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 				SNextract(freqFit[0],SNratioEX0)
 				SNextract(freqFit[1],SNratioEX1)
@@ -272,7 +271,7 @@ def fitting(dataname):
 ## ____________________________
 	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir='//sampanet.gr.jp/DFS/ShareUsers/UserTokki/Personal/Maeno/VLFsasebo/TEST/Mfittest/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfittest/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData

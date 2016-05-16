@@ -121,7 +121,6 @@ print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み�
 
 
 
-
 ##__MAKE CSV__________________________
 '''
 oldcsvSを読み込んでnewcsvSに入れる
@@ -161,7 +160,8 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # ## ____________________________
 # dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
-dateList=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160513)]  #最初から最後の日付のリストを返す
+dateList=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160514)]  #最初から最後の日付のリストを返す
+# dateList=['160514']  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
