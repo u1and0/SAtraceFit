@@ -160,8 +160,9 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 # ## ____________________________
 # dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
-dateList=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160514)]  #最初から最後の日付のリストを返す
-# dateList=['160514']  #最初から最後の日付のリストを返す
+dateList=[str(i) for i in range(151228,151231)]+[str(i) for i in range(160101,160105)]+['151228']+[str(i) for i in range(160203,160206)]+['151213']  
+# dateList+=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160514)]
+dateList=['151201']  #最初から最後の日付のリストを返す
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
@@ -169,7 +170,7 @@ filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定され�
 
 try:
 # __FITTING__________________________
-	for fitfile in filepath[0:] :
+	for fitfile in filepath[10:20] :
 		import fitting as f
 		import numpy as np
 		data=np.loadtxt(fitfile)   #load text data as array

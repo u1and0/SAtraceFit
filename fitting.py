@@ -1,5 +1,15 @@
 '''
-## fitting.py ver2.1
+## fitting.py ver3.0
+
+__UPDATE3.0__
+Mfit周波数の平均値でfitting
+Mfit周波数低い方の±10Hzのmaxを見る
+高い方の周波数との差が1dB未満で最も小さいところが高い方のSN
+ない場合は24.0kHzでMfit周波数低い方のSNと重なっている可能性があるので、最も高い値にマーク
+
+Mfit0, Mfit1の周波数±10Hzを捜索
+1. Mfit0のなかで最大値をプロットする(power0と名づける)
+2. Mfit1のなかでpower0に最も近い値をプロットする(power1と名づける)
 
 __UPDATE2.1__
 2周波数以上あるフィッティングは実際にそぐわないので、2宗派でキャリア見つける方式に変更
@@ -195,20 +205,24 @@ def fitting(dataname):
 
 
 	def SNextract(x,y):
-		'''SNやシグナルのマーカーの表示'''
-		plt.plot(x,y+noisef,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
+		'''SNやシグナルのマーカーの表示
+		ディクショナリに値を追加'''
+		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
 		if type(freqFit)!=float:
-			k=0
+			k=0    #ラベルの添え字
 			for i in freqFit:
-				SNDict[str(freqFit)+'_'+str(k)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
-				powerDict[str(freqFit)+'_'+str(k)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+				SNDict[str(freqFit)+'_'+str(k)+'kHz']=y-noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+				powerDict[str(freqFit)+'_'+str(k)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
 				k+=1
 		else:
-			SNDict[str(freqFit)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
-			powerDict[str(freqFit)+'kHz']=y+noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+			SNDict[str(freqFit)+'kHz']=y-noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
+			powerDict[str(freqFit)+'kHz']=y  #周波数をキー、SN比を値にしてfittngDictへ入れる
 
 
 
+	def fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
+		return SNratio>5 and 1<waveWidth<100 and abs(freqFit-fittingFreqFit)<0.05 #幅が0~100の間に入るとき(正常なガウシアン)
+			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
 
 
@@ -221,33 +235,53 @@ def fitting(dataname):
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
-		if (SNratio>5 
-				and 1<waveWidth<100    #幅が0~100の間に入るとき(正常なガウシアン)
-				and abs(freqFit-fittingFreqFit)<0.05) :   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
-			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			SNextract(fittingFreqFit,SNratio)
+		# if (SNratio>5 
+		# 		and 1<waveWidth<100    #幅が0~100の間に入るとき(正常なガウシアン)
+		# 		and abs(freqFit-fittingFreqFit)<0.05) :   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
+		if fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
+			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			SNextract(fittingFreqFit,SNratio+noisef)
 	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
-		SNratio=datay[freq2pnt(freqFit)]-noisef
-		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
-			SNextract(freqFit,SNratio)
+		poww=datay[freq2pnt(freqFit)]
+		if poww>10:    #SN比が10以上ならCarrierが出ているとみなす
+			SNextract(freqFit,poww)
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
-		SNratioEX0,SNratioEX1=datay[freq2pnt(freqFit[0])]-noisef,datay[freq2pnt(freqFit[1])]-noisef
+		avefit=np.mean(freqFit)
 		fitrange=0.2
-		# dataxRange=datax[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]   #±200Hzをフィッティングする
-		# datayRange=datay[freq2pnt(min(freqFit)-fitrange):freq2pnt(max(freqFit)+fitrange)]
-		# fitresult=[fity,SNratio0,fittingFreqFit0,waveWidth0,SNratio1,fittingFreqFit1,waveWidth1]=list(Mfit(dataxRange,datayRange,freqFit[0],freqFit[1]))
-		# print(fitresult)
-		# if (SNratioEX0>5
-		# 		and SNratioEX1>5    #両方の信号が5以上
-		# 		# and abs(SNratio0-SNratio1)<5    #2つのシグナルの差が5以内
-		# 		and (1<waveWidth0<100 or 1<waveWidth1<100)    #幅が0~100の間に入るとき(正常なガウシアン)
-		# 		and abs(freqFit[0]-fittingFreqFit0)<0.1
-		# 		and abs(freqFit[1]-fittingFreqFit1)<0.1):   #フィッティングされた周波数とフィッティングするはずの周波数のずれが100Hz以内
-		if SNratioEX0>5:
-			if SNratioEX0*0.6<SNratioEX1<SNratioEX0*1.4:
-				# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-				SNextract(freqFit[0],SNratioEX0)
-				SNextract(freqFit[1],SNratioEX1)
+		dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
+		datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
+		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
+		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth):
+			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			datadict={}
+			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:
+				datadict[pnt2freq(datax[i])]=datay[i]
+			print('\n'*6,dataname,'\n','Show datadict!!',datadict.items())
+			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict.items(), key=lambda x:x[1])[0])
+			xpower0=max(datadict.items(), key=lambda x:x[1])[0]
+			power0=datadict[xpower0]
+			print('Plot!!!\n',xpower0,power0)
+			# max([(fr,po) for fr,po in datadict.items())
+			# print(dataname,'datadict',max(datadict.items(),key=datadict.items()[1]))
+			# for i in datadict.items()[0]
+
+
+
+
+
+			# power0=max(dataySearch)
+			# print('!!!!!!!!!!!!!!!!!!!!!',power0)
+			# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
+			# print('!!!!!!!!!!!!!!!!!!!!!',xpower0)
+			# # xpower1=datax[datay.index(power0)]
+			# # power1=lambda y:y if abs(y-power0)==min([abs(y-power0)]) for y in checkhigh
+			# for y in datay[freq2pnt(freqFit[1]-0.01):freq2pnt(freqFit[1]+0.01)]:    #監視範囲 freqFit[1]±10Hzの範囲
+			# 	if abs(y-power0)==min([abs(y-power0)]):
+			# 		power1=y
+			# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
+			# print(power0,power1)
+			SNextract(xpower0,power0)
+			# SNextract(freqFit[1],power1)
 
 
 
@@ -267,11 +301,11 @@ def fitting(dataname):
 
 
 
-	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfittest/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData
