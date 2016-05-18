@@ -171,7 +171,7 @@ def fitting(dataname,freqWave,freqCarrier):
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit)
 	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
