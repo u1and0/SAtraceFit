@@ -1,6 +1,8 @@
 '''
-## main.py ver6.0
+## main.py ver6.1
 
+__UPDATE6.1__
+fittting の引数に周波数は入れない(fittingのforステートメント中にconfidentialから直接引っ張る)
 
 __UPDATE6.0__
 例外により中断されたら実行するtry~finally文追加
@@ -89,30 +91,27 @@ __PLAN__
 import confidential as co
 ## __CSV NAME__________________________
 '''
-コンソールからファイル名を指定
-新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-'''
-oldinpS=input('Input old SN file base name>>> ')
-oldinpP=input('Input old power file base name>>> ')
+# コンソールからファイル名を指定
+# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+# '''
+# oldinpS=input('Input old SN file base name>>> ')
+# oldinpP=input('Input old power file base name>>> ')
 
-print('新規にファイルを作成したいときは何も入力せずENTER')
-newinpS=input('Input new SN file base name>>> ')
-if not newinpS:newinpS=oldinpS
-print('新規にファイルを作成したいときは何も入力せずENTER')
-newinpP=input('Input new power file base name>>> ')
-if not newinpP:newinpP=oldinpP
+# print('新規にファイルを作成したいときは何も入力せずENTER')
+# newinpS=input('Input new SN file base name>>> ')
+# if not newinpS:newinpS=oldinpS
+# print('新規にファイルを作成したいときは何も入力せずENTER')
+# newinpP=input('Input new power file base name>>> ')
+# if not newinpP:newinpP=oldinpP
 
-inplist=[oldinpS,oldinpP,newinpS,newinpP]
-csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
-
-# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
+# inplist=[oldinpS,oldinpP,newinpS,newinpP]
+# csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
 ## ____________________________
-# '''開発環境内であらかじめファイル名を指定'''
-# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
+'''開発環境内であらかじめファイル名を指定'''
+(oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
+(oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
 ## ____________________________
 print('SN value :\nRead from %s\nWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
 print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
@@ -150,8 +149,8 @@ if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
 	dateLast=dateFirst
 ## ____________________________
 '''開発環境内でリストの最初と最後を指定'''
-# dateFirst='151229'
-# dateLast='151229'
+# dateFirst='151201'
+# dateLast='151201'
 dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
 # '''リストで指定'''
@@ -169,7 +168,7 @@ try:
 		import numpy as np
 		data=np.loadtxt(fitfile)   #load text data as array
 		if not len(data):continue    #dataが空なら次のループ
-		fitRtn=f.fitting(fitfile,co.freqWave(),co.freqCarrier())
+		fitRtn=f.fitting(fitfile)
 		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
 		print('Write to SN\n', fitRtn[0])

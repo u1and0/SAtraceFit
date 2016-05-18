@@ -124,7 +124,7 @@ def loaddata(dataname):
 
 
 
-def fitting(dataname,freqWave,freqCarrier):
+def fitting(dataname):
 	(datax,datay)=loaddata(dataname)
 
 	yy=stats.scoreatpercentile(datay, 25)	#fix at 1/4median
@@ -164,7 +164,7 @@ def fitting(dataname,freqWave,freqCarrier):
 	plt.figure(figsize=(6,6))
 	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 	SNDict,powerDict={},{}
-	for freqFit in freqWave:   #freqWaveの周波数をfit
+	for freqFit in co.freqWave():   #freqWaveの周波数をfit
 		## __FIT__________________________
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
@@ -173,7 +173,7 @@ def fitting(dataname,freqWave,freqCarrier):
 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit)
-	for freqFit in freqCarrier:   #freqCarrierの周波数のシグナルを取得
+	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
 		SNratio=datay[freq2pnt(freqFit)]-yy
 		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
 			SNextract(freqFit)
