@@ -1,5 +1,8 @@
 '''
-## main.py ver6.1
+## main.py ver6.1.1
+
+__UPDATE6.1.1__
+fot Mfit test
 
 __UPDATE6.1__
 fittting の引数に周波数は入れない(fittingのforステートメント中にconfidentialから直接引っ張る)
@@ -91,10 +94,10 @@ __PLAN__
 import confidential as co
 ## __CSV NAME__________________________
 '''
-# コンソールからファイル名を指定
-# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-# '''
+# # コンソールからファイル名を指定
+# # 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+# # 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+# # '''
 # oldinpS=input('Input old SN file base name>>> ')
 # oldinpP=input('Input old power file base name>>> ')
 
