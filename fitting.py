@@ -318,9 +318,9 @@ def fitting(dataname):
 
 
 
-	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfitver31')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
