@@ -192,7 +192,6 @@ def fitting(dataname,freqWave,freqCarrier):
 	plt.plot(pnt2freq(datax),[yy for i in datax],'-',lw=1,color='k')    #ノイズフロアを黒色で表示
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
-
 	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
