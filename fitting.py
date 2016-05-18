@@ -7,6 +7,14 @@ power1とpower0が最も近くなるようにpower1の周波数を決める
 `xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
 `
 
+
+1. fittingしてwaveが出たならば2以降へ進む
+低い方の周波数±20Hz付近をサーチして、最も大きい値をプロット。このときの値を"A"とする。
+2. 低い方の周波数±20Hz付近をサーチして、"A"に最も近い大きさの点をプロットする
+3. プロットされた周波数とシグナル及びSNをCSVファイルに吐きだす
+
+
+
 __UPDATE3.0__
 Mfit周波数の平均値でfitting
 Mfit周波数低い方の±10Hzのmaxを見る
@@ -259,7 +267,7 @@ def fitting(dataname):
 		dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
-		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condmu=0.2):
+		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2):
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			datadict0={}
 			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
@@ -320,7 +328,7 @@ def fitting(dataname):
 
 	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfitver31')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfitver31/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
