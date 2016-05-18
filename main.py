@@ -1,13 +1,12 @@
 '''
-## main.py ver7.0
+## main.py ver6.1
 
-__UPDATE7.0__
-出力先ルートパスco.out()最初に設定
-Mfitのために周波数追加
+__UPDATE6.1__
+fittting の引数に周波数は入れない(fittingのforステートメント中にconfidentialから直接引っ張る)
 
 __UPDATE6.0__
 例外により中断されたら実行するtry~finally文追加
-書き込まれない。なんで？！
+
 
 __UPDATE5.0__
 ファイル名の指定(コンソールからインプットする)
@@ -90,33 +89,36 @@ __PLAN__
 
 
 import confidential as co
-outPath=co.out()    #出力フォルダルートパス
 ## __CSV NAME__________________________
-# '''
-# コンソールからファイル名を指定
-# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-# '''
-# oldinpS=input('Input old SN file base name>>> ')
-# oldinpP=input('Input old power file base name>>> ')
+'''
+コンソールからファイル名を指定
+新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+'''
+oldinpS=input('Input old SN file base name>>> ')
+oldinpP=input('Input old power file base name>>> ')
 
-# print('新規にファイルを作成したいときは何も入力せずENTER')
-# newinpS=input('Input new SN file base name>>> ')
-# if not newinpS:newinpS=oldinpS
-# print('新規にファイルを作成したいときは何も入力せずENTER')
-# newinpP=input('Input new power file base name>>> ')
-# if not newinpP:newinpP=oldinpP
+print('新規にファイルを作成したいときは何も入力せずENTER')
+newinpS=input('Input new SN file base name>>> ')
+if not newinpS:newinpS=oldinpS
+print('新規にファイルを作成したいときは何も入力せずENTER')
+newinpP=input('Input new power file base name>>> ')
+if not newinpP:newinpP=oldinpP
 
-# inplist=[oldinpS,oldinpP,newinpS,newinpP]
-# csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: outPath+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+inplist=[oldinpS,oldinpP,newinpS,newinpP]
+csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+
+# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
 ## ____________________________
-'''開発環境内であらかじめファイル名を指定'''
-(oldcsvS,newcsvS)=(outPath+'\\CSV\\old\\Mfittest.csv',outPath+'\\CSV\\old\\Mfittest.csv')
-print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-(oldcsvP,newcsvP)=(outPath+'\\CSV\\old\\Mfittest.csv',outPath+'\\CSV\\old\\Mfittest.csv')
+# '''開発環境内であらかじめファイル名を指定'''
+# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
+# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
+# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
 ## ____________________________
 print('SN value :\nRead from %s\nWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
 print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+
 
 
 
@@ -129,12 +131,7 @@ freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
 freqFreq=co.freqWave()+co.freqCarrier()
-k=0
-for tpl in co.freqM():    #freqM()は2つ以上で1セットなので
-	for val in tpl:
-		freqFreq.append(str(tpl)+'_'+str(k))    #添え字つきでラベルにする
-		k+=1
-print('Search freaquency',freqFreq)
+outPath=co.out()    #ルートパス
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
@@ -149,28 +146,27 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 ## ____________________________
 #'''コンソールから入力'''
-# dateFirst=input('Input First Date>>> ')
-# dateLast=input('Input Last Date>>> ')
-# if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
-# 	dateLast=dateFirst
+dateFirst=input('Input First Date>>> ')
+dateLast=input('Input Last Date>>> ')
+if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
+	dateLast=dateFirst
 ## ____________________________
-# '''開発環境内でリストの最初と最後を指定'''
-# dateFirst='151213'
-# dateLast='151213'
-# ## ____________________________
-# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
+'''開発環境内でリストの最初と最後を指定'''
+# dateFirst='151229'
+# dateLast='151229'
+dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
 ## ____________________________
-dateList=[str(i) for i in range(151228,151231)]+[str(i) for i in range(160101,160105)]+['151228']+[str(i) for i in range(160203,160206)]+['151213']  
-# dateList+=[str(i) for i in range(151201,151206)]+[str(i) for i in range(151115,151118)]+[str(i) for i in range(160315,160320)]+[str(i) for i in range(160420,160423)]+[str(i) for i in range(160510,160514)]
-dateList=['151201']  #最初から最後の日付のリストを返す
+# '''リストで指定'''
+# dateList=['151201']
+## ____________________________
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
 filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 try:
-# __FITTING__________________________
-	for fitfile in filepath[10:20] :
+	# __FITTING__________________________
+	for fitfile in filepath[0:] :
 		import fitting as f
 		import numpy as np
 		data=np.loadtxt(fitfile)   #load text data as array
@@ -181,16 +177,14 @@ try:
 		print('Write to SN\n', fitRtn[0])
 		print('Write to Power\n', fitRtn[1])
 
-# except:
-# 	print('Why do you interrupt me!?')
+except KeyboardInterrupt:
+	print('Why do you interrupt me!?')
 
 
 finally:
 	## __WRITEING__________________________
-	# print('Write to SN\n', SNResult)
-	# print('Write to Power\n', powerResult)
-	print('Writeing all SN result to %s'% newcsvS)
+	print('Write to SN\n', SNResult)
+	print('Write to Power\n', powerResult)
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-	print('Writeing all power result to %s'% newcsvP)
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	# SNResult,powerResult={},{}    #SNResultのリセット
