@@ -220,8 +220,10 @@ def fitting(dataname):
 
 
 
-	def fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
-		return SNratio>5 and 1<waveWidth<100 and abs(freqFit-fittingFreqFit)<0.05 #幅が0~100の間に入るとき(正常なガウシアン)
+	def fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth,condSN=5,condwavewidth0=1,condwavewidth1=100, condmu=0.05 ):
+		return (SNratio>condSN 
+			and condwavewidth0<waveWidth<condwavewidth1 
+			and abs(freqFit-fittingFreqFit)<condmu) #幅が0~100の間に入るとき(正常なガウシアン)
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
 
@@ -251,8 +253,8 @@ def fitting(dataname):
 		dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
-		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth):
-			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condmu=0.2):
+			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			datadict={}
 			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:
 				datadict[pnt2freq(datax[i])]=datay[i]
