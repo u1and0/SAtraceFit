@@ -1,5 +1,11 @@
 '''
-## fitting.py ver3.0
+## fitting.py ver3.1
+
+__UPDATE3.1__
+Mfit 
+power1とpower0が最も近くなるようにpower1の周波数を決める
+`xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
+`
 
 __UPDATE3.0__
 Mfit周波数の平均値でfitting
@@ -255,22 +261,31 @@ def fitting(dataname):
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
 		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condmu=0.2):
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			datadict={}
-			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:
-				datadict[pnt2freq(datax[i])]=datay[i]
-			print('\n'*6,dataname,'\n','Show datadict!!',datadict.items())
-			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict.items(), key=lambda x:x[1])[0])
-			xpower0=max(datadict.items(), key=lambda x:x[1])[0]
-			power0=datadict[xpower0]
+			datadict0={}
+			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
+				datadict0[pnt2freq(datax[i])]=datay[i]
+			print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
+			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
+			xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
+			power0=datadict0[xpower0]
 			print('Plot!!!\n',xpower0,power0)
-			# max([(fr,po) for fr,po in datadict.items())
-			# print(dataname,'datadict',max(datadict.items(),key=datadict.items()[1]))
-			# for i in datadict.items()[0]
+			# max([(fr,po) for fr,po in datadict0.items())
+			# print(dataname,'datadict0',max(datadict0.items(),key=datadict0.items()[1]))
+			# for i in datadict0.items()[0]
 
 
 
 
 
+			datadict1={}
+			for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
+				datadict1[pnt2freq(datax[i])]=datay[i]
+			
+			print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
+			print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
+			xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
+			power1=datadict1[xpower1]
+			print('Plot!!!\n',xpower1,power1)
 			# power0=max(dataySearch)
 			# print('!!!!!!!!!!!!!!!!!!!!!',power0)
 			# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
@@ -283,7 +298,7 @@ def fitting(dataname):
 			# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
 			# print(power0,power1)
 			SNextract(xpower0,power0)
-			# SNextract(freqFit[1],power1)
+			SNextract(xpower1,power1)
 
 
 
