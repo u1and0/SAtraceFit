@@ -227,7 +227,22 @@ def fitting(dataname):
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
 
-
+	def around(klist,vlist,c,r):
+		'''
+		リストのインデックスcを中心にrの範囲のリストを作成し、
+		klistをキーに、vlistを値にしたディクショナリを戻す関数
+		引数klist, vlistはリスト
+		c,rはリストのインデックス
+		戻り値はディクショナリ
+		'''
+		d=[]
+		kk=klist[c-r:c+r]
+		vv=vlist[c-r:c+r]
+		print('kk,vv=',kk,vv)
+		for i in zip(kk,vv):
+			d.append=i
+		print('d',d)
+		return d
 
 
 	plt.figure(figsize=(6,6))
@@ -255,13 +270,11 @@ def fitting(dataname):
 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
 		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condmu=0.2):
 			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			datadict={}
-			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:
-				datadict[pnt2freq(datax[i])]=datay[i]
-			print('\n'*6,dataname,'\n','Show datadict!!',datadict.items())
-			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict.items(), key=lambda x:x[1])[0])
-			xpower0=max(datadict.items(), key=lambda x:x[1])[0]
-			power0=datadict[xpower0]
+			datadict=around(datax,datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
+			print('\n'*6,dataname,'\n','Show datadict!!',datadict)
+			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict, key=lambda x:x[1])[0])
+			xpower0=max(datadict, key=lambda x:x[1])[0]
+			power0=datadict[1]
 			print('Plot!!!\n',xpower0,power0)
 			# max([(fr,po) for fr,po in datadict.items())
 			# print(dataname,'datadict',max(datadict.items(),key=datadict.items()[1]))
