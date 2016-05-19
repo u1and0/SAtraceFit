@@ -1,5 +1,16 @@
 '''
-## fitting.py ver3.1
+## fitting.py ver3.3
+
+__UPDATE3.3__
+
+1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+3. power0のSNが10以上なら、フィッティングを行う
+4. 「フィッティングの状態が良い」または「power1のSN比がpower0のSN比の±5%未満」ならばpower0とpower1をプロットする
+> 「フィッティングの状態が良い」とは、指定した周波数付近に鋭くも潰れてもいないちょうど良い波が、SN比0以上で出ている。if文は次のようになる
+> `if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
+`
+
 
 __UPDATE3.1__
 Mfit 
@@ -234,9 +245,9 @@ def fitting(dataname):
 
 
 
-	def fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth,condSN=5,condwavewidth0=1,condwavewidth1=100, condmu=0.05 ):
+	def fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth,condSN=5,condwavewidthmin=1,condwavewidthmax=100, condmu=0.05 ):
 		return (SNratio>condSN 
-			and condwavewidth0<waveWidth<condwavewidth1 
+			and condwavewidthmin<waveWidth<condwavewidthmax 
 			and abs(freqFit-fittingFreqFit)<condmu) #幅が0~100の間に入るとき(正常なガウシアン)
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
@@ -261,52 +272,108 @@ def fitting(dataname):
 		poww=datay[freq2pnt(freqFit)]
 		if poww>10:    #SN比が10以上ならCarrierが出ているとみなす
 			SNextract(freqFit,poww)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## __TEST SCOPE__________________________
+
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
-		avefit=np.mean(freqFit)
-		fitrange=0.2
-		dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
-		datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
-		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
-		if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2):
-			plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			datadict0={}
-			for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
-				datadict0[pnt2freq(datax[i])]=datay[i]
-			print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
-			print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
-			xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
-			power0=datadict0[xpower0]
-			print('Plot!!!\n',xpower0,power0)
-			# max([(fr,po) for fr,po in datadict0.items())
-			# print(dataname,'datadict0',max(datadict0.items(),key=datadict0.items()[1]))
-			# for i in datadict0.items()[0]
+		datadict0={}
+		for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
+			datadict0[pnt2freq(datax[i])]=datay[i]
+		print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
+		print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
+		xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
+		power0=datadict0[xpower0]
+		print('Plot!!!\n',xpower0,power0)
+		# max([(fr,po) for fr,po in datadict0.items())
+		# print(dataname,'datadict0',max(datadict0.items(),key=datadict0.items()[1]))
+		# for i in datadict0.items()[0]
 
 
 
 
 
-			datadict1={}
-			for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
-				datadict1[pnt2freq(datax[i])]=datay[i]
-			
-			print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
-			print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
-			xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
-			power1=datadict1[xpower1]
-			print('Plot!!!\n',xpower1,power1)
-			# power0=max(dataySearch)
-			# print('!!!!!!!!!!!!!!!!!!!!!',power0)
-			# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
-			# print('!!!!!!!!!!!!!!!!!!!!!',xpower0)
-			# # xpower1=datax[datay.index(power0)]
-			# # power1=lambda y:y if abs(y-power0)==min([abs(y-power0)]) for y in checkhigh
-			# for y in datay[freq2pnt(freqFit[1]-0.01):freq2pnt(freqFit[1]+0.01)]:    #監視範囲 freqFit[1]±10Hzの範囲
-			# 	if abs(y-power0)==min([abs(y-power0)]):
-			# 		power1=y
-			# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
-			# print(power0,power1)
-			SNextract(xpower0,power0)
-			SNextract(xpower1,power1)
+		datadict1={}
+		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
+			datadict1[pnt2freq(datax[i])]=datay[i]
+		
+		print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
+		print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
+		xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
+		power1=datadict1[xpower1]
+		print('Plot!!!\n',xpower1,power1)
+		# power0=max(dataySearch)
+		# print('!!!!!!!!!!!!!!!!!!!!!',power0)
+		# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
+		# print('!!!!!!!!!!!!!!!!!!!!!',xpower0)
+		# # xpower1=datax[datay.index(power0)]
+		# # power1=lambda y:y if abs(y-power0)==min([abs(y-power0)]) for y in checkhigh
+		# for y in datay[freq2pnt(freqFit[1]-0.01):freq2pnt(freqFit[1]+0.01)]:    #監視範囲 freqFit[1]±10Hzの範囲
+		# 	if abs(y-power0)==min([abs(y-power0)]):
+		# 		power1=y
+		# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
+		# print(power0,power1)
+
+
+
+		if power0-noisef>10:
+			# __ver3.1__________________________
+			avefit=np.mean(freqFit)
+			fitrange=0.2
+			dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
+			datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
+			fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
+			if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2,condwavewidthmin=10) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
+				plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			# __ver3.1__________________________
+
+
+
+				SNextract(xpower0,power0)
+				SNextract(xpower1,power1)
+
+## __TEST SCOPE__________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -328,7 +395,7 @@ def fitting(dataname):
 
 	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfitver31/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit33/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
