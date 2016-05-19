@@ -1,5 +1,8 @@
 '''
-## fitting.py ver3.4
+## fitting.py ver3.5
+
+__UPDATE3.5__
+
 
 __UPDATE3.4__
 
@@ -326,15 +329,15 @@ def fitting(dataname):
 		datadict0={}
 		for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
 			datadict0[pnt2freq(datax[i])]=datay[i]
+
+		'''
+		テスト用
 		print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
 		print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
+		'''
 		xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
 		power0=datadict0[xpower0]
-		print('Plot!!!\n',xpower0,power0)
-		# max([(fr,po) for fr,po in datadict0.items())
-		# print(dataname,'datadict0',max(datadict0.items(),key=datadict0.items()[1]))
-		# for i in datadict0.items()[0]
-
+		# print('Plot!!!\n',xpower0,power0)
 
 
 
@@ -342,11 +345,15 @@ def fitting(dataname):
 		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
 			datadict1[pnt2freq(datax[i])]=datay[i]
 		
+		'''
 		print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
 		print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
+		'''
 		xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
 		power1=datadict1[xpower1]
+		'''
 		print('Plot!!!\n',xpower1,power1)
+		
 		# power0=max(dataySearch)
 		# print('!!!!!!!!!!!!!!!!!!!!!',power0)
 		# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
@@ -358,10 +365,12 @@ def fitting(dataname):
 		# 		power1=y
 		# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
 		# print(power0,power1)
+		'''
 
 
-
-		if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:
+		if (datay[freq2pnt(24.1)]-noisef<10
+					and power0-noisef*0.8<power1-noisef<power0-noisef*1.2):
+		# if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:
 			# __ver3.3__________________________
 			# avefit=np.mean(freqFit)
 			# fitrange=0.2
@@ -453,7 +462,7 @@ def fitting(dataname):
 
 	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit34/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit35/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
