@@ -323,7 +323,6 @@ def fitting(dataname):
 
 
 
-
 		datadict1={}
 		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
 			datadict1[pnt2freq(datax[i])]=datay[i]
