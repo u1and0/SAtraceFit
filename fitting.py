@@ -263,7 +263,22 @@ def fitting(dataname):
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
 
-
+	def around(klist,vlist,c,r):
+		'''
+		リストのインデックスcを中心にrの範囲のリストを作成し、
+		klistをキーに、vlistを値にしたディクショナリを戻す関数
+		引数klist, vlistはリスト
+		c,rはリストのインデックス
+		戻り値はディクショナリ
+		'''
+		d=[]
+		kk=klist[c-r:c+r]
+		vv=vlist[c-r:c+r]
+		print('kk,vv=',kk,vv)
+		for i in zip(kk,vv):
+			d.append=i
+		print('d',d)
+		return d
 
 
 	plt.figure(figsize=(6,6))
@@ -357,6 +372,41 @@ def fitting(dataname):
 				# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			# __ver3.3__________________________
 
+
+		# __ver3.1__________________________
+		# avefit=np.mean(freqFit)
+		# fitrange=0.2
+		# dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
+		# datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
+		# fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
+		# if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condmu=0.2):
+		# 	plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+		# 	datadict=around(datax,datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
+		# 	print('\n'*6,dataname,'\n','Show datadict!!',datadict)
+		# 	print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict, key=lambda x:x[1])[0])
+		# 	xpower0=max(datadict, key=lambda x:x[1])[0]
+		# 	power0=datadict[1]
+		# 	print('Plot!!!\n',xpower0,power0)
+		# __ver3.1__________________________
+			# max([(fr,po) for fr,po in datadict.items())
+			# print(dataname,'datadict',max(datadict.items(),key=datadict.items()[1]))
+			# for i in datadict.items()[0]
+
+
+
+
+
+			# power0=max(dataySearch)
+			# print('!!!!!!!!!!!!!!!!!!!!!',power0)
+			# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
+			# print('!!!!!!!!!!!!!!!!!!!!!',xpower0)
+			# # xpower1=datax[datay.index(power0)]
+			# # power1=lambda y:y if abs(y-power0)==min([abs(y-power0)]) for y in checkhigh
+			# for y in datay[freq2pnt(freqFit[1]-0.01):freq2pnt(freqFit[1]+0.01)]:    #監視範囲 freqFit[1]±10Hzの範囲
+			# 	if abs(y-power0)==min([abs(y-power0)]):
+			# 		power1=y
+			# 	# if y==index(min([abs(y-power0) for y in checkhigh]) )
+			# print(power0,power1)
 			SNextract(xpower0,power0)
 			SNextract(xpower1,power1)
 
