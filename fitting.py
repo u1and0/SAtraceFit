@@ -1,5 +1,15 @@
 '''
-## fitting.py ver3.3
+## fitting.py ver3.4
+
+__UPDATE3.4__
+
+1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+3. 「power0のSNが10以上」 かつ 「power1がpower0の±20%以内ならばプロット」
+> `if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:`
+
+* carriierの表示にはnoisefを引く必要があった
+
 
 __UPDATE3.3__
 
@@ -116,9 +126,10 @@ __ACTION__
 11. ディクショナリ in ディクショナリを返す
 
 __TODO__
-M-fitting:
-	fitting周波数が2つ
-	2つの周波数の重ね合わせ
+* M-fitting:
+	* fitting周波数が2つ
+	* 2つの周波数の重ね合わせ
+* carrier fitの周辺ぼやかして探す
 '''
 
 import numpy as np
@@ -270,7 +281,7 @@ def fitting(dataname):
 			SNextract(fittingFreqFit,SNratio+noisef)
 	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
 		poww=datay[freq2pnt(freqFit)]
-		if poww>10:    #SN比が10以上ならCarrierが出ているとみなす
+		if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
 			SNextract(freqFit,poww)
 
 
@@ -336,21 +347,19 @@ def fitting(dataname):
 
 
 
-		if power0-noisef>10:
-			# __ver3.1__________________________
-			avefit=np.mean(freqFit)
-			fitrange=0.2
-			dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
-			datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
-			fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
-			if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2,condwavewidthmin=10) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
-				plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			# __ver3.1__________________________
+		if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:
+			# __ver3.3__________________________
+			# avefit=np.mean(freqFit)
+			# fitrange=0.2
+			# dataxRange=datax[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]   #±200Hzをフィッティングする
+			# datayRange=datay[freq2pnt(avefit-fitrange):freq2pnt(avefit+fitrange)]
+			# fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,avefit))
+			# if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2,condwavewidthmin=10) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
+				# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+			# __ver3.3__________________________
 
-
-
-				SNextract(xpower0,power0)
-				SNextract(xpower1,power1)
+			SNextract(xpower0,power0)
+			SNextract(xpower1,power1)
 
 ## __TEST SCOPE__________________________
 
@@ -395,7 +404,7 @@ def fitting(dataname):
 
 	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit33/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit34/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
