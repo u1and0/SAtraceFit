@@ -1,5 +1,8 @@
 '''
-## fitting.py ver3.1.1
+## fitting.py ver3.1.2
+
+__UPDATE3.1.2__
+around関数作ってcarrierにも適用
 
 __UPDATE3.1.1__
 fitting conditionのwavewithminの条件を甘くした
@@ -244,7 +247,13 @@ def fitting(dataname):
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
 
-
+	def around(listx,listy,c,r):    #listx,yはdatax,yだから0,1,2,3...と-89,-90,-87,...
+		dic={}
+		# print(listx,listy,c,r)
+		for i in range(len(listx)):
+			dic[listx[i]]=listy[i]
+		print(dic)
+		return dic
 
 
 	plt.figure(figsize=(6,6))
@@ -265,9 +274,10 @@ def fitting(dataname):
 		if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
 			SNextract(freqFit,poww)
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
-		datadict0={}
-		for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
-			datadict0[pnt2freq(datax[i])]=datay[i]
+		datadict0,datadict1={},{}
+		# for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
+		# 	datadict0[pnt2freq(datax[i])]=datay[i]
+		datadict0=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
 		'''
 		print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
 		print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
@@ -280,9 +290,12 @@ def fitting(dataname):
 
 
 
-		datadict1={}
 		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
 			datadict1[pnt2freq(datax[i])]=datay[i]
+		datadict11=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[1]),freq2pnt(0.02))
+		if datadict1!=datadict11:
+			print('hoghe')
+			break
 		'''
 		print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
 		print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
@@ -333,7 +346,7 @@ def fitting(dataname):
 
 	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit311/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit312/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
