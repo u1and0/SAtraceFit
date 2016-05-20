@@ -166,7 +166,7 @@ filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定され�
 
 try:
 	# __FITTING__________________________
-	for fitfile in filepath[0:] :
+	for fitfile in filepath[10:20] :
 		import fitting as f
 		import numpy as np
 		data=np.loadtxt(fitfile)   #load text data as array

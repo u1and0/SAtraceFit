@@ -153,6 +153,7 @@ import sys
 import datetime
 d = datetime.datetime.today()
 import confidential as co
+from listdic import *
 
 
 
@@ -275,14 +276,13 @@ def fitting(dataname):
 			and abs(freqFit-fittingFreqFit)<condmu) #幅が0~100の間に入るとき(正常なガウシアン)
 			   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
 
-
-	def around(listx,listy,c,r):    #listx,yはdatax,yだから0,1,2,3...と-89,-90,-87,...
-		dic={}
-		# print(listx,listy,c,r)
-		for i in range(len(listx)):
-			dic[listx[i]]=listy[i]
-		print(dic)
-		return dic
+	# def around(listx,listy,c,r):    #listx,yはdatax,yだから0,1,2,3...と-89,-90,-87,...
+	# 	dic={}
+	# 	# print(listx,listy,c,r)
+	# 	for i in range(len(listx)):
+	# 		dic[listx[i]]=listy[i]
+	# 	print(dic)
+	# 	return dic
 	'''
 
 	=======
@@ -347,9 +347,9 @@ def fitting(dataname):
 
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
 		datadict0,datadict1={},{}
-		# for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
-		# 	datadict0[pnt2freq(datax[i])]=datay[i]
-		datadict0=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
+		for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
+			datadict0[pnt2freq(datax[i])]=datay[i]
+		# datadict0=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
 		'''
 		=======
 		datadict0={}
@@ -363,36 +363,40 @@ def fitting(dataname):
 		'''
 		xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
 		power0=datadict0[xpower0]
-		'''
-		<<<<<<< HEAD
-		print('Plot!!!\n',xpower0,power0)
-		'''
 
 
 
 		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
 			datadict1[pnt2freq(datax[i])]=datay[i]
-		datadict11=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[1]),freq2pnt(0.02))
-		if datadict1!=datadict11:
-			print('hoghe')
-			break
-		# print('Plot!!!\n',xpower0,power0)
+		# datadict11=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[1]),freq2pnt(0.02))
+		# datadict11=twoList2dic(around(datax,freq2pnt(freqFit[1]),freq2pnt(0.02)), around(datay,freq2pnt(freqFit[1]),freq2pnt(0.02)))
+		datadict11=twoList2dic(pnt2freq(datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]),datay[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)])
 
-
-
-		datadict1={}
-		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
-			datadict1[pnt2freq(datax[i])]=datay[i]
 		
+		# print(datax)
+		# print(freq2pnt(freqFit[1]),freq2pnt(0.02))
+		# print(around(datax,10,2))
+		# print(around(datax,freq2pnt(freqFit[1]),freq2pnt(0.2)))
+		print(datadict11)
+		# if datadict1!=datadict11:
+		# 	print('hoghe')
+			# break
+
+
 		'''
 		print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
 		print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
 		'''
-		xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
-		power1=datadict1[xpower1]
-		'''
+
+
+		xpower1=(min(datadict11.items(), key=lambda x:abs(x[1]-power0))[0])    #datadict11をキーと値でタプルにして、要素の1番目(ディクショナリの値)を比較して、min(power0との差が最も小さい)ところのタプルの第0要素を返す
+		power1=datadict11[xpower1]
+
+
+
+		print('!!!!!!!!!!!!!!!!!!!!!!!!!!')
+		print('Plot!!!\n',xpower0,power0)
 		print('Plot!!!\n',xpower1,power1)
-		'''
 
 		# power0=max(dataySearch)
 		# print('!!!!!!!!!!!!!!!!!!!!!',power0)
@@ -509,9 +513,9 @@ def fitting(dataname):
 
 
 
-	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
-	plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit312/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit312/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 
