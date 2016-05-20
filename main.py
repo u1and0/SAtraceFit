@@ -102,7 +102,6 @@ import confidential as co
 # 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
 # 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
 # '''
-<<<<<<< HEAD
 oldinpS=input('Input old SN file base name>>> ')
 oldinpP=input('Input old power file base name>>> ')
 
