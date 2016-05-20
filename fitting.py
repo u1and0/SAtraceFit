@@ -415,10 +415,6 @@ def fitting(dataname):
 
 
 
-		print('!!!!!!!!!!!!!!!!!!!!!!!!!!')
-		print('Plot!!!\n',xpower0,power0)
-		print('Plot!!!\n',xpower1,power1)
-
 		# power0=max(dataySearch)
 		# print('!!!!!!!!!!!!!!!!!!!!!',power0)
 		# xpower1=pnt2freq(dataxSearch[dataySearch.index(power0)])
@@ -531,11 +527,11 @@ def fitting(dataname):
 	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
-	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	# plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 
-	# plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename)    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 ## ____________________________
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/Mfit35/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	# plotshowing(filebasename,ext='png',dir=co.out()+'TEST/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション

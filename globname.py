@@ -66,6 +66,11 @@ print(globname(rootroot(),dateList))
 
 
 
+def globfullname(rootpath,date,time):
+	'''rootpath内のファイルのフルパスを返す'''
+	filename=rootpath+'20'+date+'_'+time+'.txt'
+	return filename
+
 
 
 

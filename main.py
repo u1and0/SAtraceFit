@@ -99,28 +99,10 @@ __PLAN__
 import confidential as co
 ## __CSV NAME__________________________
 '''
-# コンソールからファイル名を指定
-# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-# '''
-oldinpS=input('Input old SN file base name>>> ')
-oldinpP=input('Input old power file base name>>> ')
-
-print('新規にファイルを作成したいときは何も入力せずENTER')
-newinpS=input('Input new SN file base name>>> ')
-if not newinpS:newinpS=oldinpS
-print('新規にファイルを作成したいときは何も入力せずENTER')
-newinpP=input('Input new power file base name>>> ')
-if not newinpP:newinpP=oldinpP
-
-inplist=[oldinpS,oldinpP,newinpS,newinpP]
-csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
-## ____________________________
-'''開発環境内であらかじめファイル名を指定'''
-# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
-# =======
+コンソールからファイル名を指定
+新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+'''
 # oldinpS=input('Input old SN file base name>>> ')
 # oldinpP=input('Input old power file base name>>> ')
 
@@ -134,11 +116,10 @@ csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp
 # inplist=[oldinpS,oldinpP,newinpS,newinpP]
 # csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
 ## ____________________________
-# '''開発環境内であらかじめファイル名を指定'''
-# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
-# >>>>>>> Mfit
+'''開発環境内であらかじめファイル名を指定'''
+(oldcsvS,newcsvS)=(co.out()+'\\CSV\\TEST\\SNfitting.csv',co.out()+'\\CSV\\TEST\\SNfitting.csv')
+print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
+(oldcsvP,newcsvP)=(co.out()+'\\CSV\\TEST\\Pfitting.csv',co.out()+'\\CSV\\TEST\\Pfitting.csv')
 ## ____________________________
 print('SN value :\nRead from %s\nWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
 print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
@@ -166,28 +147,41 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 
 
-## __DATE LIST__________________________
-from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-## ____________________________
-'''コンソールから入力'''
-dateFirst=input('Input First Date>>> ')
-dateLast=input('Input Last Date>>> ')
-if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
-	dateLast=dateFirst
-## ____________________________
-'''開発環境内でリストの最初と最後を指定'''
-# dateFirst='151201'
-# dateLast='151201'
-dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
-## ____________________________
-# '''リストで指定'''
-# dateList=['151201']
-## ____________________________
-print('\nNow extracting from these dates\n%s\n'% dateList)
 
+# # >>>>>master
+# ## __DATE LIST__________________________
+# from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
+# ## ____________________________
+# '''コンソールから入力'''
+# dateFirst=input('Input First Date>>> ')
+# dateLast=input('Input Last Date>>> ')
+# if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
+# 	dateLast=dateFirst
+# ## ____________________________
+# '''開発環境内でリストの最初と最後を指定'''
+# # dateFirst='151201'
+# # dateLast='151201'
+# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
+# ## ____________________________
+# # '''リストで指定'''
+# # dateList=['151201']
+# ## ____________________________
+# print('\nNow extracting from these dates\n%s\n'% dateList)
+# filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+
+
+
+
+print('使い方')
+print(' 表示したいファイル名の日付部分を6桁で入力、次に時間部分を6桁で入力。')
+print('\n例)20151201_000344.txt>>>\n')
+date=input('グラフ化する日付を6桁で入力してください(yymmdd形式)>>> ')
+time=input('グラフ化する時間を6桁で入力してください(HHMMSS形式)>>> ')
+
+# >>>>timearg
 import globname as g
-filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
-
+print(g.globfullname(co.root(),date,time))
+filepath=[g.globfullname(co.root(),date,time)]    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 try:
 	# __FITTING__________________________
 	for fitfile in filepath[0:] :
