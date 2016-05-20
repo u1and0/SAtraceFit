@@ -23,7 +23,7 @@ datetime関数で日付の形式に直して
 globの
 
 __PLAN__
-none
+時間を引数にする
 '''
 
 
