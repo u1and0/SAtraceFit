@@ -1,4 +1,21 @@
 '''
+## fitting.py ver3.5
+
+__UPDATE3.5__
+
+* listdic モジュール追加
+	* listdic()リストの一部を抜き出す:
+	* search_maxy_returnx():2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする
+* carrier fitの周辺ぼやかして探す
+	* search_maxy_returnx()
+
+
+around():リストの一部を抜き出す
+はdataxをあらかじめpnt2freq()していないからうまく動かない
+多くの箇所を直さなければならなくなるので後回し
+
+
+
 <<<<<<< HEAD
 ## fitting.py ver3.1.2
 
@@ -8,9 +25,6 @@ around関数作ってcarrierにも適用
 __UPDATE3.1.1__
 fitting conditionのwavewithminの条件を甘くした
 =======
-## fitting.py ver3.5
-
-__UPDATE3.5__
 
 
 __UPDATE3.4__
@@ -142,7 +156,13 @@ __TODO__
 * M-fitting:
 	* fitting周波数が2つ
 	* 2つの周波数の重ね合わせ
-* carrier fitの周辺ぼやかして探す
+>list2dic()
+dataxはロードする時点でpnt2freqかけておかないと
+> around():リストの一部を抜き出す
+> はdataxをあらかじめpnt2freq()していないからうまく動かない
+> 多くの箇所を直さなければならなくなるので後回し
+
+
 '''
 
 import numpy as np
@@ -153,7 +173,7 @@ import sys
 import datetime
 d = datetime.datetime.today()
 import confidential as co
-from listdic import *
+import listdic as ld
 
 
 
@@ -318,22 +338,17 @@ def fitting(dataname):
 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit,SNratio+noisef)
 	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
-		poww=datay[freq2pnt(freqFit)]
-		if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
-			SNextract(freqFit,poww)
+		datadict=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)]),datay[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)])
+		print('datad',datadict)
+		xpower=ld.search_maxy_returnx(datadict)
+		power=datadict[xpower]
 
-
-
-
-
-
-
-
-
-
-
-
-
+		# poww=datay[freq2pnt(freqFit)]
+		if power-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
+			SNextract(xpower,power)
+			print('Plot!', xpower,power)
+		# if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
+		# 	SNextract(freqFit,poww)
 
 
 
@@ -346,10 +361,11 @@ def fitting(dataname):
 ## __TEST SCOPE__________________________
 
 	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
-		datadict0,datadict1={},{}
-		for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
-			datadict0[pnt2freq(datax[i])]=datay[i]
-		# datadict0=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
+		# datadict0,datadict1={},{}
+		# for i in datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]:    #iはdataxの限られたポイント数
+		# 	datadict0[pnt2freq(datax[i])]=datay[i]
+		# # datadict0=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[0]),freq2pnt(0.02))
+		datadict0=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]),datay[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)])
 		'''
 		=======
 		datadict0={}
@@ -361,26 +377,13 @@ def fitting(dataname):
 		print('\n'*6,dataname,'\n','Show datadict0!!',datadict0.items())
 		print('\n'*4,'Which one is MAX!?!?!?\n',max(datadict0.items(), key=lambda x:x[1])[0])
 		'''
-		xpower0=max(datadict0.items(), key=lambda x:x[1])[0]
+		xpower0=ld.search_maxy_returnx(datadict0)
 		power0=datadict0[xpower0]
 
 
 
-		for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
-			datadict1[pnt2freq(datax[i])]=datay[i]
-		# datadict11=around(list(map(pnt2freq,datax)),datay,freq2pnt(freqFit[1]),freq2pnt(0.02))
-		# datadict11=twoList2dic(around(datax,freq2pnt(freqFit[1]),freq2pnt(0.02)), around(datay,freq2pnt(freqFit[1]),freq2pnt(0.02)))
-		datadict11=twoList2dic(pnt2freq(datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]),datay[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)])
 
-		
-		# print(datax)
-		# print(freq2pnt(freqFit[1]),freq2pnt(0.02))
-		# print(around(datax,10,2))
-		# print(around(datax,freq2pnt(freqFit[1]),freq2pnt(0.2)))
-		print(datadict11)
-		# if datadict1!=datadict11:
-		# 	print('hoghe')
-			# break
+		datadict1=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]),datay[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)])
 
 
 		'''
@@ -389,8 +392,8 @@ def fitting(dataname):
 		'''
 
 
-		xpower1=(min(datadict11.items(), key=lambda x:abs(x[1]-power0))[0])    #datadict11をキーと値でタプルにして、要素の1番目(ディクショナリの値)を比較して、min(power0との差が最も小さい)ところのタプルの第0要素を返す
-		power1=datadict11[xpower1]
+		xpower1=(min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])    #datadict1をキーと値でタプルにして、要素の1番目(ディクショナリの値)を比較して、min(power0との差が最も小さい)ところのタプルの第0要素を返す
+		power1=datadict1[xpower1]
 
 
 
