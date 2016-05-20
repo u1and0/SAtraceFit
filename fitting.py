@@ -201,7 +201,7 @@ def plotshowing(title,ext=None,dir='./'):
 	'''
 	plt.title(d.strptime(title,'%Y%m%d_%H%M%S'))
 	# plt.legend(loc='best',fancybox=True,fontsize='small')
-	plt.legend(bbox_to_anchor=(0.5, -0.25), loc='center', borderaxespad=0,fontsize='small',ncol=4)
+	plt.legend(bbox_to_anchor=(0.5, -0.25), loc='center', borderaxespad=0,fontsize='small',ncol=3)
 	plt.subplots_adjust(bottom=0.25)
 	plt.xlabel('Frequency[kHz]')
 	plt.ylabel('Power[dBm]')
@@ -355,24 +355,24 @@ def fitting(dataname):
 
 
 
-# <<<<<<< HEAD
-	plt.figure(figsize=(6,6))
-	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
-	SNDict,powerDict={},{}
-	for freqFit in co.freqWave():   #freqWaveの周波数をfit
-		## __FIT__________________________
-		fitrange=0.2
-		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
-		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
-		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
-		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
-			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-			SNextract(fittingFreqFit)
-	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
-		SNratio=datay[freq2pnt(freqFit)]-yy
-		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
-			SNextract(freqFit)
-# =======
+# # <<<<<<< HEAD
+# 	plt.figure(figsize=(6,6))
+# 	indicateCondition='SNratio>5 and (1<waveWidth<100) and abs(freqFit-fittingFreqFit)<0.05'    #幅が0~100の間に入るとき(正常なガウシアン)　かつ　フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
+# 	SNDict,powerDict={},{}
+# 	for freqFit in co.freqWave():   #freqWaveの周波数をfit
+# 		## __FIT__________________________
+# 		fitrange=0.2
+# 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
+# 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
+# 		fitresult=[fity,SNratio,fittingFreqFit,waveWidth]=list(gaussfit(dataxRange,datayRange,freqFit))
+# 		if eval(indicateCondition) :   #indicateConditionにマッチしたウェーブだけをプロットする
+# 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
+# 			SNextract(fittingFreqFit)
+# 	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
+# 		SNratio=datay[freq2pnt(freqFit)]-yy
+# 		if SNratio>10:    #SN比が10以上ならCarrierが出ているとみなす
+# 			SNextract(freqFit)
+# # =======
 
 
 
