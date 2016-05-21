@@ -2,7 +2,69 @@
 開発者用マニュアル
 各モジュールの説明等、開発メモ
 
-## main.py ver2.3
+
+
+
+## main.py ver7.0
+
+__UPDATE7.0__
+ファイル名を呼び出して1ファイルだけmatplotlibに表示する用
+
+### 使い方
+1. cmdなどのターミナルを開く
+2. このファイルのあるディレクトリまでcdする
+3. ターミナルに`python .main.py`と入力
+> 値が入力されるcsvファイルのフルパスが表示される
+4. 以下のように表示されるので、**拡張子無しのファイル名**(=日時)を例に倣って入力する
+> ____________________________
+> 使い方
+> グラフ化したいファイル名を"拡張子無しで"入力
+> (例)20151201_000344
+> ファイル名を入力して下さい>>>
+5. 別ウィンドウでグラフが表示され、ターミナルにはファイル名とプロットした座標が描かれる。グラフの拡大縮小、保存等の操作を行う
+6. グラフをバツ印で消す
+7. 項目3の注釈にあるcsvファイルにプロットされたSN比とシグナル強度が書き込まれる。
+8. 項目3操作に戻る
+
+
+
+
+
+__UPDATE6.1.1__
+fot Mfit test
+
+__UPDATE6.1__
+fittting の引数に周波数は入れない(fittingのforステートメント中にconfidentialから直接引っ張る)
+
+__UPDATE6.0__
+例外により中断されたら実行するtry~finally文追加
+
+
+__UPDATE5.0__
+ファイル名の指定(コンソールからインプットする)
+>第一引数：作成するファイル名
+>第二引数：取り込み元のファイル名(オプション)
+
+
+__UPDATE4.0__
+やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
+やっぱりcsvの書き込みは1ファイルのfitting後ごとに行う
+
+
+
+__UPDATE3.0__
+
+* fittingの廃止→SN_PowerSearchに変更
+* SN_PowerSearchに2つの関数
+	* SN, Power作成
+* csvは２つ吐き出す
+	* SN
+	* Power
+
+
+__UPDATE2.4__
+ファイル名はフルパスで受ける
+globname.pyを新規作成
 
 __UPDATE2.3__
 データファイルの場所と注目すべき周波数はconfidential.pyに記載
@@ -13,13 +75,13 @@ __INTRODUCTION__
 __ACTION__
 引数:
 dateFirst, dateLast : コンソールから入力、テストの際はコード内で書き換える
-oldcsv, newcsv : コード内で書き換える
+oldcsvS, newcsvS : コード内で書き換える
 
 戻り値:なし(CSVファイルに書き込む)
 
 1. datelistにより、フィッティングを行う最初の日付から最後の日付までのリストを抽出する。
 コンソールに出力
-2. (oldcsv,newcsv)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
+2. (oldcsvS,newcsvS)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
 rawdataPathで、データの位置を指定する(日付)
 3. confidentialにより、rootディレクトリとfittingに必要な周波数を指定する。
 4. CSV_IOにより、CSVを読み込む。
@@ -29,22 +91,33 @@ rawdataPathで、データの位置を指定する(日付)
 
 __USAGE__
 
-+ コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
-	+ フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
-+ CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
-	+ fitting>read>translate>update>translate>writeの流れは1セット
+* コマンドライン上にて`python main.py`で起動
+	SN, powerを出力するcsvファイル名(ディレクトリパスと拡張子は抜き)の入力が求められる(例：ファイル名をhogehoge.csvとしたければ、`hogehoge`と入力する)
+	フィッティング対象のデータの日付の入力が求められる`<最初の日付> <最後の日付>`。フォーマットはyymmdd形式(例：2015年11月1日の日付からにしたいときは`151101`と打ちこむ)
+* CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
+	* fitting>read>translate>update>translate>writeの流れは1セット
 
 __PLAN__
 
-+ プログラムを途中で止めるとこれまでの計算結果が記録されない
+* プログラムを途中で止めるとこれまでの計算結果が記録されない
 > writeメソッドが走るのはfor文の最後だから
 > read, writeメソッドが走るタイミングを調整する
-+ 二重起動すると強制終了される
-> マルチプロセスかができない
-+ exe化する予定
+> keyboard interruptされたときにwriteメソッド機能するようにできる?
+* 二重起動すると強制終了される
+> マルチプロセス化ができない
+> 書き込みが2重にくるからいけないんだと思う。
+> 仕様として、月々ごとにまとめろ、とある
+>> mainの親プロセスを作って、入力したら月々ごとにファイル名指定できるようにする？
+* exe化する予定
 > py2exe
-+ GUI化する予定
+* GUI化する予定
 > TKinter
+* csvの容量が大きくなるとプロセスの進行が遅れる
+> 読み込みに時間がかかる
+> 読み込みがfor文ごとにあるのがいけない
+>> for文終了後に一気に書き込みできるようにする
+>>> keyboard interruptされたときにwriteメソッド機能するようにしないと、プロセス中断すると計算結果がメモリとともに消えてしまう
+* 日付だけでなく時間を引数にする
 
 
 
@@ -53,28 +126,11 @@ __PLAN__
 
 
 
-## datelist.py ver1.0
-
-__UPDATE1.0__
-first commit
-
-__INTRODUCTION__
-main.pyから2つの値が渡される
-2つの間の日付のリストを返す
-
-__ACTION__
-yymmdd形式の6桁をdatetime関数で日付にする
-ddate1,2に代入する
-ddate1がddate2になるまで(while)
-ddate1を1日ずつ足して、リストに追加する(append)
-
-__USAGE__
-引数 : 最初の日付yymmdd形式、最後の日付yymmdd形式
-戻り値 : 最初の日付から最後の日付を入れたリストyymmdd形式
 
 
-__PLAN__
-none
+
+
+
 
 
 
@@ -115,6 +171,11 @@ none
 
 
 
+
+
+
+
+-------------------
 ## CSV_IO.py ver1.0
 __INTRODUCTION__
 関数readCSV,writeCSV, editCSVで構成される。
@@ -130,7 +191,7 @@ __INTRODUCTION__
 
 
 
-## readCSV.py ver1.1
+### readCSV.py ver1.1
 __UPDATE1.1__
 クラス'csv.DictReader()'を使ってディクショナリ形式でcsvを取り出す。
 キーは見出し(csvの1行目)
@@ -152,7 +213,7 @@ filenameにいれた名前のファイルを開く
 
 
 
-## writeCSV.py ver1.3
+### writeCSV.py ver1.3
 __UPDATE1.3__
 周波数の指定は外部ファイルから渡されてくる周波数のリスト'outparam'
 計算結果は外部ファイルから渡されてくる計算結果のリスト'cal_result'
@@ -176,7 +237,7 @@ datetimeでソートしたい
 
 
 
-## editCSV ver1.0
+### editCSV ver1.0
 __INTRODUCTION__
 fitting>read>translate>update>translate>writeの流れを一まとめにした
 __ACTION__
@@ -230,7 +291,7 @@ None
 
 
 
-
+-------------------
 ## csv_dict_transfer.py ver1.0
 
 __UPDATE1.0__
@@ -404,7 +465,7 @@ Testはコメントアウト外してbuildするのみ
 
 
 
-
+-------------------
 ### datatocsv ver1.0
 __UPDATE1.0__
 first commit
@@ -455,7 +516,7 @@ none
 
 
 
-
+-------------------
 ### csvtodata ver1.0
 
 __UPDATE1.0__
@@ -482,64 +543,190 @@ none
 
 
 
+---------------------
+## fitting.py ver3.5
+
+__UPDATE3.5__
+
+* listdic モジュール追加
+	* listdic()リストの一部を抜き出す:
+	* search_maxy_returnx():2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする
+* carrier fitの周辺ぼやかして探す
+	* search_maxy_returnx()
+
+
+around():リストの一部を抜き出す
+はdataxをあらかじめpnt2freq()していないからうまく動かない
+多くの箇所を直さなければならなくなるので後回し
 
 
 
-## fittingDiv.py ver0.3.8
+## fitting.py ver3.1.2
 
-__UPDATE0.3.8__
-datayとyyを比較することでS/N比が大体どれくらいか見積もることでfittingにかけるべきか否かわかる
->fittingかけなくてすめば時間短縮
->何故かfittingされちゃう1.0e+8みたいなデータもなくなる
+__UPDATE3.1.2__
+around関数作ってcarrierにも適用
+
+__UPDATE3.1.1__
+fitting conditionのwavewithminの条件を甘くした
+=======
+
+
+__UPDATE3.4__
+
+1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+3. 「power0のSNが10以上」 かつ 「power1がpower0の±20%以内ならばプロット」
+> `if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:`
+
+* carriierの表示にはnoisefを引く必要があった
+
+
+__UPDATE3.3__
+
+1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+3. power0のSNが10以上なら、フィッティングを行う
+4. 「フィッティングの状態が良い」または「power1のSN比がpower0のSN比の±5%未満」ならばpower0とpower1をプロットする
+> 「フィッティングの状態が良い」とは、指定した周波数付近に鋭くも潰れてもいないちょうど良い波が、SN比0以上で出ている。if文は次のようになる
+> `if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
+`
+
+>>>>>>> origin/Mfit
+
+__UPDATE3.1__
+Mfit 
+power1とpower0が最も近くなるようにpower1の周波数を決める
+`xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
+`
+
+
+1. fittingしてwaveが出たならば2以降へ進む
+低い方の周波数±20Hz付近をサーチして、最も大きい値をプロット。このときの値を"A"とする。
+2. 低い方の周波数±20Hz付近をサーチして、"A"に最も近い大きさの点をプロットする
+3. プロットされた周波数とシグナル及びSNをCSVファイルに吐きだす
+
+
+
+__UPDATE3.0__
+Mfit周波数の平均値でfitting
+Mfit周波数低い方の±10Hzのmaxを見る
+高い方の周波数との差が1dB未満で最も小さいところが高い方のSN
+ない場合は24.0kHzでMfit周波数低い方のSNと重なっている可能性があるので、最も高い値にマーク
+
+Mfit0, Mfit1の周波数±10Hzを捜索
+1. Mfit0のなかで最大値をプロットする(power0と名づける)
+2. Mfit1のなかでpower0に最も近い値をプロットする(power1と名づける)
+
+__UPDATE2.1__
+2周波数以上あるフィッティングは実際にそぐわないので、2宗派でキャリア見つける方式に変更
+
+__UPDATE2.0__
+Mfit：2周波数以上あるフィッティング
+周波数はこのモジュールfitting.pyから直接confidentialに問い合わせる形式にした(元々はmainから問い合わせて引数として渡す)
+
+Mfit関数
+dualgauss関数追加
+
+
+__UPDATE1.4__
+プロットするとき、ラベルはマーカーだけに限定
+
+__UPDATE1.3__
+ラベルに国名を表示
+
+__UPDATE1.2__
+データプロットを最前面にした
+
+__UPDATE1.1__
+
+* loaddata プロットの太さを0.1>>>0.2変更
+* 取り出すシグナル強度をダイヤモンドマーカーで表示
+* ノイズフロアの表示
+* pngで保存も可能にした
+
+__UPDATE1.0__
+
+* fittingDiv, SN_PowerSearchの統合
+* waveとcarrier分けた
+
+**課題**
+
+* fittingの廃止
+* powerを別ファイルに吐き出す
+
+__UPDATE0.3.9.4__
+差分が一定以上ある場合は、測定値(Carrierとみなす)
+差分が一定以内におさまる場合は、fit(Waveとみなす)
+差分:(fit-signaldiv)
+
+__UPDATE0.3.9.3__
+failebasenameではなくglobで拾われるフルパスに変更
+indicateConditionにSNratio>5 を追加した(前処理で5以上と判断されても、fitしてみてS/N５以上とは限らないため)
+
+__UPDATE0.3.9.2__
+SN抽出対象をWaveとCarrierに分けた
+	Wave:
+		帯域持つのでfitする
+		フィッティング結果のSNを出力
+	Carrier:
+		帯域持たず、fitすると異常に高い値が出ることがあるので、fitしない
+		Carrierはその周波数のsignalとノイズフロアの差分をSNとして出力
 
 __INTRODUCTION__
-タイムスタンプを引数にフィッティング結果を返すpy
+タイムスタンプと周波数を引数にフィッティング結果を返すpy
 
 __ACTION__
-引数:
+引数:filebasename:タイムスタンプのこと。例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
+	freqWave:帯域を持つ周波数のリスト
+	freqCarrier:帯域を持たない周波数のリスト
+戻り値:タプル形式
+	1. SNのディクショナリ in ディクショナリ形式のフィッティング結果{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}}
+	2. Powerのディクショナリ in ディクショナリ形式のフィッティング結果{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}}
 
-+ rawdata_directory
->生データ置き場
->rootディレクトリ+日付(yymmdd形式)
->>SAtraceGraphで作成されたディレクトリ
-+ filebasename
-> 拡張子を除いたファイル名
-> SAtraceによってタイムスタンプとされている
-> 例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
-+ freqWave
-> フィッティングする周波数
 
-戻り値:フィッティング結果(ディクショナリ in ディクショナリ形式{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}})
-
-1. データをテキスト形式で読み込みdataにリストとして読み込む
-1. 下からの四分位境界値(小さい順に並べて全体の1/4番目にある値)をノイズフロアと定義する
-2. freqWaveで指定した周波数の分だけfittingを行う
+1. データをテキスト形式で読み込みdataにリストとして読み込み
+2. freqで指定した周波数の分だけfittingを行い
 3. データとフィッティング曲線をプロットする
-> 内部処理なので表示はしない
-4. ガウス曲線に従ってfittingする
+4. waveに格納された周波数をfittingする
+5. waveとしてみるか判断(OKだったらプロット)>>>indicatecondition
+6. carrierに格納された周波数をfittingする
+7. carrierとしてみるか判断(OKだったらプロット)
+8. ノイズフロアをプロット
+9. 測定データのプロット
+10. pngを吐き出す(オプションでプロットして表示)
+11. ディクショナリ in ディクショナリを返す
+
+__TODO__
+* M-fitting:
+	* fitting周波数が2つ
+	* 2つの周波数の重ね合わせ
+>list2dic()
+dataxはロードする時点でpnt2freqかけておかないと
+> around():リストの一部を抜き出す
+> はdataxをあらかじめpnt2freq()していないからうまく動かない
+> 多くの箇所を直さなければならなくなるので後回し
 
 
 
 
 
-```math
-\frac{\pi}{2}
-```
-
-
-5. 表示するかしないか判断
-6. プロットして表示(オプション)
-7. ログを吐き出す
-8. ディクショナリ in ディクショナリを返す
-
-__PLAN__
-None
 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+---------------------
 ## plotSN.gp ver2.0
 __UPDATE2.0__
 awkコマンドを用いてcsvの見出し行を取得する
@@ -557,11 +744,11 @@ JUST BUILD
 
 
 
+-------------------
+## globname.py ver1.1
 
-
-
-
-## globname.py ver1.0
+__UPDATE1.1__
+拡張子無しファイル名入力`globfullname`関数追加
 
 __UPDATE1.0__
 first commit
@@ -570,22 +757,19 @@ __USAGE__
 mainから呼び出す
 引数:
 	rootpath: 
-	dateFirst:最初の日付yymmdd形式
-	dateLast:最後の日付yymmdd形式
-戻り値:リストfilebesename
- ~~イテレータでもいいな~~
-
-globのhelpによるとリストを返すらしい
->    glob(pathname, *, recursive=False)
->        Return a list of paths matching a pathname pattern.
+	dateFirst:最初の日付yymmdd文字列が入ったリスト形式形式
+	dateLast:最後の日付yymmdd文字列が入ったリスト形式形式
+戻り値:
+	filebesename:リスト形式
 
 
 __INTRODUCTION__
-最初と最後の日付をもらって、その中のfilebasename(拡張子無しのファイル名)
+rootroot()下のファイルのフルパスを返す。
+ただし、最初と最後の日付をもらって、その間にある日付のファイルに限る
 
 __ACTION__
 datetime関数で日付の形式に直して
 globの
 
 __PLAN__
-none
+時間を引数にする

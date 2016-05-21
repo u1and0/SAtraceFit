@@ -1,5 +1,8 @@
 '''
-## globname.py ver1.0
+## globname.py ver1.1
+
+__UPDATE1.1__
+拡張子無しファイル名入力`globfullname`関数追加
 
 __UPDATE1.0__
 first commit
@@ -68,7 +71,7 @@ print(globname(rootroot(),dateList))
 
 def globfullname(rootpath,f):
 	'''rootpath内のファイルのフルパスを返す'''
-	filename=rootpath+f
+	filename=rootpath+f+'.txt'
 	return filename
 
 

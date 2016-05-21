@@ -15,7 +15,7 @@ from datetime import datetime
 
 def readCSV(filename):
 	'''
-	## readCSV.py ver1.1.1
+	### readCSV.py ver1.1.1
 
 	__UPDATE1.1.1__
 	print文コメントアウト
@@ -62,7 +62,7 @@ def readCSV(filename):
 
 def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し行、ディクショナリ in リスト形式
 	'''
-	## writeCSV.py ver1.4
+	### writeCSV.py ver1.4
 
 	__UPDATE1.4__
 	ソートコメントアウト
@@ -109,7 +109,7 @@ def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し�
 
 def editCSV(readcsv,writecsv,appendDict,freqWave):
 	'''
-	## editCSV ver1.0
+	### editCSV ver1.0
 	__INTRODUCTION__
 	fitting>read>translate>update>translate>writeの流れを一まとめにした
 	__ACTION__
@@ -163,7 +163,7 @@ def editCSV(readcsv,writecsv,appendDict,freqWave):
 # fit_result=[{'date_time':'20151201_000023','22.2kHz':4,'23.0kHz':5,'24.5kHz':6,'25kHz':8}
 # ,{'date_time':'20151201_001022','22.2kHz':2,'23.0kHz':None,'24.5kHz':None,'25kHz':9}   #Noneは空白、'None'はNoneとして書き込まれる
 # ,{'date_time':'20151201_000524','22.2kHz':3,'23.0kHz':7,'24.5kHz':9,'25kHz':9}]   	#25kHzはリストに入ってないからcsvに書き込まれない
-# 	## __RUN__________________________
+# 	### __RUN__________________________
 # csv_writer(freqWave,fit_result)
 # # ____________________________
 
