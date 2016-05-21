@@ -1,5 +1,10 @@
 '''
-## globname.py ver1.2
+## globname.py ver1.3
+
+__UPDATE1.3__
+ファイル名は入力者にもワイルドカード使えるようにした。
+filename=glob.glob(rootpath+num)   #上で指定したディレクトリから.txt形式のデータをglob
+
 
 __UPDATE1.2__
 `globregname`関数追加
@@ -103,11 +108,12 @@ def globregname(rootpath,num):
 	'''rootpath内のファイルのフルパスを返す
 	ファイル名は`20`で始まり、`.txt`で終わる文字列'''
 	import glob
-	filename=glob.glob(rootpath+'20'+num+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
+	print(num)
+	filename=glob.glob(rootpath+num+'.txt')   #上で指定したディレクトリから.txt形式のデータをglob
 	return filename
 
 '''
 TEST
 import confidential as co
-print(globregname(co.root(),'160512_002'))
+print(globregname(co.root(),'201601??_21*'))
 '''
