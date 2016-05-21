@@ -175,13 +175,12 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 print('使い方')
 print(' 表示したいファイル名の日付部分を6桁で入力、次に時間部分を6桁で入力。')
 print('\n例)20151201_000344.txt>>>\n')
-date=input('グラフ化する日付を6桁で入力してください(yymmdd形式)>>> ')
-time=input('グラフ化する時間を6桁で入力してください(HHMMSS形式)>>> ')
+filename=input('ファイル名を入力して下さい(例20160229_010506.txt)>>> ')
 
 # >>>>timearg
 import globname as g
-print(g.globfullname(co.root(),date,time))
-filepath=[g.globfullname(co.root(),date,time)]    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+filepath=[g.globfullname(co.root(),filename)]    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+print('グラフ化するファイルのフルパス: ',filepath)
 try:
 	# __FITTING__________________________
 	for fitfile in filepath[0:] :
