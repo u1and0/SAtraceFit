@@ -1,5 +1,8 @@
 '''
-## globname.py ver1.1
+## globname.py ver1.2
+
+__UPDATE1.2__
+`globregname`関数追加
 
 __UPDATE1.1__
 拡張子無しファイル名入力`globfullname`関数追加
@@ -85,3 +88,26 @@ def globfullname(rootpath,f):
 # 		import os
 # 		filebasename=[os.path.basename(r)[:-4] for r in filename]    #拡張子'.txt'なので最後は必ず4文字だから-4
 # 		return filebasename
+
+
+
+
+
+
+
+
+
+
+
+def globregname(rootpath,num):
+	'''rootpath内のファイルのフルパスを返す
+	ファイル名は`20`で始まり、`.txt`で終わる文字列'''
+	import glob
+	filename=glob.glob(rootpath+'20'+num+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
+	return filename
+
+'''
+TEST
+import confidential as co
+print(globregname(co.root(),'160512_002'))
+'''

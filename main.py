@@ -1,5 +1,11 @@
 '''
-## main.py ver7.0
+## main.py ver7.1
+
+__UPDATE7.1__
+入力の冗長化
+globregname関数
+rootpath内のファイルのフルパスを返す
+ファイル名は`20`で始まり、`.txt`で終わる文字列
 
 __UPDATE7.0__
 ファイル名を呼び出して1ファイルだけmatplotlibに表示する用
@@ -191,13 +197,18 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 # >>>>timearg
 print('____________________________')
 print('使い方')
-print(' グラフ化したいファイル名を"拡張子無しで"入力')
-print('(例)20151201_000344')
+print(' グラフ化したいファイル名の"20"以降の数字を入力')
+print('(例)151201_000344<<<2015/12/01 00:03:44のデータ')
+print('(例)151201_001<<<2015/12/01 0時10分～19分のデータ')
+print('(例)151201_00<<<2015/12/01 00時台のデータ')
+print('(例)151201_0<<<2015/12/01 0～9時台のデータ')
+print('(例)151201<<<2015/12/01のデータ')
 filename=input('ファイル名を入力して下さい>>> ')
 import globname as g
-filepath=[g.globfullname(co.root(),filename)]    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+filepath=g.globregname(co.root(),filename)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 print('グラフ化するファイルのフルパス: ',filepath)
 print('____________________________')
+
 
 
 
@@ -214,6 +225,9 @@ try:
 		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
 		print('Write to SN\n', fitRtn[0])
 		print('Write to Power\n', fitRtn[1])
+		print('____________________________ ')
+		print('中断するときは`ctrl+c`!!!')
+		print('____________________________ ')
 
 except KeyboardInterrupt:
 	print('Why do you interrupt me!?')
