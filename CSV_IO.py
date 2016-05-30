@@ -90,6 +90,9 @@ def writeCSV(outpath,outparam,dictList):    #ファイル名、csvの見出し�
 	csv_writer(引数1,引数2)を実行する
 
 	__PLAN__
+	UPDATE1.4のソートのコメントアウトは適切か？
+	データ整理しにくいのだが
+	1.3に戻そうかな
 	'''
 
 	# outparam.sort()   #outparamを小さい順にソート
