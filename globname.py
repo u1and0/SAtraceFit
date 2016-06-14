@@ -1,5 +1,11 @@
 '''
-## globname.py ver1.3.1
+## globname.py ver1.4
+
+__UPDATE1.4__
+os.basenameでフルパスではなくファイル名だけを表示
+
+__UPDATE1.3.2__
+'ファイル名は`20`で始まる文字列' の文を削除
 
 __UPDATE1.3.1__
 ファイル名とディレクトリの表示
@@ -40,6 +46,8 @@ globの
 __PLAN__
 時間を引数にする
 '''
+import glob
+import os
 
 
 def globname(rootpath,dateList):
@@ -47,8 +55,7 @@ def globname(rootpath,dateList):
 	ただし、ファイル名が日付dateListの中による'''
 	filename=[]
 	for i in dateList:
-		import glob
-		filename+=glob.glob(rootpath+'20'+i+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
+			filename+=glob.glob(rootpath+'20'+i+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
 	return filename
 
 
@@ -91,34 +98,19 @@ def globfullname(rootpath,f):
 
 
 
-# def filebasename(a):
-# 	'''filebasenameを取得'''
-# 	for filename in a:
-# 		import os
-# 		filebasename=[os.path.basename(r)[:-4] for r in filename]    #拡張子'.txt'なので最後は必ず4文字だから-4
-# 		return filebasename
-
-
-
-
-
-
-
-
-
 
 
 def globregname(rootpath,num):
 	'''rootpath内のファイルのフルパスを返す
 	ファイル名は`20`で始まり、`.txt`で終わる文字列'''
-	import glob
 	filename=glob.glob(rootpath+num+'.txt')   #上で指定したディレクトリから.txt形式のデータをglob
-	print('Directory:\n',rootpath,'\n\n')
+	print('\n____________________________')
+	print('以下のディレクトリ内のファイルを検索します。\n',rootpath,'\n')
 	print('____________________________')
-	print('受け取ったコマンド:\n', num,'\n\n')
-	print('____________________________\nfilename:')
+	print('受け取ったコマンド:\n', num,'\n')
+	print('____________________________\nコマンドから検索されるファイル名:')
 	for i in filename:
-		print (i[-19:])
+		print(os.path.basename(i))
 	return filename
 
 '''
