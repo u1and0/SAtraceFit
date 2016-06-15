@@ -1,6 +1,6 @@
 '''
 ## globname.py ver1.4
-test
+
 __UPDATE1.4__
 os.basenameでフルパスではなくファイル名だけを表示
 
