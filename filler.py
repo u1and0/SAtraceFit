@@ -1,8 +1,22 @@
 # coding: utf-8
 from itertools import *
 from more_itertools import *
-import datetime
-d=datetime
+from datetime import datetime, timedelta
+
+
+def daterange(start_date, end_date):
+	for n in range((end_date - start_date).days):
+		yield start_date + timedelta(n)
+
+'''
+daterange() TEST
+start = datetime.strptime('201201', '%Y%m')
+end = datetime.strptime('201202', '%Y%m')
+for i in daterange(start, end):
+	print(i)
+'''
+
+
 
 def fill(li,ins):
 	'''
@@ -22,8 +36,9 @@ def fill(li,ins):
 
 
 
-'''TEST'''
+'''TEST
 li=[[1,50],[0,8,10,16],[1,5,9,11,14,15]]
 for x in li:
 	print(fill(x,10))
 	# print(bool(fill(x)==list(range(x[0],x[-1]+1))))
+'''
