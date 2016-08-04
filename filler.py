@@ -5,16 +5,17 @@ from datetime import datetime, timedelta
 
 
 def daterange(start_date, end_date):
-	for n in range((end_date - start_date).days):
-		yield start_date + timedelta(n)
+	for n in range((end_date - start_date).seconds,,timedelta(minutes=5)):
+		print(n)
+		yield start_date + timedelta(seconds=n)
 
 '''
 daterange() TEST
-start = datetime.strptime('201201', '%Y%m')
-end = datetime.strptime('201202', '%Y%m')
+'''
+start = datetime.strptime('20120601_230505', '%Y%m%d_%H%M%S')
+end = datetime.strptime('20120601_235500', '%Y%m%d_%H%M%S')
 for i in daterange(start, end):
 	print(i)
-'''
 
 
 
