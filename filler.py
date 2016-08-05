@@ -34,22 +34,6 @@ for x in li:
 
 
 
-def daterange(start_date, end_date,step=1):
-	for n in range((end_date - start_date).days):
-		yield start_date + timedelta(n)
-
-'''
-daterange() TEST
-'''
-# start=datetime(2016,2,1)
-# end=datetime(2016,3,5)
-
-# # for i in daterange(start, end):
-# # 	print(i)
-
-
-
-
 def datetime_to_epoch(d):
 	return int(time.mktime(d.timetuple()))
 
@@ -64,8 +48,8 @@ def datetimerange(start_time,end_time,step_time=timedelta(seconds=1)):
 datetimerange() TEST
 '''
 start=datetime(2016,2,4,14,38,16)
-end=datetime(2016,2,4,20,39,55)
-step=timedelta(minutes=10.5)
+end=datetime(2016,5,4,14,38,17)
+step=timedelta(days=1)
 
 # seclist=[x for x in datetimerange(start,end,step)]
 # print(seclist)
