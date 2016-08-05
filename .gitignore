@@ -19,3 +19,4 @@ confidential.py
 /log/
 /__pycache__/
 UserManual.*
+ipython*

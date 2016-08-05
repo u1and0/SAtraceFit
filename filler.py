@@ -87,6 +87,10 @@ def drange(end_time,start_time=epoch_to_datetime(0),step_time=timedelta(days=1))
 	for i in np.arange(datetime_to_epoch(start_time),datetime_to_epoch(end_time),step_time.total_seconds()):
 		yield epoch_to_datetime(i)
 
+
+'''
+TEST
+'''
 e=datetime(1971,1,1)
 s=datetime(1972,1,1)
 
