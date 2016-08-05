@@ -2,20 +2,20 @@
 from itertools import *
 from more_itertools import *
 from datetime import datetime, timedelta
+import time
 
-
-def daterange(start_date, end_date):
-	for n in range((end_date - start_date).seconds,,timedelta(minutes=5)):
-		print(n)
-		yield start_date + timedelta(seconds=n)
+# def daterange(start_date, end_date):
+# 	for n in range((end_date - start_date).seconds,,timedelta(minutes=5)):
+# 		print(n)
+# 		yield start_date + timedelta(seconds=n)
 
 '''
 daterange() TEST
-'''
 start = datetime.strptime('20120601_230505', '%Y%m%d_%H%M%S')
 end = datetime.strptime('20120601_235500', '%Y%m%d_%H%M%S')
 for i in daterange(start, end):
 	print(i)
+'''
 
 
 
@@ -43,3 +43,24 @@ for x in li:
 	print(fill(x,10))
 	# print(bool(fill(x)==list(range(x[0],x[-1]+1))))
 '''
+
+
+
+
+def datetime_to_epoch(d):
+	return int(time.mktime(d.timetuple()))
+
+def epoch_to_datetime(epoch):
+	return datetime(*time.localtime(epoch)[:6])
+
+def sec_range(start_time,end_time,timedeltatype):
+	for i in range(datetime_to_epoch(start_time),datetime_to_epoch(end_time),timedeltatype.seconds):
+		yield epoch_to_datetime(i)
+
+
+start=datetime(2016,2,4,14,38,16)
+end=datetime(2016,2,4,18,3,55)
+step=timedelta(minutes=5)
+# step=timedelta(minutes=5)
+seclist=[x for x in sec_range(start,end,step)]
+print(seclist)
