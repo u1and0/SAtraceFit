@@ -3,20 +3,7 @@ from itertools import *
 from more_itertools import *
 from datetime import datetime, timedelta
 import time
-
-# def daterange(start_date, end_date):
-# 	for n in range((end_date - start_date).seconds,,timedelta(minutes=5)):
-# 		print(n)
-# 		yield start_date + timedelta(seconds=n)
-
-'''
-daterange() TEST
-start = datetime.strptime('20120601_230505', '%Y%m%d_%H%M%S')
-end = datetime.strptime('20120601_235500', '%Y%m%d_%H%M%S')
-for i in daterange(start, end):
-	print(i)
-'''
-
+import numpy as np
 
 
 def fill(li,ins):
@@ -47,20 +34,41 @@ for x in li:
 
 
 
+def daterange(start_date, end_date,step=1):
+	for n in range((end_date - start_date).days):
+		yield start_date + timedelta(n)
+
+'''
+daterange() TEST
+'''
+# start=datetime(2016,2,1)
+# end=datetime(2016,3,5)
+
+# # for i in daterange(start, end):
+# # 	print(i)
+
+
+
+
 def datetime_to_epoch(d):
 	return int(time.mktime(d.timetuple()))
 
 def epoch_to_datetime(epoch):
 	return datetime(*time.localtime(epoch)[:6])
 
-def sec_range(start_time,end_time,timedeltatype):
-	for i in range(datetime_to_epoch(start_time),datetime_to_epoch(end_time),timedeltatype.seconds):
+def datetimerange(start_time,end_time,step_time=timedelta(seconds=1)):
+	for i in np.arange(datetime_to_epoch(start_time),datetime_to_epoch(end_time),step_time.total_seconds()):
 		yield epoch_to_datetime(i)
 
-
+'''
+datetimerange() TEST
+'''
 start=datetime(2016,2,4,14,38,16)
-end=datetime(2016,2,4,18,3,55)
-step=timedelta(minutes=5)
-# step=timedelta(minutes=5)
-seclist=[x for x in sec_range(start,end,step)]
-print(seclist)
+end=datetime(2016,2,4,20,39,55)
+step=timedelta(minutes=10.5)
+
+# seclist=[x for x in datetimerange(start,end,step)]
+# print(seclist)
+
+for i in datetimerange(start,end,step):
+	print(i)
