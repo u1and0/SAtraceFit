@@ -1,34 +1,81 @@
 # coding: utf-8
-# from itertools import *
-# from moreitertools import *
+from itertools import *
+from more_itertools import *
 from datetime import datetime, timedelta
 import time
 import numpy as np
+import matplotlib.dates as pltd
 
 
-def fill(li,ins):
+
+
+# def insert_hole(two,delta):
+# 	try:
+# 		if type(t[0])==datetime
+# 			for i in pltd.drange(two[0]+delta,two[-1],delta):
+# 				li.insert(li.index(two[-1]),i)   #タプルの要素間の場所にdeltaずつ増やした値を入れる
+# 		elif type(t[0])==float or type(t[0])==int
+# 			for i in range(two[0]+delta,two[-1],delta):
+# 				li.insert(li.index(two[-1]),i)   #タプルの要素間の場所にdeltaずつ増やした値を入れる
+# 	except TypeError:
+# 		raise
+# 	print('insert',i)
+
+
+
+
+
+def fill(li,delta):
 	'''
 	引数:
 		li:リスト
-		ins:int
+		delta:int
 	戻り値：編集を加えた、引数と同じリスト
 	'''
 	for two in list(pairwise(li)):   #liの中身を2つずつにわける
 		print(two)
-		if two[-1]-two[0]>ins:   #抜き出したタプルの要素の差がins上であれば
-			for i in range(two[0]+ins,two[-1],ins):
-				li.insert(li.index(two[-1]),i)   #タプルの要素間の場所にinsずつ増やした値を入れる
-				print('insert',i)
+		if two[-1]-two[0]>delta:   #抜き出したタプルの要素の差がdelta上であれば
+			if type(two[0])==datetime:
+				for i in pltd.drange(two[0]+delta,two[-1],delta):
+					li.insert(li.index(two[-1]),pltd.num2date(i))   #タプルの要素間の場所にdeltaずつ増やした値を入れる
+					print('insert',pltd.num2date(i))
+			else :
+				for i in range(two[0]+delta,two[-1],delta):
+					li.insert(li.index(two[-1]),i)   #タプルの要素間の場所にdeltaずつ増やした値を入れる
+					print('insert',i)
 		else:print('OK!')
 	return li
 
 
 
 '''TEST
-li=[[1,50],[0,8,10,16],[1,5,9,11,14,15]]
+'''
+s=datetime(2016,5,10,12,38,12)
+se=datetime(2016,5,11,0,38,12)
+e=datetime(2016,5,11,12,38,12)
+print(s,se,e)
+# li=[[1,50],[0,8,10,16],[1,5,9,11,14,15][s,e]]
+li=[[s,se,e]]
 for x in li:
-	print(fill(x,10))
+	print(fill(x,timedelta(hours=1)))
 	# print(bool(fill(x)==list(range(x[0],x[-1]+1))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+__以下は自作drange__________________________
+せっかくmatplotlib.datesでdrange用意されているんだからそっちを使おう
 '''
 
 
@@ -90,9 +137,9 @@ def drange(end_time,start_time=epoch_to_datetime(0),step_time=timedelta(days=1))
 
 '''
 TEST
-'''
 e=datetime(1971,1,1)
 s=datetime(1972,1,1)
 
 for i in drange(s,e):
 	print(i)
+'''
