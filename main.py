@@ -9,7 +9,7 @@ fot Mfit test
 >>>>>>> Mfit
 
 __UPDATE6.1__
-fittting の引数に周波数は入れない(fittingのforステートメント中にconfidentialから直接引っ張る)
+fittting の引数に周波数は入れない(fittingのforステートメント中にparameterから直接引っ張る)
 
 __UPDATE6.0__
 例外により中断されたら実行するtry~finally文追加
@@ -42,7 +42,7 @@ __UPDATE2.4__
 globname.pyを新規作成
 
 __UPDATE2.3__
-データファイルの場所と注目すべき周波数はconfidential.pyに記載
+データファイルの場所と注目すべき周波数はparameter.pyに記載
 
 __INTRODUCTION__
 各モジュールを動かすメインファイル
@@ -58,7 +58,7 @@ oldcsvS, newcsvS : コード内で書き換える
 コンソールに出力
 2. (oldcsvS,newcsvS)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
 rawdataPathで、データの位置を指定する(日付)
-3. confidentialにより、rootディレクトリとfittingに必要な周波数を指定する。
+3. parameterにより、inディレクトリとfittingに必要な周波数を指定する。
 4. CSV_IOにより、CSVを読み込む。
 5. fittingDivにより、fittingを行う。
 6. CSV_IOにより、CSVを書き込む。
@@ -96,7 +96,8 @@ __PLAN__
 '''
 
 
-import confidential as co
+import parameter
+param=parameter.param()
 ## __CSV NAME__________________________
 '''
 # コンソールからファイル名を指定
@@ -116,7 +117,7 @@ newinpS=oldinpS
 newinpP=oldinpP
 
 inplist=[oldinpS,oldinpP,newinpS,newinpP]
-csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: param['out']+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
 
 ## ____________________________
 print('SN value :\n\tRead from %s\n\tWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
@@ -133,9 +134,9 @@ SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
 freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
-freqFreq=co.freqWave()+co.freqCarrier()
+freqFreq=param['freqWave']+param['freqCarrier']
 freqFreq.sort()   #周波数のソート
-outPath=co.out()    #ルートパス
+outPath=param['out']    #ルートパス
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
@@ -167,7 +168,7 @@ dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリスト�
 print('\nNow extracting from these dates\n%s\n'% dateList)
 
 import globname as g
-filepath=g.globname(co.root(),dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+filepath=g.globname(param['in'],dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 try:
 	# __FITTING__________________________

@@ -29,8 +29,8 @@ fitting conditionのwavewithminの条件を甘くした
 
 __UPDATE3.4__
 
-1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
-2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+1. parameter.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. parameter.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
 3. 「power0のSNが10以上」 かつ 「power1がpower0の±20%以内ならばプロット」
 > `if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:`
 
@@ -39,8 +39,8 @@ __UPDATE3.4__
 
 __UPDATE3.3__
 
-1. co.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
-2. co.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
+1. parameter.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
+2. parameter.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
 3. power0のSNが10以上なら、フィッティングを行う
 4. 「フィッティングの状態が良い」または「power1のSN比がpower0のSN比の±5%未満」ならばpower0とpower1をプロットする
 > 「フィッティングの状態が良い」とは、指定した周波数付近に鋭くも潰れてもいないちょうど良い波が、SN比0以上で出ている。if文は次のようになる
@@ -78,7 +78,7 @@ __UPDATE2.1__
 
 __UPDATE2.0__
 Mfit：2周波数以上あるフィッティング
-周波数はこのモジュールfitting.pyから直接confidentialに問い合わせる形式にした(元々はmainから問い合わせて引数として渡す)
+周波数はこのモジュールfitting.pyから直接parameterに問い合わせる形式にした(元々はmainから問い合わせて引数として渡す)
 
 Mfit関数
 dualgauss関数追加
@@ -172,7 +172,8 @@ import matplotlib.pyplot as plt
 import sys
 import datetime
 d = datetime.datetime.today()
-import confidential as co
+import parameter
+param=parameter.param()
 import listdic as ld
 
 
@@ -250,7 +251,7 @@ def fitting(dataname):
 	def SNextract(x,y):
 		'''SNやシグナルのマーカーの表示
 		ディクショナリに値を追加'''
-		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+co.country(freqFit))   #fitting結果のプロット
+		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+parameter.country(freqFit))   #fitting結果のプロット
 		if type(freqFit)!=float:
 			k=0    #ラベルの添え字
 			for i in freqFit:
@@ -273,7 +274,7 @@ def fitting(dataname):
 
 	plt.figure(figsize=(6,6))
 	SNDict,powerDict={},{}
-	for freqFit in co.freqWave():   #freqWaveの周波数をfit
+	for freqFit in param['freqWave']:   #freqWaveの周波数をfit
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
@@ -284,7 +285,7 @@ def fitting(dataname):
 		if fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit,SNratio+noisef)
-	for freqFit in co.freqCarrier():   #freqCarrierの周波数のシグナルを取得
+	for freqFit in param['freqCarrier']:   #freqCarrierの周波数のシグナルを取得
 		datadict=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)]),datay[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)])
 		print('datad',datadict)
 		xpower=ld.search_maxy_returnx(datadict)
@@ -304,7 +305,7 @@ def fitting(dataname):
 
 
 
-	for freqFit in co.freqM():   #freqMの周波数のシグナルを取得
+	for freqFit in param['freqM']:   #freqMの周波数のシグナルを取得
 		datadict0=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]),datay[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)])
 		xpower0=ld.search_maxy_returnx(datadict0)
 		power0=datadict0[xpower0]
@@ -380,7 +381,7 @@ def fitting(dataname):
 	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
 	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 
-	plotshowing(filebasename,ext='png',dir=co.out()+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 
 
 	return outData
@@ -398,8 +399,9 @@ def fitting(dataname):
 # '''
 # TEST
 # '''
-# import confidential as co
-# a=co.rootroot()+'20160112_132741.txt'
-# b=co.freqWave
-# c=co.freqCarrier
+# import parameter
+# param=parameter.param()
+# a=param['rootroot']+'20160112_132741.txt'
+# b=param['freqWave']
+# c=param['freqCarrier']
 # fitting(a,b,c)
