@@ -136,7 +136,7 @@ freqFreqで見出し行を作る
 SNResult,powerResult={},{}
 freqFreq=param['freqWave']+param['freqCarrier']
 freqFreq.sort()   #周波数のソート
-outPath=param['out']    #ルートパス
+outPath=param['out']    #出力先の親ディレクトリ
 
 import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
@@ -180,8 +180,9 @@ try:
 		fitRtn=f.fitting(fitfile)
 		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
-		print('Write to SN\n', fitRtn[0])
-		print('Write to Power\n', fitRtn[1])
+		print('Now Fitting',fitRtn[0].keys())
+		# print('Write to SN\n', fitRtn[0])
+		# print('Write to Power\n', fitRtn[1])
 
 except KeyboardInterrupt:
 	print('Why do you interrupt me!?')

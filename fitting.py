@@ -287,14 +287,14 @@ def fitting(dataname):
 			SNextract(fittingFreqFit,SNratio+noisef)
 	for freqFit in param['freqCarrier']:   #freqCarrierの周波数のシグナルを取得
 		datadict=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)]),datay[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)])
-		print('datad',datadict)
+		# print('datad',datadict)
 		xpower=ld.search_maxy_returnx(datadict)
 		power=datadict[xpower]
 
 		# poww=datay[freq2pnt(freqFit)]
 		if power-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
 			SNextract(xpower,power)
-			print('Plot!', xpower,power)
+			# print('Plot!', xpower,power)
 		# if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
 		# 	SNextract(freqFit,poww)
 
@@ -316,20 +316,10 @@ def fitting(dataname):
 		datadict1=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]),datay[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)])
 
 
-		'''
-		print('\n'*6,dataname,'\n','Show datadict1!!',datadict1.items())
-		print('\n'*4,'Which one is NEAR!?!?!?\n',min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])
-		'''
-
 
 		xpower1=(min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0])    #datadict1をキーと値でタプルにして、要素の1番目(ディクショナリの値)を比較して、min(power0との差が最も小さい)ところのタプルの第0要素を返す
 		power1=datadict1[xpower1]
 
-
-
-		print('!!!!!!!!!!!!!!!!!!!!!!!!!!')
-		print('Plot!!!\n',xpower0,power0)
-		print('Plot!!!\n',xpower1,power1)
 
 
 		avefit=np.mean(freqFit)
