@@ -178,7 +178,7 @@ import listdic as ld
 
 
 
-def freq2pnt(x):return (x*1000-22000)/4
+def freq2pnt(x):return (x*1000-22000)/4   #integer使わないと将来的にエラーが起きるというwarning出される
 
 def pnt2freq(x):return (x*4+22000)/1000
 
