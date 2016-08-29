@@ -106,10 +106,12 @@ import confidential as co
 oldinpS=input('Input old SN file base name>>> ')
 oldinpP=input('Input old power file base name>>> ')
 
-print('新規にファイルを作成したいときは何も入力せずENTER')
+print('古いファイル名old file base name と新しいファイル名new file base nameを同じにする')
+print('何も入力せずにEnter.')
 newinpS=input('Input new SN file base name>>> ')
 if not newinpS:newinpS=oldinpS
-print('新規にファイルを作成したいときは何も入力せずENTER')
+print('古いファイル名old file base name と新しいファイル名new file base nameを同じにする')
+print('何も入力せずにEnter.')
 newinpP=input('Input new power file base name>>> ')
 if not newinpP:newinpP=oldinpP
 
@@ -189,7 +191,7 @@ except KeyboardInterrupt:
 
 finally:
 	## __WRITEING__________________________
-	print('Write to SN\n', SNResult)
-	print('Write to Power\n', powerResult)
+	# print('Write to SN\n', SNResult)   #標準出力に結果を書き込む
+	# print('Write to Power\n', powerResult)
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む

@@ -19,3 +19,5 @@ confidential.py
 /log/
 /__pycache__/
 UserManual.*
+SAtraceFit.sublime-project
+SAtraceFit.sublime-workspace
