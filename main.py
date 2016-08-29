@@ -137,6 +137,7 @@ freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
 freqFreq=co.freqWave()+co.freqCarrier()
+freqFreq.sort()   #周波数のソート
 outPath=co.out()    #ルートパス
 
 import CSV_IO as c
