@@ -103,27 +103,24 @@ import confidential as co
 # 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
 # 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
 # '''
-oldinpS=input('Input old SN file base name>>> ')
-oldinpP=input('Input old power file base name>>> ')
+oldinpS=input('Input SN file base name>>> ')
+oldinpP=input('Input power file base name>>> ')
 
-print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
-newinpS=input('Input new SN file base name>>> ')
-if not newinpS:newinpS=oldinpS
-print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
-newinpP=input('Input new power file base name>>> ')
-if not newinpP:newinpP=oldinpP
+# print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
+# newinpS=input('Input new SN file base name>>> ')
+# if not newinpS:newinpS=oldinpS
+# print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
+# newinpP=input('Input new power file base name>>> ')
+# if not newinpP:newinpP=oldinpP
+newinpS=oldinpS
+newinpP=oldinpP
 
 inplist=[oldinpS,oldinpP,newinpS,newinpP]
 csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: co.out()+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
-## ____________________________
-'''開発環境内であらかじめファイル名を指定'''
-# (oldcsvS,newcsvS)=(co.out()+'\\CSV\\SNfitting.csv',co.out()+'\\CSV\\SNfitting.csv')
-# print('Read from %s\nWrite to %s'% (oldcsvS,newcsvS))
-# (oldcsvP,newcsvP)=(co.out()+'\\CSV\\Pfitting.csv',co.out()+'\\CSV\\Pfitting.csv')
 
 ## ____________________________
-print('SN value :\nRead from %s\nWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
-print('Power value :\nRead from %s\nWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+print('SN value :\n\tRead from %s\n\tWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+print('Power value :\n\tRead from %s\n\tWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
 
 
 
@@ -154,6 +151,7 @@ from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数�
 ## ____________________________
 '''コンソールから入力'''
 dateFirst=input('Input First Date>>> ')
+print('IF you wish Last Date=First Date THEN Enter without input.')
 dateLast=input('Input Last Date>>> ')
 if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
 	dateLast=dateFirst
