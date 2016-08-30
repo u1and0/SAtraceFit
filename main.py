@@ -177,15 +177,15 @@ print('''
 pandas.daterangeの形式で指定すること。
 http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
 
-(例) 20160101, 20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
-(例) 20160101, 20160108, freq="H" <<< 2016年1月1日から2016年1月8日までを1時間ずつ出力
+(例) 20160101,20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
+(例) 20160101,20160108, freq="H" <<< 2016年1月1日から2016年1月8日までを1時間ずつ出力
 (例) 
 ''')
 inp=input('Input date pandas format >>').split()
 '''
 input().sprit()はスペース区切りでリストの要素として
 '''
-pd.date_range(inp)
+dateList=d.date_range(inp)
 
 print('\nNow extracting from these dates\n%s\n'% dateList)
 import globname as g
