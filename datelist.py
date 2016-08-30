@@ -38,3 +38,60 @@ def datelist(date1,date2):
 # date2='160302'
 # print(datelist(date1,date2))
 ##____________________________
+
+
+
+import pandas as pd
+def date_range_input():
+	'''
+	ファイル名のglobに用いる日付を基にした文字列をyieldするgenerator
+	引数:なし
+	戻り値:
+		datestr:文字列(%Y%m%d形式)
+	'''
+	print('''
+
+<データファイルの選択方法>
+データファイルのファイル名はタイムスタンプ(yyyymmdd_HHMMSS形式)で決められているので
+ファイル名は時間で指定する。
+pandas.daterangeの形式で指定すること。
+http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
+
+(例) 20160101,20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
+(例) 20160101,20160108, 5D <<< 2016年1月1日から2016年1月8日までを5日おきに出力
+(例) 20160101,20160108, H <<< 2016年1月1日から2016年1月8日までを1時間おきに出力
+(例) 20160101,20160108, 2H <<< 2016年1月1日から2016年1月8日までを2時間おきに出力
+
+	''')
+
+	while True:
+		try:
+			inp=input('pandas.date_range型で入力 >>').split(',')   #input().sprit()はスペース区切りでリストの要素として
+			if len(inp)==2:
+				datelist=pd.date_range(inp[0],inp[1])
+				datestr=datelist.strftime('%Y%m%d')
+				break
+			elif 'D' in inp[2]:
+				datelist=pd.date_range(inp[0],inp[1],freq=inp[2])
+				datestr=datelist.strftime('%Y%m%d')
+				break
+			elif 'H' in inp[2]:
+				datelist=pd.date_range(inp[0],inp[1],freq=inp[2])
+				datestr=datelist.strftime('%Y%m%d_%H')
+				break
+		except KeyboardInterrupt:
+			raise
+		except:
+			print('入力が間違っています')
+	yield datestr
+
+'''TEST date_range_input()
+# リスト内包表記
+print([i for i  in date_range_input()])
+'''
+
+'''TEST date_range_input()
+# %Y%m%d形式に直して出力
+for i in date_range_input():
+	print(i)
+'''
