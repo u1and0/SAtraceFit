@@ -95,9 +95,21 @@ __PLAN__
 * 日付だけでなく時間を引数にする
 '''
 
+
+# __BUILTIN MODULES__________________________
 import pandas as pd
+import numpy as np
+import glob
+# __USER MODULES__________________________
+import fitting as f
 import parameter
 param=parameter.param()
+import datelist as dl
+import CSV_IO as c
+# import globname as g
+
+
+
 ## __CSV NAME__________________________
 '''
 # コンソールからファイル名を指定
@@ -138,7 +150,6 @@ freqFreq=param['freqWave']+param['freqCarrier']
 freqFreq.sort()   #周波数のソート
 outPath=param['out']    #出力先の親ディレクトリ
 
-import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
 c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
@@ -151,63 +162,28 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 
 # ## __DATE LIST__________________________
-# from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-# ## ____________________________
-# '''コンソールから入力'''
-# dateFirst=input('Input First Date>>> ')
-# print('IF you wish Last Date=First Date THEN Enter without input.')
-# dateLast=input('Input Last Date>>> ')
-# if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
-# 	dateLast=dateFirst
-# ## ____________________________
-# '''開発環境内でリストの最初と最後を指定'''
-# # dateFirst='151201'
-# # dateLast='151201'
-# dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
-# ## ____________________________
-# # '''リストで指定'''
-# # dateList=['151201']
-# ## ____________________________
 
-print('''
-\n
-<データファイルの選択方法>
-データファイルのファイル名はタイムスタンプ(yyyymmdd_HHMMSS形式)で決められているので
-ファイル名は時間で指定する。
-pandas.daterangeの形式で指定すること。
-http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
-
-(例) 20160101,20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
-(例) 20160101,20160108, freq="H" <<< 2016年1月1日から2016年1月8日までを1時間ずつ出力
-(例) 
-''')
-inp=input('Input date pandas format >>').split()
-'''
-input().sprit()はスペース区切りでリストの要素として
-'''
-dateList=d.date_range(inp)
-
+dateList=dl.date_range_input()
 print('\nNow extracting from these dates\n%s\n'% dateList)
-import globname as g
+filepath
 filepath=g.globname(param['in'],dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 try:
 	# __FITTING__________________________
-	for fitfile in filepath[0:] :
-		import fitting as f
-		import numpy as np
-		data=np.loadtxt(fitfile)   #load text data as array
-		if not len(data):continue    #dataが空なら次のループ
-		fitRtn=f.fitting(fitfile)
-		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
-		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
-		print('Now Fitting',fitRtn[0].keys())
-		# print('Write to SN\n', fitRtn[0])
-		# print('Write to Power\n', fitRtn[1])
+	for d in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
+		for i in d:
+			for fitfile in glob.iglob(param['in']+i+'*') :   #タイムスタンプ形式のファイルをglobするgenerator
+				data=np.loadtxt(fitfile)   #load text data as array
+				if not len(data):continue    #dataが空なら次のループ
+				fitRtn=f.fitting(fitfile)
+				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
+				powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
+				print('Now Fitting',fitRtn[0].keys())
+				# print('Write to SN\n', fitRtn[0])
+				# print('Write to Power\n', fitRtn[1])
 
 except KeyboardInterrupt:
-	print('Why do you interrupt me!?')
-
+	raise
 
 finally:
 	## __WRITEING__________________________

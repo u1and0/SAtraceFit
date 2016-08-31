@@ -25,6 +25,7 @@ globの
 __PLAN__
 時間を引数にする
 '''
+import glob
 
 
 def globname(rootpath,dateList):
@@ -32,7 +33,6 @@ def globname(rootpath,dateList):
 	ただし、ファイル名が日付dateListの中による'''
 	filename=[]
 	for i in dateList:
-		import glob
 		filename+=glob.glob(rootpath+'20'+i+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
 	return filename
 
@@ -67,13 +67,18 @@ print(globname(rootroot(),dateList))
 
 
 
+'''
+TEST
+指定した日付の間のファイルを取り出す
 
+parameter.param()['in']というディレクトリからglob
+ディレクトリ内には"ファイルベースネーム=タイムスタンプ"のファイルが詰まっている
+import datelist as dl
+import parameter
+path=parameter.param()['in']
+for d in dl.date_range_input():
+	for i in d:
+		for g in glob.iglob(path+i+'*'):
+			print(g)
+'''
 
-
-
-# def filebasename(a):
-# 	'''filebasenameを取得'''
-# 	for filename in a:
-# 		import os
-# 		filebasename=[os.path.basename(r)[:-4] for r in filename]    #拡張子'.txt'なので最後は必ず4文字だから-4
-# 		return filebasename
