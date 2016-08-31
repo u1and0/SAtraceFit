@@ -1,12 +1,8 @@
 '''
-<<<<<<< HEAD
-## main.py ver6.1
-=======
-## main.py ver6.1.1
+## main.py ver7.0
 
 __UPDATE6.1.1__
 fot Mfit test
->>>>>>> Mfit
 
 __UPDATE6.1__
 fittting の引数に周波数は入れない(fittingのforステートメント中にparameterから直接引っ張る)
@@ -96,8 +92,20 @@ __PLAN__
 '''
 
 
+# __BUILTIN MODULES__________________________
+import pandas as pd
+import numpy as np
+import glob
+# __USER MODULES__________________________
+import fitting as f
 import parameter
 param=parameter.param()
+import datelist as dl
+import CSV_IO as c
+# import globname as g
+
+
+
 ## __CSV NAME__________________________
 '''
 # コンソールからファイル名を指定
@@ -138,55 +146,39 @@ freqFreq=param['freqWave']+param['freqCarrier']
 freqFreq.sort()   #周波数のソート
 outPath=param['out']    #出力先の親ディレクトリ
 
-import CSV_IO as c
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
 c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 
 
 
+# ## __DATE LIST__________________________
+
+# dateList=dl.date_range_input()
+# print('\nNow extracting from these dates\n%s\n'% dateList)
 
 
-## __DATE LIST__________________________
-from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
-## ____________________________
-'''コンソールから入力'''
-dateFirst=input('Input First Date>>> ')
-print('IF you wish Last Date=First Date THEN Enter without input.')
-dateLast=input('Input Last Date>>> ')
-if not dateLast:    #dateLastの入力がなければdateFirstと同じにする
-	dateLast=dateFirst
-## ____________________________
-'''開発環境内でリストの最初と最後を指定'''
-# dateFirst='151201'
-# dateLast='151201'
-dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリストを返す
-## ____________________________
-# '''リストで指定'''
-# dateList=['151201']
-## ____________________________
-print('\nNow extracting from these dates\n%s\n'% dateList)
-
-import globname as g
-filepath=g.globname(param['in'],dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 try:
 	# __FITTING__________________________
-	for fitfile in filepath[0:] :
-		import fitting as f
-		import numpy as np
-		data=np.loadtxt(fitfile)   #load text data as array
-		if not len(data):continue    #dataが空なら次のループ
-		fitRtn=f.fitting(fitfile)
-		SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
-		powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
-		print('Now Fitting',fitRtn[0].keys())
-		# print('Write to SN\n', fitRtn[0])
-		# print('Write to Power\n', fitRtn[1])
+	for d in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
+		for i in d:
+			print('_'*20)
+			print('次の日時のファイルをfittingします。')
+			print(i,'\n'+'_'*20)
+			for fitfile in glob.iglob(param['in']+i+'*') :   #タイムスタンプ形式のファイルをglobするgenerator
+				data=np.loadtxt(fitfile)   #load text data as array
+				if not len(data):continue    #dataが空なら次のループ
+				fitRtn=f.fitting(fitfile)
+				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
+				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
+				# fitting_datetime=list(fitRtn[0].keys())[0].strftime('%Y/%m/%d %H:%M:%S')
+				print('Now Fitting',fitfile[-19:])   #標準出力に現在fittingしている時刻表示
+				# print('Write to SN\n', fitRtn[0])
+				# print('Write to Power\n', fitRtn[1])
 
 except KeyboardInterrupt:
-	print('Why do you interrupt me!?')
-
+	raise
 
 finally:
 	## __WRITEING__________________________
@@ -194,3 +186,5 @@ finally:
 	# print('Write to Power\n', powerResult)
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	print('%sにSN値を書き込みました'% newcsvS)
+	print('%sにpower値を書き込みました'% newcsvP)
