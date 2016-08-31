@@ -182,13 +182,14 @@ try:
 	# __FITTING__________________________
 	for d in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
 		for i in d:
-			print('_'*20+'\n次の日時のファイルをfittingします。\n',i)
+			print('\n'+'_'*20+'\n次の日時のファイルをfittingします。\n',i)
+			for fitfile in glob.iglob(param['in']+i+'*'):
 				data=np.loadtxt(fitfile)   #load text data as array
 				if not len(data):continue    #dataが空なら次のループ
 				fitRtn=f.fitting(fitfile)
 				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
-				print('\n'*3)
+				print('')
 				print('Now Fitting...',fitfile[-19:])
 				print('Write to SN...', list(fitRtn[0].values())[0])
 				print('Write to Power...', list(fitRtn[1].values())[0])
@@ -200,5 +201,6 @@ finally:
 	# print('Write to Power\n', powerResult)
 	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
 	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	print('')
 	print('%sにSN値を書き込みました'% newcsvS)
 	print('%sにpower値を書き込みました'% newcsvP)
