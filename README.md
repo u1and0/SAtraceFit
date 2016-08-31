@@ -2,48 +2,102 @@
 開発者用マニュアル
 各モジュールの説明等、開発メモ
 
-## main.py ver2.3
+## main.py v7.0.0
 
-__UPDATE2.3__
-データファイルの場所と注目すべき周波数はconfidential.pyに記載
+__USAGE__
+コマンドライン上で`python main.py`で実行
 
 __INTRODUCTION__
-各モジュールを動かすメインファイル
+SAtraceFitの実行ファイル
+
+1. データソースからのテキストにフィッティングをかけて
+2. 結果をcsvに書き込み
+3. フィッティング結果を反映したスペクトラム図のpngを吐き出す
+	* csvファイル名はユーザーの入力
+	* csvファイル出力先はmain.pyに書き込まれている
+	* pngファイル出力先はfitting.plotshowing()に書き込まれている。
+
+
 
 __ACTION__
-引数:
-dateFirst, dateLast : コンソールから入力、テストの際はコード内で書き換える
-oldcsv, newcsv : コード内で書き換える
 
-戻り値:なし(CSVファイルに書き込む)
+<実行したときの、コマンドラインの表示の流れ>
 
-1. datelistにより、フィッティングを行う最初の日付から最後の日付までのリストを抽出する。
-コンソールに出力
-2. (oldcsv,newcsv)で、読み込み元CSV, 書き込み先CSVファイルを指定する。
-rawdataPathで、データの位置を指定する(日付)
-3. confidentialにより、rootディレクトリとfittingに必要な周波数を指定する。
-4. CSV_IOにより、CSVを読み込む。
-5. fittingDivにより、fittingを行う。
-6. CSV_IOにより、CSVを書き込む。
+1. データファイル、出力ファイルのディレクトリ指定→parameter.pyで指定
+2. SNを書き込むcsvファイル名を聞かれる→入力する
+3. powerを書き込むcsvファイル名を聞かれる→入力する
+4. csvのフルパス表示
+5. 日付を指定(指定方法がメッセージで表示される。詳しくはdatelist.date_range_input()参照)
+	6. fitting.fitting()実行。詳しくはfitting.fitting()参照
+	7. フィッティング日時表示
+	8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
+
+
+__UPDATE7.0.0__
+ファイル名は日時指定で引っ張ってくる
+
+__UPDATE6.1.1__
+fot Mfit test
+
+__UPDATE6.1__
+fittting の引数に周波数は入れない(fittingのforステートメント中にparameterから直接引っ張る)
+
+__UPDATE6.0__
+例外により中断されたら実行するtry~finally文追加
+
+
+__UPDATE5.0__
+ファイル名の指定(コンソールからインプットする)
+>第一引数：作成するファイル名
+>第二引数：取り込み元のファイル名(オプション)
+
+
+__UPDATE4.0__
+やっぱりwaveとcarrier分ける(fittingDiv3系列の前半のように)
+やっぱりcsvの書き込みは1ファイルのfitting後ごとに行う
+
+
+
+__UPDATE3.0__
+
+* fittingの廃止→SN_PowerSearchに変更
+* SN_PowerSearchに2つの関数
+	* SN, Power作成
+* csvは２つ吐き出す
+	* SN
+	* Power
+
+
+__UPDATE2.4__
+ファイル名はフルパスで受ける
+globname.pyを新規作成
+
+__UPDATE2.3__
+データファイルの場所と注目すべき周波数はparameter.pyに記載
 
 
 __USAGE__
 
-+ コマンドライン上にて`python main.py <最初の日付> <最後の日付>`
-	+ フォーマットはyymmdd形式(例えば2015年11月1日=151101と打ちこむ)
-+ CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
-	+ fitting>read>translate>update>translate>writeの流れは1セット
+* コマンドライン上にて`python main.py`で起動
+	SN, powerを出力するcsvファイル名(ディレクトリパスと拡張子は抜き)の入力が求められる(例：ファイル名をhogehoge.csvとしたければ、`hogehoge`と入力する)
+	フィッティング対象のデータの日付の入力が求められる`<最初の日付> <最後の日付>`。フォーマットはyymmdd形式(例：2015年11月1日の日付からにしたいときは`151101`と打ちこむ)
+* CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
+	* fitting>read>translate>update>translate>writeの流れは1セット
 
 __PLAN__
 
-+ プログラムを途中で止めるとこれまでの計算結果が記録されない
+* プログラムを途中で止めるとこれまでの計算結果が記録されない
 > writeメソッドが走るのはfor文の最後だから
 > read, writeメソッドが走るタイミングを調整する
-+ 二重起動すると強制終了される
-> マルチプロセスかができない
-+ exe化する予定
+> keyboard interruptされたときにwriteメソッド機能するようにできる?
+* 二重起動すると強制終了される
+> マルチプロセス化ができない
+> 書き込みが2重にくるからいけないんだと思う。
+> 仕様として、月々ごとにまとめろ、とある
+>> mainの親プロセスを作って、入力したら月々ごとにファイル名指定できるようにする？
+* exe化する予定
 > py2exe
-+ GUI化する予定
+* GUI化する予定
 > TKinter
 
 
@@ -51,9 +105,11 @@ __PLAN__
 
 
 
+## datelist.datelist()
 
+**廃止**
+datelist.date_range_input()にアップグレード
 
-## datelist.py ver1.0
 
 __UPDATE1.0__
 first commit
@@ -75,6 +131,22 @@ __USAGE__
 
 __PLAN__
 none
+
+
+
+## datelist.date_range_input()
+
+* ファイル名のglobに用いる日付を基にした文字列をyieldするgenerator
+* 引数:なし(ユーザーに入力施す)
+* 戻り値:
+	* datestr:文字列(%Y%m%d形式)
+
+
+
+
+
+
+
 
 
 
