@@ -13,11 +13,11 @@
 *.log
 *.pdf
 *.tmp
-confidential.py
+param*
 /old/
 /doc/
 /log/
 /__pycache__/
 UserManual.*
-SAtraceFit.sublime-project
-SAtraceFit.sublime-workspace
+*.sublime-project
+*.sublime-workspace
