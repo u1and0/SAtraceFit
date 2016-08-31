@@ -50,12 +50,15 @@ def date_range_input():
 		datestr:文字列(%Y%m%d形式)
 	'''
 	print('''
+ファイル名を日時から指定します。
 
-<データファイルの選択方法>
-データファイルのファイル名はタイムスタンプ(yyyymmdd_HHMMSS形式)で決められているので
-ファイル名は時間で指定する。
-pandas.daterangeの形式で指定すること。
-http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
+<使い方>
+`始めの日時,終わりの日時,<数字D|数字H>`
+
+* 少なくとも2つの引数
+* 日時指定はpandas.daterangeの形式で指定すること。
+* http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
+* 3つめの引数はD:day H:hour　ごとにイテレート
 
 (例) 20160101,20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
 (例) 20160101,20160108, 5D <<< 2016年1月1日から2016年1月8日までを5日おきに出力
