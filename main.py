@@ -163,10 +163,10 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 # ## __DATE LIST__________________________
 
-dateList=dl.date_range_input()
-print('\nNow extracting from these dates\n%s\n'% dateList)
-filepath
-filepath=g.globname(param['in'],dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
+# dateList=dl.date_range_input()
+# print('\nNow extracting from these dates\n%s\n'% dateList)
+# filepath
+# filepath=g.globname(param['in'],dateList)    #dateList内の日付に測定されたファイル名のリスト(20151111_??????.txtが288×たくさん個)
 
 try:
 	# __FITTING__________________________

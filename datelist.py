@@ -45,7 +45,7 @@ import pandas as pd
 def date_range_input():
 	'''
 	ファイル名のglobに用いる日付を基にした文字列をyieldするgenerator
-	引数:なし
+	引数:なし(ユーザーに入力施す)
 	戻り値:
 		datestr:文字列(%Y%m%d形式)
 	'''
@@ -56,8 +56,10 @@ def date_range_input():
 `始めの日時,終わりの日時,<数字D|数字H>`
 
 * 少なくとも2つの引数
+* カンマで区切る
+* 時間を指定するときは、日付6文字の後にスペースやハイフンで区切る(例参照)
 * 日時指定はpandas.daterangeの形式で指定すること。
-* http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
+	* http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html
 * 3つめの引数はD:day H:hour　ごとにイテレート
 
 (例) 20160101,20160108 <<< 2016年1月1日から2016年1月8日までを1日ずつ出力
