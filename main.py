@@ -178,9 +178,10 @@ try:
 				fitRtn=f.fitting(fitfile)
 				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 				powerResult.update(fitRtn[1])    #fittingを行い、結果をSNResultに貯める
-				print('Now Fitting',fitRtn[0].keys())
-				# print('Write to SN\n', fitRtn[0])
-				# print('Write to Power\n', fitRtn[1])
+				print('\n'*3)
+				print('Now Fitting...',fitfile[-19:])
+				print('Write to SN...', list(fitRtn[0].values())[0])
+				print('Write to Power...', list(fitRtn[1].values())[0])
 
 except KeyboardInterrupt:
 	raise
