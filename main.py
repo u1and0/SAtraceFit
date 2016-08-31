@@ -1,5 +1,39 @@
 '''
-## main.py ver7.0
+## main.py v7.0.0
+
+
+__USAGE__
+コマンドライン上で`python main.py`で実行
+
+__INTRODUCTION__
+SAtraceFitの実行ファイル
+
+1. データソースからのテキストにフィッティングをかけて
+2. 結果をcsvに書き込み
+3. フィッティング結果を反映したスペクトラム図のpngを吐き出す
+	* csvファイル名はユーザーの入力
+	* csvファイル出力先はmain.pyに書き込まれている
+	* pngファイル出力先はfitting.plotshowing()に書き込まれている。
+
+
+
+__ACTION__
+
+<実行したときの、コマンドラインの表示の流れ>
+
+1. データファイル、出力ファイルのディレクトリ指定→parameter.pyで指定
+2. SNを書き込むcsvファイル名を聞かれる→入力する
+3. powerを書き込むcsvファイル名を聞かれる→入力する
+4. csvのフルパス表示
+5. 日付を指定(指定方法がメッセージで表示される。詳しくはdatelist.date_range_input()参照)
+	6. fitting.fitting()実行。詳しくはfitting.fitting()参照
+	7. フィッティング日時表示
+	8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
+
+
+
+__UPDATE7.0.0__
+ファイル名は日時指定で引っ張ってくる
 
 __UPDATE6.1.1__
 fot Mfit test
@@ -83,12 +117,6 @@ __PLAN__
 > py2exe
 * GUI化する予定
 > TKinter
-* csvの容量が大きくなるとプロセスの進行が遅れる
-> 読み込みに時間がかかる
-> 読み込みがfor文ごとにあるのがいけない
->> for文終了後に一気に書き込みできるようにする
->>> keyboard interruptされたときにwriteメソッド機能するようにしないと、プロセス中断すると計算結果がメモリとともに消えてしまう
-* 日付だけでなく時間を引数にする
 '''
 
 
@@ -99,10 +127,9 @@ import glob
 # __USER MODULES__________________________
 import fitting as f
 import parameter
-param=parameter.param()
+param=parameter.param()   #パラメータの読み込み
 import datelist as dl
 import CSV_IO as c
-# import globname as g
 
 
 
@@ -151,35 +178,22 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 
 
-
-# ## __DATE LIST__________________________
-
-# dateList=dl.date_range_input()
-# print('\nNow extracting from these dates\n%s\n'% dateList)
-
-
-
 try:
 	# __FITTING__________________________
 	for d in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
 		for i in d:
-			print('_'*20)
-			print('次の日時のファイルをfittingします。')
-			print(i,'\n'+'_'*20)
-			for fitfile in glob.iglob(param['in']+i+'*') :   #タイムスタンプ形式のファイルをglobするgenerator
+			print('_'*20+'\n次の日時のファイルをfittingします。\n',i)
 				data=np.loadtxt(fitfile)   #load text data as array
 				if not len(data):continue    #dataが空なら次のループ
 				fitRtn=f.fitting(fitfile)
 				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
-				# fitting_datetime=list(fitRtn[0].keys())[0].strftime('%Y/%m/%d %H:%M:%S')
-				print('Now Fitting',fitfile[-19:])   #標準出力に現在fittingしている時刻表示
-				# print('Write to SN\n', fitRtn[0])
-				# print('Write to Power\n', fitRtn[1])
-
+				print('\n'*3)
+				print('Now Fitting...',fitfile[-19:])
+				print('Write to SN...', list(fitRtn[0].values())[0])
+				print('Write to Power...', list(fitRtn[1].values())[0])
 except KeyboardInterrupt:
 	raise
-
 finally:
 	## __WRITEING__________________________
 	# print('Write to SN\n', SNResult)   #標準出力に結果を書き込む
