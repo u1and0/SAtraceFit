@@ -224,7 +224,7 @@ def loaddata(dataname):
 
 
 
-def fitting(dataname):
+def fitting(dataname,plot_switch=True):
 	(datax,datay)=loaddata(dataname)
 
 	noisef=stats.scoreatpercentile(datay, 25)	#fix at 1/4median
@@ -367,12 +367,11 @@ def fitting(dataname):
 	# print('SN: %s\npower: %s'% (SNData,powerData))
 
 
-
-	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
-	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
-
-	plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
-
+	if plot_switch:   #引数がTrueならプロット
+		plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
+		plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
+		plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	else :pass
 
 	return outData
 
