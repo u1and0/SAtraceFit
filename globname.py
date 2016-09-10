@@ -28,21 +28,17 @@ __PLAN__
 import glob
 
 
-def globname(rootpath,dateList):
+def globname(rootpath, dateList):
 	'''rootpath内のファイルのフルパスを返す
 	ただし、ファイル名が日付dateListの中による'''
-	filename=[]
+	filename = []
 	for i in dateList:
-		filename+=glob.glob(rootpath+'20'+i+'*.txt')   #上で指定したディレクトリから.txt形式のデータをglob
+		filename += glob.glob(rootpath + '20' + i + '*.txt')  # 上で指定したディレクトリから.txt形式のデータをglob
 	return filename
 
 
-
-
-
-
 '''
-TEST
+TEST globname()
 ## __DATE LIST__________________________
 from datelist import datelist  #最初と最後の日付(yymmdd形式)を引数に、その間の日付をリストとして返す
 # dateFirst=input('Input First Date>>> ')
@@ -59,12 +55,9 @@ dateList=datelist(dateFirst,dateLast)  #最初から最後の日付のリスト�
 # dateList=datelist(dateBet[0],dateBet[1])  #最初から最後の日付のリストを返す
 print('\ndateList\n',dateList)
 
-import confidential
-from confidential import rootroot
-print(globname(rootroot(),dateList))
+import parameter
+print(globname(parameter.param()['in'],dateList))
 '''
-
-
 
 
 '''
@@ -81,4 +74,3 @@ for d in dl.date_range_input():
 		for g in glob.iglob(path+i+'*'):
 			print(g)
 '''
-
