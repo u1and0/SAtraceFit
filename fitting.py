@@ -178,7 +178,7 @@ import listdic as ld
 
 
 
-def freq2pnt(x):return (x*1000-22000)/4   #integer使わないと将来的にエラーが起きるというwarning出される
+def freq2pnt(x):return int((x*1000-22000)/4)   #integer使わないと将来的にエラーが起きるというwarning出される
 
 def pnt2freq(x):return (x*4+22000)/1000
 
@@ -210,7 +210,6 @@ def plotshowing(title,ext=None,dir='./'):
 	plt.ylim(ymin=-120,ymax=0)
 	switch='plt.show()' if ext==None else 'plt.savefig(dir+title+"."+ext)'
 	eval(switch)
-	plt.close()
 
 def loaddata(dataname):
 	'''
@@ -224,7 +223,7 @@ def loaddata(dataname):
 
 
 
-def fitting(dataname):
+def fitting(dataname,plot_switch=True):
 	(datax,datay)=loaddata(dataname)
 
 	noisef=stats.scoreatpercentile(datay, 25)	#fix at 1/4median
@@ -251,8 +250,8 @@ def fitting(dataname):
 	def SNextract(x,y):
 		'''SNやシグナルのマーカーの表示
 		ディクショナリに値を追加'''
-		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+parameter.country(freqFit))   #fitting結果のプロット
-		if type(freqFit)!=float:
+		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+param['country'].get(freqFit,' UNK'))   #fitting結果のプロット
+		if type(freqFit)==tuple:
 			k=0    #ラベルの添え字
 			for i in freqFit:
 				SNDict[str(freqFit)+'_'+str(k)+'kHz']=y-noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
@@ -367,13 +366,11 @@ def fitting(dataname):
 	# print('SN: %s\npower: %s'% (SNData,powerData))
 
 
-
-	plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
-	plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
-
-	plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
-
-
+	if plot_switch:   #引数がTrueならプロット
+		plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
+		plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
+		plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+	plt.close()
 	return outData
 
 

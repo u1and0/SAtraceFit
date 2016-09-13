@@ -169,9 +169,14 @@ SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
 freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
-freqFreq=param['freqWave']+param['freqCarrier']
-freqFreq.sort()   #周波数のソート
-outPath=param['out']    #出力先の親ディレクトリ
+# freqFreq=param['freqWave']+param['freqCarrier']
+
+freqFreq=np.r_[param['freqWave'],param['freqCarrier']]   # np.r_クラスで行列の横向き結合
+freqFreq=np.unique(freqFreq)
+freqFreq.sort()
+   # np.unique重複する値削除
+   #周波数のソート
+# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
 
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
 c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
@@ -180,13 +185,14 @@ c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
 
 try:
 	# __FITTING__________________________
-	for d in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
-		for i in d:
-			print('\n'+'_'*20+'\n次の日時のファイルをfittingします。\n',i)
-			for fitfile in glob.iglob(param['in']+i+'*'):
+	plot=True if input('プロットしますか？ y/n >')=='y' else False
+	for date in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
+		for randate in date:
+			print('\n'+'_'*20+'\n次の日時のファイルをfittingします。\n',randate)
+			for fitfile in glob.iglob(param['in']+randate+'*'):
 				data=np.loadtxt(fitfile)   #load text data as array
 				if not len(data):continue    #dataが空なら次のループ
-				fitRtn=f.fitting(fitfile)
+				fitRtn=f.fitting(fitfile,plot_switch=plot)
 				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
 				print('')
