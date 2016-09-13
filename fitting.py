@@ -252,7 +252,7 @@ def fitting(dataname,plot_switch=True):
 		'''SNやシグナルのマーカーの表示
 		ディクショナリに値を追加'''
 		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+parameter.country(freqFit))   #fitting結果のプロット
-		if type(freqFit)!=float:
+		if type(freqFit)==tuple:
 			k=0    #ラベルの添え字
 			for i in freqFit:
 				SNDict[str(freqFit)+'_'+str(k)+'kHz']=y-noisef  #周波数をキー、SN比を値にしてfittngDictへ入れる
