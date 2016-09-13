@@ -210,7 +210,6 @@ def plotshowing(title,ext=None,dir='./'):
 	plt.ylim(ymin=-120,ymax=0)
 	switch='plt.show()' if ext==None else 'plt.savefig(dir+title+"."+ext)'
 	eval(switch)
-	plt.close()
 
 def loaddata(dataname):
 	'''
@@ -251,7 +250,7 @@ def fitting(dataname,plot_switch=True):
 	def SNextract(x,y):
 		'''SNやシグナルのマーカーの表示
 		ディクショナリに値を追加'''
-		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+parameter.country(freqFit))   #fitting結果のプロット
+		plt.plot(x,y,'D',fillstyle='none',markeredgewidth=1.5,label=str(freqFit)+param['country'].get(freqFit,' UNK'))   #fitting結果のプロット
 		if type(freqFit)==tuple:
 			k=0    #ラベルの添え字
 			for i in freqFit:
@@ -371,8 +370,7 @@ def fitting(dataname,plot_switch=True):
 		plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
 		plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
 		plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
-	else :pass
-
+	plt.close()
 	return outData
 
 
