@@ -170,12 +170,13 @@ freqFreqで見出し行を作る
 '''
 SNResult,powerResult={},{}
 # freqFreq=param['freqWave']+param['freqCarrier']
+
 freqFreq=np.r_[param['freqWave'],param['freqCarrier']]   # np.r_クラスで行列の横向き結合
 freqFreq=np.unique(freqFreq)
 freqFreq.sort()
    # np.unique重複する値削除
    #周波数のソート
-outPath=param['out']    #出力先の親ディレクトリ
+# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
 
 c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
 c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
