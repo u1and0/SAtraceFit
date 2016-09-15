@@ -1,132 +1,5 @@
 '''
-## fitting.py ver3.5
-
-__UPDATE3.5__
-
-* listdic モジュール追加
-	* listdic()リストの一部を抜き出す:
-	* search_maxy_returnx():2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする
-* carrier fitの周辺ぼやかして探す
-	* search_maxy_returnx()
-
-
-around():リストの一部を抜き出す
-はdataxをあらかじめpnt2freq()していないからうまく動かない
-多くの箇所を直さなければならなくなるので後回し
-
-
-
-<<<<<<< HEAD
-## fitting.py ver3.1.2
-
-__UPDATE3.1.2__
-around関数作ってcarrierにも適用
-
-__UPDATE3.1.1__
-fitting conditionのwavewithminの条件を甘くした
-=======
-
-
-__UPDATE3.4__
-
-1. parameter.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
-2. parameter.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
-3. 「power0のSNが10以上」 かつ 「power1がpower0の±20%以内ならばプロット」
-> `if power0-noisef>10 and power0-noisef*0.8<power1-noisef<power0-noisef*1.2:`
-
-* carriierの表示にはnoisefを引く必要があった
-
-
-__UPDATE3.3__
-
-1. parameter.Mfit()の低い方の周辺20Hzの周波数の最大値を探す。そのシグナル値をpower0とする
-2. parameter.Mfit()の高い方の周辺20Hzの周波数のにおいて、power0のシグナル値と最も近いシグナル値を探す。そのシグナル値をpower1とする
-3. power0のSNが10以上なら、フィッティングを行う
-4. 「フィッティングの状態が良い」または「power1のSN比がpower0のSN比の±5%未満」ならばpower0とpower1をプロットする
-> 「フィッティングの状態が良い」とは、指定した周波数付近に鋭くも潰れてもいないちょうど良い波が、SN比0以上で出ている。if文は次のようになる
-> `if fitcondition(avefit,SNratio,fittingFreqFit,waveWidth,condSN=0,condmu=0.2) or (power0-noisef>10 and power0-noisef*0.95<power1-noisef<power0-noisef*1.05):
-`
-
->>>>>>> origin/Mfit
-
-__UPDATE3.1__
-Mfit 
-power1とpower0が最も近くなるようにpower1の周波数を決める
-`xpower1=min(datadict1.items(), key=lambda x:abs(x[1]-power0))[0]
-`
-
-
-1. fittingしてwaveが出たならば2以降へ進む
-低い方の周波数±20Hz付近をサーチして、最も大きい値をプロット。このときの値を"A"とする。
-2. 低い方の周波数±20Hz付近をサーチして、"A"に最も近い大きさの点をプロットする
-3. プロットされた周波数とシグナル及びSNをCSVファイルに吐きだす
-
-
-
-__UPDATE3.0__
-Mfit周波数の平均値でfitting
-Mfit周波数低い方の±10Hzのmaxを見る
-高い方の周波数との差が1dB未満で最も小さいところが高い方のSN
-ない場合は24.0kHzでMfit周波数低い方のSNと重なっている可能性があるので、最も高い値にマーク
-
-Mfit0, Mfit1の周波数±10Hzを捜索
-1. Mfit0のなかで最大値をプロットする(power0と名づける)
-2. Mfit1のなかでpower0に最も近い値をプロットする(power1と名づける)
-
-__UPDATE2.1__
-2周波数以上あるフィッティングは実際にそぐわないので、2宗派でキャリア見つける方式に変更
-
-__UPDATE2.0__
-Mfit：2周波数以上あるフィッティング
-周波数はこのモジュールfitting.pyから直接parameterに問い合わせる形式にした(元々はmainから問い合わせて引数として渡す)
-
-Mfit関数
-dualgauss関数追加
-
-
-__UPDATE1.4__
-プロットするとき、ラベルはマーカーだけに限定
-
-__UPDATE1.3__
-ラベルに国名を表示
-
-__UPDATE1.2__
-データプロットを最前面にした
-
-__UPDATE1.1__
-
-* loaddata プロットの太さを0.1>>>0.2変更
-* 取り出すシグナル強度をダイヤモンドマーカーで表示
-* ノイズフロアの表示
-* pngで保存も可能にした
-
-__UPDATE1.0__
-
-* fittingDiv, SN_PowerSearchの統合
-* waveとcarrier分けた
-
-**課題**
-
-* fittingの廃止
-* powerを別ファイルに吐き出す
-
-__UPDATE0.3.9.4__
-差分が一定以上ある場合は、測定値(Carrierとみなす)
-差分が一定以内におさまる場合は、fit(Waveとみなす)
-差分:(fit-signaldiv)
-
-__UPDATE0.3.9.3__
-failebasenameではなくglobで拾われるフルパスに変更
-indicateConditionにSNratio>5 を追加した(前処理で5以上と判断されても、fitしてみてS/N５以上とは限らないため)
-
-__UPDATE0.3.9.2__
-SN抽出対象をWaveとCarrierに分けた
-	Wave:
-		帯域持つのでfitする
-		フィッティング結果のSNを出力
-	Carrier:
-		帯域持たず、fitすると異常に高い値が出ることがあるので、fitしない
-		Carrierはその周波数のsignalとノイズフロアの差分をSNとして出力
+## fitting.py
 
 __INTRODUCTION__
 タイムスタンプと周波数を引数にフィッティング結果を返すpy
@@ -153,16 +26,13 @@ __ACTION__
 11. ディクショナリ in ディクショナリを返す
 
 __TODO__
-* M-fitting:
-	* fitting周波数が2つ
-	* 2つの周波数の重ね合わせ
->list2dic()
-dataxはロードする時点でpnt2freqかけておかないと
-> around():リストの一部を抜き出す
-> はdataxをあらかじめpnt2freq()していないからうまく動かない
-> 多くの箇所を直さなければならなくなるので後回し
-
-
+* plotshowing()
+	* plotするかしないか
+	* showするかsavepngするか
+	* 条件分岐
+	* dictionary使う？inputでmain.py空の命令に従う
+* fittingされてreturnするdictをプロット
+	* `plt.plot(dictionary.keys(), dictionary.keys(), dictionary.values()) `
 '''
 
 import numpy as np
@@ -369,7 +239,7 @@ def fitting(dataname,plot_switch=True):
 	if plot_switch:   #引数がTrueならプロット
 		plt.plot(pnt2freq(datax),[noisef for i in datax],'-',lw=1,color='k')    #ノイズフロアのプロット
 		plt.plot(pnt2freq(datax),datay,'-',lw=0.2,color='k')    #測定データのプロット
-		plotshowing(filebasename,ext='png',dir=param['out']+'PNG/')    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
+		plotshowing(filebasename,ext='png',dir=param['out_png'])    #extは拡張子指定オプション(デフォルトはplt.show())、dirは保存するディレクトリ指定オプション
 	plt.close()
 	return outData
 

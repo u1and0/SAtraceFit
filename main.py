@@ -152,7 +152,7 @@ newinpS=oldinpS
 newinpP=oldinpP
 
 inplist=[oldinpS,oldinpP,newinpS,newinpP]
-csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: param['out']+'\\CSV\\'+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: param['out_csv']+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
 
 ## ____________________________
 print('SN value :\n\tRead from %s\n\tWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
