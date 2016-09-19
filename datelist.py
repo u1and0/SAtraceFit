@@ -21,27 +21,27 @@ first commit
 ## PLAN
 none
 '''
+import pandas as pd
 import datetime
-d=datetime
+d = datetime
 
-def datelist(date1,date2):
-	ddate1=d.datetime.strptime(date1,'%y%m%d')
-	ddate2=d.datetime.strptime(date2,'%y%m%d')
-	dateList=[ddate1.strftime('%y%m%d')]   #strfrimeでyymmdd形式に変換
-	while ddate1!=ddate2:
-		ddate1+=d.timedelta(1)   #ddate1の次の日
-		dateList.append(ddate1.strftime('%y%m%d'))   #dateListにddate1追加#strfrimeでyymmdd形式に変換
+
+def datelist(date1, date2):
+	ddate1 = d.datetime.strptime(date1, '%y%m%d')
+	ddate2 = d.datetime.strptime(date2, '%y%m%d')
+	dateList = [ddate1.strftime('%y%m%d')]  # strfrimeでyymmdd形式に変換
+	while ddate1 != ddate2:
+		ddate1 += d.timedelta(1)  # ddate1の次の日
+		dateList.append(ddate1.strftime('%y%m%d'))  # dateListにddate1追加#strfrimeでyymmdd形式に変換
 	return dateList
 
-## __TEST__________________________
+# __TEST__________________________
 # date1='160225'
 # date2='160302'
 # print(datelist(date1,date2))
-##____________________________
+# ____________________________
 
 
-
-import pandas as pd
 def date_range_input():
 	'''
 	ファイル名のglobに用いる日付を基にした文字列をyieldするgenerator
@@ -70,25 +70,24 @@ def date_range_input():
 	''')
 
 	while True:
+		date_command_dict = {'D': '%Y%m%d', 'H': '%Y%m%d_%H'}
 		try:
-			inp=input('pandas.date_range型で入力 >>').split(',')   #input().sprit()はスペース区切りでリストの要素として
-			if len(inp)==2:
-				datelist=pd.date_range(inp[0],inp[1])
-				datestr=datelist.strftime('%Y%m%d')
+			inp_bare = input('pandas.date_range型で入力 >>').split(',')  # カンマ区切りでリストの要素として拾う
+			inp = [i.strip() for i in inp_bare]  # リスト各要素の両端の空白を削除
+			if len(inp) == 2:
+				datelist = pd.date_range(inp[0], inp[1])
+				datestr = datelist.strftime('%Y%m%d')
 				break
-			elif 'D' in inp[2]:
-				datelist=pd.date_range(inp[0],inp[1],freq=inp[2])
-				datestr=datelist.strftime('%Y%m%d')
-				break
-			elif 'H' in inp[2]:
-				datelist=pd.date_range(inp[0],inp[1],freq=inp[2])
-				datestr=datelist.strftime('%Y%m%d_%H')
+			elif inp[2] in date_command_dict.keys():
+				datelist = pd.date_range(inp[0], inp[1], freq=inp[2])
+				datestr = datelist.strftime(date_command_dict[inp[2]])
 				break
 		except KeyboardInterrupt:
 			raise
 		except:
 			print('入力が間違っています')
 	yield datestr
+
 
 '''TEST date_range_input()
 # リスト内包表記
