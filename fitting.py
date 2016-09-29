@@ -45,6 +45,7 @@ d = datetime.datetime.today()
 import parameter
 param=parameter.param()
 import listdic as ld
+from tqdm import tqdm
 
 
 
@@ -143,7 +144,7 @@ def fitting(dataname,plot_switch=True):
 
 	plt.figure(figsize=(6,6))
 	SNDict,powerDict={},{}
-	for freqFit in param['freqWave']:   #freqWaveの周波数をfit
+	for freqFit in tqdm(param['freqWave']):   #freqWaveの周波数をfit
 		fitrange=0.2
 		dataxRange=datax[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]   #±200Hzをフィッティングする
 		datayRange=datay[freq2pnt(freqFit-fitrange):freq2pnt(freqFit+fitrange)]
@@ -154,7 +155,7 @@ def fitting(dataname,plot_switch=True):
 		if fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit,SNratio+noisef)
-	for freqFit in param['freqCarrier']:   #freqCarrierの周波数のシグナルを取得
+	for freqFit in tqdm(param['freqCarrier']):   #freqCarrierの周波数のシグナルを取得
 		datadict=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)]),datay[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)])
 		# print('datad',datadict)
 		xpower=ld.search_maxy_returnx(datadict)
@@ -174,7 +175,7 @@ def fitting(dataname,plot_switch=True):
 
 
 
-	for freqFit in param['freqM']:   #freqMの周波数のシグナルを取得
+	for freqFit in tqdm(param['freqM']):   #freqMの周波数のシグナルを取得
 		datadict0=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]),datay[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)])
 		xpower0=ld.search_maxy_returnx(datadict0)
 		power0=datadict0[xpower0]

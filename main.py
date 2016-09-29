@@ -124,6 +124,7 @@ __PLAN__
 import pandas as pd
 import numpy as np
 import glob
+from tqdm import tqdm
 # __USER MODULES__________________________
 import fitting as f
 import parameter
@@ -189,10 +190,12 @@ try:
 	for date in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
 		for randate in date:
 			print('\n'+'_'*20+'\n次の日時のファイルをfittingします。\n',randate)
-			for fitfile in glob.iglob(param['in']+randate+'*'):
+			for fitfile in tqdm(glob.glob(param['in']+randate+'*')):
 				data=np.loadtxt(fitfile)   #load text data as array
 				if not len(data):continue    #dataが空なら次のループ
-				fitRtn=f.fitting(fitfile,plot_switch=plot)
+
+				fitRtn=f.fitting(fitfile,plot_switch=plot)  # fitting.pyへフルパス渡す
+
 				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
 				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
 				print('')
