@@ -1,5 +1,6 @@
 '''
-## main.py v7.0.0
+## main.py v7.1.0
+
 
 
 __USAGE__
@@ -31,6 +32,13 @@ __ACTION__
 	8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
 
 
+
+__UPDATE7.1.0__
+データの引継ぎ機能復活
+old, newのファイル名を入力する
+ファイル名の頭につける文字列は
+	'SN': SN比
+	'P': power
 
 __UPDATE7.0.0__
 ファイル名は日時指定で引っ張ってくる
@@ -128,88 +136,106 @@ from tqdm import tqdm
 # __USER MODULES__________________________
 import fitting as f
 import parameter
-param=parameter.param()   #パラメータの読み込み
+param = parameter.param()  # パラメータの読み込み
 import datelist as dl
 import CSV_IO as c
 
 
-
-## __CSV NAME__________________________
+# __CSV NAME__________________________
 '''
 # コンソールからファイル名を指定
 # 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
 # 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
 # '''
-oldinpS=input('Input SN file base name>>> ')
-oldinpP=input('Input power file base name>>> ')
+oldinp = input('データ引き継ぎ元: 拡張子抜きのファイル名 >> ')
+oldinpS, oldinpP = 'SN' + oldinp, 'P' + oldinp
 
-# print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
-# newinpS=input('Input new SN file base name>>> ')
-# if not newinpS:newinpS=oldinpS
-# print('古いファイル名old file base name と新しいファイル名new file base nameを同じにするとき、何も入力せずにEnter.')
-# newinpP=input('Input new power file base name>>> ')
-# if not newinpP:newinpP=oldinpP
-newinpS=oldinpS
-newinpP=oldinpP
+print('新規作成したいとき or データ引継ぎ元ファイルに上書き => 何も入力せずEnter')
+newinp = input('データ引き継ぎ先: 拡張子抜きのファイル名 >> ')
+if not newinp:
+	newinp = oldinp
+newinpS, newinpP = 'SN' + newinp, 'P' + newinp
 
-inplist=[oldinpS,oldinpP,newinpS,newinpP]
-csvlist=[oldcsvS,oldcsvP,newcsvS,newcsvP]=map(lambda inp: param['out_csv']+inp+'.csv' ,inplist)    #入力したファイルベースネームをフルパスと拡張しつけて返す
+# newinpS=oldinpS
+# newinpP=oldinpP
 
-## ____________________________
-print('SN value :\n\tRead from %s\n\tWrite to %s'% (oldcsvS,newcsvS))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
-print('Power value :\n\tRead from %s\n\tWrite to %s'% (oldcsvP,newcsvP))    #読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+# 入力したファイルベースネームをフルパスと拡張しつけて返す
+inplist = [oldinpS, oldinpP, newinpS, newinpP]
+csvlist = [oldcsvS,
+           oldcsvP,
+           newcsvS,
+           newcsvP] = map(
+	lambda inplist_element: param['out_csv'] + inplist_element + '.csv', inplist)
+
+# ____________________________
+print('SN value :\n\tRead from %s\n\tWrite to %s' %
+      (oldcsvS, newcsvS))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+print('Power value :\n\tRead from %s\n\tWrite to %s' %
+      (oldcsvP, newcsvP))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
 
 
-
-
-
-##__MAKE CSV__________________________
+# __MAKE CSV__________________________
 '''
 oldcsvSを読み込んでnewcsvSに入れる
 SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
 freqFreqで見出し行を作る
 '''
-SNResult,powerResult={},{}
+SNResult, powerResult = {}, {}
 # freqFreq=param['freqWave']+param['freqCarrier']
 
-freqFreq=np.r_[param['freqWave'],param['freqCarrier']]   # np.r_クラスで行列の横向き結合
-freqFreq=np.unique(freqFreq)
+freqFreq = np.r_[param['freqWave'], param['freqCarrier']]   # np.r_クラスで行列の横向き結合
+freqFreq = np.unique(freqFreq)
 freqFreq.sort()
-   # np.unique重複する値削除
-   #周波数のソート
+# np.unique重複する値削除
+# 周波数のソート
 # np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
 
-c.editCSV(oldcsvS,newcsvS,SNResult,freqFreq)
-c.editCSV(oldcsvP,newcsvP,powerResult,freqFreq)
-
+c.editCSV(oldcsvS, newcsvS, SNResult, freqFreq)
+c.editCSV(oldcsvP, newcsvP, powerResult, freqFreq)
 
 
 try:
 	# __FITTING__________________________
-	plot=True if input('プロットしますか？ y/n >')=='y' else False
-	for date in dl.date_range_input():   #pd.date_rangeの引数をinput方式にカスタマイズした
+	plot = True if input('プロットしますか？ y/n >') == 'y' else False
+	for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
 		for randate in date:
-			print('\n'+'_'*20+'\n次の日時のファイルをfittingします。\n',randate)
-			for fitfile in tqdm(glob.glob(param['in']+randate+'*')):
-				data=np.loadtxt(fitfile)   #load text data as array
-				if not len(data):continue    #dataが空なら次のループ
+			print('\n' + '_' * 20 + '\n次の日時のファイルをfittingします。\n', randate)
+			for fitfile in tqdm(glob.glob(param['in'] + randate + '*')):
+				data = np.loadtxt(fitfile)  # load text data as array
+				if not len(data):
+					continue  # dataが空なら次のループ
 
-				fitRtn=f.fitting(fitfile,plot_switch=plot)  # fitting.pyへフルパス渡す
+				fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
 
-				SNResult.update(fitRtn[0])    #fittingを行い、結果をSNResultに貯める
-				powerResult.update(fitRtn[1])    #fittingを行い、結果をpowerResultに貯める
+				SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
+				powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
 				print('')
-				print('Now Fitting...',fitfile[-19:])
+				print('Now Fitting...', fitfile[-19:])
 				print('Write to SN...', list(fitRtn[0].values())[0])
 				print('Write to Power...', list(fitRtn[1].values())[0])
+
+				# __WRITEING__________________________
+				'''
+				for文の中でc.editCSVを行うと
+				逐一書き込むので処理の最中にctrl+Cで中断できるが
+				(しかもfinallyステート内で最後に書き込みを行わせる)
+				逐一ファイルの読み込みを行うので、
+				csvファイルが巨大になっていくごとにc.editCSVの処理に時間がかかる
+
+				**なるべく小分けに計算してあとでcsvを統合した方がいい。**
+
+				'''
+				c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+				c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+				print('')
+				print('%sにSN値を書き込みました' % newcsvS)
+				print('%sにpower値を書き込みました' % newcsvP)
 except KeyboardInterrupt:
 	raise
 finally:
-	## __WRITEING__________________________
-	# print('Write to SN\n', SNResult)   #標準出力に結果を書き込む
-	# print('Write to Power\n', powerResult)
-	c.editCSV(newcsvS,newcsvS,SNResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
-	c.editCSV(newcsvP,newcsvP,powerResult,freqFreq)    #newcsvSにフィッティング結果を書き込む
+	c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+	c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
 	print('')
-	print('%sにSN値を書き込みました'% newcsvS)
-	print('%sにpower値を書き込みました'% newcsvP)
+	print('%sにSN値を書き込みました' % newcsvS)
+	print('%sにpower値を書き込みました' % newcsvP)
+	print('fittingを終了します')
