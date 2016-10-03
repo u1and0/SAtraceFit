@@ -12,9 +12,9 @@ SAtraceFitの実行ファイル
 1. データソースからのテキストにフィッティングをかけて
 2. 結果をcsvに書き込み
 3. フィッティング結果を反映したスペクトラム図のpngを吐き出す
-	* csvファイル名はユーザーの入力
-	* csvファイル出力先はmain.pyに書き込まれている
-	* pngファイル出力先はfitting.plotshowing()に書き込まれている。
+    * csvファイル名はユーザーの入力
+    * csvファイル出力先はmain.pyに書き込まれている
+    * pngファイル出力先はfitting.plotshowing()に書き込まれている。
 
 
 
@@ -27,9 +27,9 @@ __ACTION__
 3. powerを書き込むcsvファイル名を聞かれる→入力する
 4. csvのフルパス表示
 5. 日付を指定(指定方法がメッセージで表示される。詳しくはdatelist.date_range_input()参照)
-	6. fitting.fitting()実行。詳しくはfitting.fitting()参照
-	7. フィッティング日時表示
-	8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
+    6. fitting.fitting()実行。詳しくはfitting.fitting()参照
+    7. フィッティング日時表示
+    8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
 
 
 
@@ -37,8 +37,8 @@ __UPDATE7.1.0__
 データの引継ぎ機能復活
 old, newのファイル名を入力する
 ファイル名の頭につける文字列は
-	'SN': SN比
-	'P': power
+    'SN': SN比
+    'P': power
 
 __UPDATE7.0.0__
 ファイル名は日時指定で引っ張ってくる
@@ -69,10 +69,10 @@ __UPDATE3.0__
 
 * fittingの廃止→SN_PowerSearchに変更
 * SN_PowerSearchに2つの関数
-	* SN, Power作成
+    * SN, Power作成
 * csvは２つ吐き出す
-	* SN
-	* Power
+    * SN
+    * Power
 
 
 __UPDATE2.4__
@@ -105,10 +105,10 @@ rawdataPathで、データの位置を指定する(日付)
 __USAGE__
 
 * コマンドライン上にて`python main.py`で起動
-	SN, powerを出力するcsvファイル名(ディレクトリパスと拡張子は抜き)の入力が求められる(例：ファイル名をhogehoge.csvとしたければ、`hogehoge`と入力する)
-	フィッティング対象のデータの日付の入力が求められる`<最初の日付> <最後の日付>`。フォーマットはyymmdd形式(例：2015年11月1日の日付からにしたいときは`151101`と打ちこむ)
+    SN, powerを出力するcsvファイル名(ディレクトリパスと拡張子は抜き)の入力が求められる(例：ファイル名をhogehoge.csvとしたければ、`hogehoge`と入力する)
+    フィッティング対象のデータの日付の入力が求められる`<最初の日付> <最後の日付>`。フォーマットはyymmdd形式(例：2015年11月1日の日付からにしたいときは`151101`と打ちこむ)
 * CSV_IO.editCSV内でread, writeメソッドを1つの関数に収めた
-	* fitting>read>translate>update>translate>writeの流れは1セット
+    * fitting>read>translate>update>translate>writeの流れは1セット
 
 __PLAN__
 
@@ -133,10 +133,11 @@ import pandas as pd
 import numpy as np
 import glob
 from tqdm import tqdm
+import simplejson
+with open('parameter.json', 'r') as f:
+    param = simplejson.load(f)
 # __USER MODULES__________________________
 import fitting as f
-import parameter
-param = parameter.param()  # パラメータの読み込み
 import datelist as dl
 import CSV_IO as c
 
@@ -153,7 +154,7 @@ oldinpS, oldinpP = 'SN' + oldinp, 'P' + oldinp
 print('新規作成したいとき or データ引継ぎ元ファイルに上書き => 何も入力せずEnter')
 newinp = input('データ引き継ぎ先: 拡張子抜きのファイル名 >> ')
 if not newinp:
-	newinp = oldinp
+    newinp = oldinp
 newinpS, newinpP = 'SN' + newinp, 'P' + newinp
 
 # newinpS=oldinpS
@@ -165,7 +166,7 @@ csvlist = [oldcsvS,
            oldcsvP,
            newcsvS,
            newcsvP] = map(
-	lambda inplist_element: param['out_csv'] + inplist_element + '.csv', inplist)
+    lambda inplist_element: param['out_csv'] + inplist_element + '.csv', inplist)
 
 # ____________________________
 print('SN value :\n\tRead from %s\n\tWrite to %s' %
@@ -195,47 +196,47 @@ c.editCSV(oldcsvP, newcsvP, powerResult, freqFreq)
 
 
 try:
-	# __FITTING__________________________
-	plot = True if input('プロットしますか？ y/n >') == 'y' else False
-	for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
-		for randate in date:
-			print('\n' + '_' * 20 + '\n次の日時のファイルをfittingします。\n', randate)
-			for fitfile in tqdm(glob.glob(param['in'] + randate + '*')):
-				data = np.loadtxt(fitfile)  # load text data as array
-				if not len(data):
-					continue  # dataが空なら次のループ
+    # __FITTING__________________________
+    plot = True if input('プロットしますか？ y/n >') == 'y' else False
+    for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
+        for randate in date:
+            print('\n' + '_' * 20 + '\n次の日時のファイルをfittingします。\n', randate)
+            for fitfile in tqdm(glob.glob(param['in'] + randate + '*')):
+                data = np.loadtxt(fitfile)  # load text data as array
+                if not len(data):
+                    continue  # dataが空なら次のループ
 
-				fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
+                fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
 
-				SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
-				powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
-				print('')
-				print('Now Fitting...', fitfile[-19:])
-				print('Write to SN...', list(fitRtn[0].values())[0])
-				print('Write to Power...', list(fitRtn[1].values())[0])
+                SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
+                powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
+                print('')
+                print('Now Fitting...', fitfile[-19:])
+                print('Write to SN...', list(fitRtn[0].values())[0])
+                print('Write to Power...', list(fitRtn[1].values())[0])
 
-				# __WRITEING__________________________
-				'''
-				for文の中でc.editCSVを行うと
-				逐一書き込むので処理の最中にctrl+Cで中断できるが
-				(しかもfinallyステート内で最後に書き込みを行わせる)
-				逐一ファイルの読み込みを行うので、
-				csvファイルが巨大になっていくごとにc.editCSVの処理に時間がかかる
+                # __WRITEING__________________________
+                '''
+                for文の中でc.editCSVを行うと
+                逐一書き込むので処理の最中にctrl+Cで中断できるが
+                (しかもfinallyステート内で最後に書き込みを行わせる)
+                逐一ファイルの読み込みを行うので、
+                csvファイルが巨大になっていくごとにc.editCSVの処理に時間がかかる
 
-				**なるべく小分けに計算してあとでcsvを統合した方がいい。**
+                **なるべく小分けに計算してあとでcsvを統合した方がいい。**
 
-				'''
-				c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-				c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-				print('')
-				print('%sにSN値を書き込みました' % newcsvS)
-				print('%sにpower値を書き込みました' % newcsvP)
+                '''
+                c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+                c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+                print('')
+                print('%sにSN値を書き込みました' % newcsvS)
+                print('%sにpower値を書き込みました' % newcsvP)
 except KeyboardInterrupt:
-	raise
+    raise
 finally:
-	c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-	c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-	print('')
-	print('%sにSN値を書き込みました' % newcsvS)
-	print('%sにpower値を書き込みました' % newcsvP)
-	print('fittingを終了します')
+    c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+    c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+    print('')
+    print('%sにSN値を書き込みました' % newcsvS)
+    print('%sにpower値を書き込みました' % newcsvP)
+    print('fittingを終了します')
