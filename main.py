@@ -1,7 +1,5 @@
 '''
-## main.py v7.1.0
-
-
+## main.py v7.2.0
 
 __USAGE__
 コマンドライン上で`python main.py`で実行
@@ -16,8 +14,6 @@ SAtraceFitの実行ファイル
     * csvファイル出力先はmain.pyに書き込まれている
     * pngファイル出力先はfitting.plotshowing()に書き込まれている。
 
-
-
 __ACTION__
 
 <実行したときの、コマンドラインの表示の流れ>
@@ -31,6 +27,14 @@ __ACTION__
     7. フィッティング日時表示
     8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
 
+
+__UPDATE7.2.0__
+* 逐一読み込む方式再度廃止(コメントアウトで残してある)
+* 1ヵ月ごとに読み込むのがやはり遅い
+* csvに保存するまでがこいつの仕事
+* データフレームとして複数のcsvを読み込み、1つのcsvにまとめる(pandas.concat)
+    * してから保存する(pandas.DataFrame.to_csv())ことでcsvにするのが
+    * SAtraceView save_table.concat_table()の仕事
 
 
 __UPDATE7.1.0__
@@ -134,12 +138,14 @@ import numpy as np
 import glob
 from tqdm import tqdm
 import simplejson
-with open('parameter.json', 'r') as f:
-    param = simplejson.load(f)
 # __USER MODULES__________________________
 import fitting as f
 import datelist as dl
 import CSV_IO as c
+
+# __PARAMETER DEFINITION__________________________
+with open('parameter.json', 'r') as pa:
+    param = simplejson.load(pa)
 
 
 # __CSV NAME__________________________
@@ -198,39 +204,47 @@ c.editCSV(oldcsvP, newcsvP, powerResult, freqFreq)
 try:
     # __FITTING__________________________
     plot = True if input('プロットしますか？ y/n >') == 'y' else False
-    for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
-        for randate in date:
-            print('\n' + '_' * 20 + '\n次の日時のファイルをfittingします。\n', randate)
-            for fitfile in tqdm(glob.glob(param['in'] + randate + '*')):
-                data = np.loadtxt(fitfile)  # load text data as array
-                if not len(data):
-                    continue  # dataが空なら次のループ
+    # for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
+    inp_date = input('最初の日付, 最後の日付>>').split(',')  # カンマ区切りでリストの要素として拾う
+    inp_date_nospace = [i.strip() for i in inp_date]  # リスト各要素の両端の空白を削除
+    for da in tqdm(pd.date_range(*inp_date_nospace)):
+        randate=da.strftime('%Y%m%d')
+        print('''
 
-                fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
+___________________________________
+次の年月日のファイルをfittingします。
+            ''')
+        print(randate)
+        for fitfile in tqdm(glob.glob(param['in'] + randate + '*')):
+            data = np.loadtxt(fitfile)  # load text data as array
+            if not len(data):
+                continue  # dataが空なら次のループ
 
-                SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
-                powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
-                print('')
-                print('Now Fitting...', fitfile[-19:])
-                print('Write to SN...', list(fitRtn[0].values())[0])
-                print('Write to Power...', list(fitRtn[1].values())[0])
+            fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
 
-                # __WRITEING__________________________
-                '''
-                for文の中でc.editCSVを行うと
-                逐一書き込むので処理の最中にctrl+Cで中断できるが
-                (しかもfinallyステート内で最後に書き込みを行わせる)
-                逐一ファイルの読み込みを行うので、
-                csvファイルが巨大になっていくごとにc.editCSVの処理に時間がかかる
+            SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
+            powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
+            # print('')
+            # print('Now Fitting...', fitfile[-19:])
+            # print('Write to SN...', list(fitRtn[0].values())[0])
+            # print('Write to Power...', list(fitRtn[1].values())[0])
 
-                **なるべく小分けに計算してあとでcsvを統合した方がいい。**
+            # __WRITEING__________________________
+            '''
+            for文の中でc.editCSVを行うと
+            逐一書き込むので処理の最中にctrl+Cで中断できるが
+            (しかもfinallyステート内で最後に書き込みを行わせる)
+            逐一ファイルの読み込みを行うので、
+            csvファイルが巨大になっていくごとにc.editCSVの処理に時間がかかる
 
-                '''
-                c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-                c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
-                print('')
-                print('%sにSN値を書き込みました' % newcsvS)
-                print('%sにpower値を書き込みました' % newcsvP)
+            **なるべく小分けに計算してあとでcsvを統合した方がいい。**
+
+            '''
+            # c.editCSV(newcsvS, newcsvS, SNResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+            # c.editCSV(newcsvP, newcsvP, powerResult, freqFreq)  # newcsvSにフィッティング結果を書き込む
+            # print('')
+            # print('%sにSN値を書き込みました' % newcsvS)
+            # print('%sにpower値を書き込みました' % newcsvP)
 except KeyboardInterrupt:
     raise
 finally:

@@ -155,7 +155,7 @@ def fitting(dataname,plot_switch=True):
 		if fitcondition(freqFit,SNratio,fittingFreqFit,waveWidth):
 			# plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
 			SNextract(fittingFreqFit,SNratio+noisef)
-	for freqFit in tqdm(param['freqCarrier']):   #freqCarrierの周波数のシグナルを取得
+	for freqFit in param['freqCarrier']:   #freqCarrierの周波数のシグナルを取得
 		datadict=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)]),datay[freq2pnt(freqFit-0.01):freq2pnt(freqFit+0.01)])
 		# print('datad',datadict)
 		xpower=ld.search_maxy_returnx(datadict)
@@ -175,7 +175,7 @@ def fitting(dataname,plot_switch=True):
 
 
 
-	for freqFit in tqdm(param['freqM']):   #freqMの周波数のシグナルを取得
+	for freqFit in param['freqM']:   #freqMの周波数のシグナルを取得
 		datadict0=ld.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)]),datay[freq2pnt(freqFit[0]-0.02):freq2pnt(freqFit[0]+0.02)])
 		xpower0=ld.search_maxy_returnx(datadict0)
 		power0=datadict0[xpower0]
