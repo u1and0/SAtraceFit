@@ -40,7 +40,6 @@ import numpy as np
 from scipy import stats
 from scipy import optimize
 import matplotlib.pyplot as plt
-import sys
 import os
 import datetime
 # INSTALL PACKAGE
@@ -77,7 +76,7 @@ def plotshowing(title, ext=None, dir='./'):
     plt.ylabel('Power[dBm]')
     plt.grid(True)
     plt.ylim(ymin=-120, ymax=0)
-    switch = 'plt.show()' if ext == None else 'plt.savefig(dir+title+"."+ext)'
+    switch = 'plt.show()' if not ext else 'plt.savefig(dir+title+"."+ext)'
     eval(switch)
 
 
@@ -95,6 +94,7 @@ def fitting(dataname, plot_switch=True):
     (datax, datay) = loaddata(dataname)
 
     noisef = stats.scoreatpercentile(datay, 25)  # fix at 1/4median
+
     def gauss(x, *param):  # fitting function
         [aa, mu, si] = param
         return aa * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
@@ -118,7 +118,7 @@ def fitting(dataname, plot_switch=True):
         '''SNやシグナルのマーカーの表示
         ディクショナリに値を追加'''
         plt.plot(x, y, 'D', fillstyle='none', markeredgewidth=1.5, label=str(
-            freqFit) + param['country'].get(freqFit, ' UNK'))  # fitting結果のプロット
+            freqFit) + param['country'].get(str(freqFit), ' UNK'))  # fitting結果のプロット
         if type(freqFit) == tuple:
             k = 0  # ラベルの添え字
             for i in freqFit:
@@ -130,7 +130,14 @@ def fitting(dataname, plot_switch=True):
             SNDict[str(freqFit) + 'kHz'] = y - noisef  # 周波数をキー、SN比を値にしてfittngDictへ入れる
             powerDict[str(freqFit) + 'kHz'] = y  # 周波数をキー、SN比を値にしてfittngDictへ入れる
 
-    def fitcondition(freqFit, SNratio, fittingFreqFit, waveWidth, condSN=5, condwavewidthmin=1, condwavewidthmax=100, condmu=0.05):
+    def fitcondition(freqFit,
+                     SNratio,
+                     fittingFreqFit,
+                     waveWidth,
+                     condSN=5,
+                     condwavewidthmin=1,
+                     condwavewidthmax=100,
+                     condmu=0.05):
         return (SNratio > condSN
                 and condwavewidthmin < waveWidth < condwavewidthmax
                 and abs(freqFit - fittingFreqFit) < condmu)  # 幅が0~100の間に入るとき(正常なガウシアン)
@@ -138,40 +145,54 @@ def fitting(dataname, plot_switch=True):
 
     plt.figure(figsize=(6, 6))
     SNDict, powerDict = {}, {}
+    # __WAVE FIT__________________________
     for freqFit in tqdm(param['freqWave']):  # freqWaveの周波数をfit
         fitrange = 0.2
-        dataxRange = datax[freq2pnt(freqFit - fitrange)
-                                    :freq2pnt(freqFit + fitrange)]  # ±200Hzをフィッティングする
-        datayRange = datay[freq2pnt(freqFit - fitrange):freq2pnt(freqFit + fitrange)]
-        fitresult = [fity, SNratio, fittingFreqFit, waveWidth] = list(
-            gaussfit(dataxRange, datayRange, freqFit))
+        datax_range = listdic.around(datax, freqFit, fitrange, freq2pnt)  # ±200Hzをフィッティングする
+        datay_range = listdic.around(datay, freqFit, fitrange, freq2pnt)  # ±200Hzをフィッティングする
+        # datax_range = datax[freq2pnt(freqFit - fitrange):freq2pnt(freqFit + fitrange)]  # ±200Hzをフィッティングする
+        # datax_range = datax[freq2pnt(freqFit - fitrange):freq2pnt(freqFit +
+        # fitrange)]  # ±200Hzをフィッティングする
+        # datay_range = datay[freq2pnt(freqFit - fitrange):freq2pnt(freqFit + fitrange)]
+        [fity, SNratio, fittingFreqFit, waveWidth] = list(
+            gaussfit(datax_range, datay_range, freqFit))
         # if (SNratio>5
         #       and 1<waveWidth<100    #幅が0~100の間に入るとき(正常なガウシアン)
         #       and abs(freqFit-fittingFreqFit)<0.05) :   #フィッティングされた周波数とフィッティングするはずの周波数のずれが50Hz以内
         if fitcondition(freqFit, SNratio, fittingFreqFit, waveWidth):
             # plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
             SNextract(fittingFreqFit, SNratio + noisef)
+
+    # __CARRIER FIT__________________________
     for freqFit in param['freqCarrier']:  # freqCarrierの周波数のシグナルを取得
-        datadict = listdic.twoList2dic(pnt2freq(datax[freq2pnt(
-            freqFit - 0.01):freq2pnt(freqFit + 0.01)]), datay[freq2pnt(freqFit - 0.01):freq2pnt(freqFit + 0.01)])
-        # print('datad',datadict)
+        datax_range = listdic.around(datax, freqFit, 0.01, freq2pnt)  # ±10Hzを抜き出し
+        datay_range = listdic.around(datay, freqFit, 0.01, freq2pnt)  # ±10Hzを抜き出し
+        datadict = dict(zip(pnt2freq(datax_range), datay_range))
+        # 2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする
         xpower = listdic.search_maxy_returnx(datadict)
         power = datadict[xpower]
 
         # poww=datay[freq2pnt(freqFit)]
         if power - noisef > 10:  # SN比が10以上ならCarrierが出ているとみなす
             SNextract(xpower, power)
-            # print('Plot!', xpower,power)
         # if poww-noisef>10:    #SN比が10以上ならCarrierが出ているとみなす
         #   SNextract(freqFit,poww)
+
+    # __M FIT__________________________
     for freqFit in chunked(param['freqM'], 2):  # freqMの周波数のシグナルを取得
-        datadict0 = listdic.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[0] - 0.02):freq2pnt(
-            freqFit[0] + 0.02)]), datay[freq2pnt(freqFit[0] - 0.02):freq2pnt(freqFit[0] + 0.02)])
+                                                # chunkedでリストを2個ずつにまとめる
+        zipx0 = pnt2freq(listdic.around(datax, freqFit[0], 0.02, freq2pnt))
+        zipy0 = listdic.around(datay, freqFit[0], 0.02, freq2pnt)
+        datadict0 = dict(zip(zipx0, zipy0))
+        # datadict0 = dict(zip(pnt2freq(datax[freq2pnt(freqFit[0] - 0.02):freq2pnt(freqFit[0] + 0.02)]), datay[freq2pnt(freqFit[0] - 0.02):freq2pnt(freqFit[0] + 0.02)]))
         xpower0 = listdic.search_maxy_returnx(datadict0)
         power0 = datadict0[xpower0]
 
-        datadict1 = listdic.twoList2dic(pnt2freq(datax[freq2pnt(freqFit[1] - 0.02):freq2pnt(
-            freqFit[1] + 0.02)]), datay[freq2pnt(freqFit[1] - 0.02):freq2pnt(freqFit[1] + 0.02)])
+        zipx1 = pnt2freq(listdic.around(datax, freqFit[1], 0.02, freq2pnt))
+        zipy1 = listdic.around(datay, freqFit[1], 0.02, freq2pnt)
+        datadict1 = dict(zip(zipx1, zipy1))
+        # datadict1 = dict(zip(pnt2freq(datax[freq2pnt(freqFit[1] - 0.02):freq2pnt(
+        # freqFit[1] + 0.02)]), datay[freq2pnt(freqFit[1] - 0.02):freq2pnt(freqFit[1] + 0.02)]))
 
         # datadict1をキーと値でタプルにして、要素の1番目(ディクショナリの値)を比較して、min(power0との差が最も小さい)ところのタプルの第0要素を返す
         xpower1 = (min(datadict1.items(), key=lambda x: abs(x[1] - power0))[0])
@@ -179,14 +200,21 @@ def fitting(dataname, plot_switch=True):
 
         avefit = np.mean(freqFit)
         fitrange = 0.2
-        dataxRange = datax[freq2pnt(avefit - fitrange)
-                                    :freq2pnt(avefit + fitrange)]  # ±200Hzをフィッティングする
-        datayRange = datay[freq2pnt(avefit - fitrange):freq2pnt(avefit + fitrange)]
-        fitresult = [fity, SNratio, fittingFreqFit, waveWidth] = list(
-            gaussfit(dataxRange, datayRange, avefit))
+        datax_range = listdic.around(datax, avefit, fitrange, freq2pnt)  # ±200Hzをフィッティングする
+        datay_range = listdic.around(datay, avefit, fitrange, freq2pnt)  # ±200Hzをフィッティングする
+        # datax_range = datax[freq2pnt(avefit - fitrange):freq2pnt(avefit +
+        # fitrange)]  # ±200Hzをフィッティングする
+        # datay_range = datay[freq2pnt(avefit - fitrange):freq2pnt(avefit + fitrange)]
+        [fity, SNratio, fittingFreqFit, waveWidth] = list(
+            gaussfit(datax_range, datay_range, avefit))
         # plt.plot(pnt2freq(datax),fity,'-',lw=1)   #fitting結果のプロット
-        if fitcondition(avefit, SNratio, fittingFreqFit, waveWidth, condwavewidthmin=1, condSN=-5, condmu=0.2) and power0 - noisef > 5 and power1 - noisef > 5:
-
+        if fitcondition(avefit,
+                        SNratio,
+                        fittingFreqFit,
+                        waveWidth,
+                        condwavewidthmin=1,
+                        condSN=-5,
+                        condmu=0.2) and power0 - noisef > 5 and power1 - noisef > 5:
             SNextract(xpower0, power0)
             SNextract(xpower1, power1)
 
