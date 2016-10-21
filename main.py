@@ -248,7 +248,7 @@ try:
     # __FITTING__________________________
     plot = True if input('プロットしますか？ y/n >') == 'y' else False
     # for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
-    inp_date = input('最初の日付, 最後の日付>>').split(',')  # カンマ区切りでリストの要素として拾う
+    inp_date = input('最初の日付, 最後の日付(カンマ区切りでyymmdd形式) >> ').split(',')  # カンマ区切りでリストの要素として拾う
     inp_date_nospace = [i.strip() for i in inp_date]  # リスト各要素の両端の空白を削除
     for da in tqdm(pd.date_range(*inp_date_nospace)):
         randate = da.strftime('%Y%m%d')
