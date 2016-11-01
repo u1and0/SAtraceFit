@@ -92,8 +92,8 @@ def loaddata(dataname):
 	return r
 
 
-
-
+from numba import jit, f8
+@jit(local=dict(datax=list(f8), datay=list(f8), ))
 def fitting(dataname,plot_switch=True):
 	(datax,datay)=loaddata(dataname)
 
