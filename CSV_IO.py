@@ -136,3 +136,11 @@ def editCSV(readcsv, writecsv, appendDict, freqWave):
 # __WRITE TO CSV__________________________
     writing = t.datatocsv(dictdict)
     writeCSV(writecsv, freqWave, writing)  # 書き込み
+
+
+if __name__ == '__main__':
+    dir='./test/'
+    rc='P2016_04.csv'
+    wc='P2016_0test.csv'
+    fl=['22.2kHz', '23.4kHz', '24.0kHz', '24.5kHz', '24.8kHz', '25.2kHz', '23.0kHz', '24.1kHz', '25.0kHz', '25.1kHz', '25.5kHz']
+    editCSV(rc, wc, {'DateTime':'hoge', '22.2kHz': 'hogehoge'}, fl)

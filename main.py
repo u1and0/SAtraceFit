@@ -183,7 +183,7 @@ import glob
 from tqdm import tqdm
 import simplejson
 # __USER MODULES__________________________
-import fitting as f
+import fitting
 import CSV_IO as c
 
 # __PARAMETER DEFINITION__________________________
@@ -193,10 +193,10 @@ with open('parameter.json', 'r') as pa:
 
 # __CSV NAME__________________________
 '''
-# コンソールからファイル名を指定
-# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-# '''
+コンソールからファイル名を指定
+新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+'''
 oldinp = input('データ引き継ぎ元: 拡張子抜きのファイル名 >> ')
 oldinpS, oldinpP = 'SN' + oldinp, 'P' + oldinp
 
@@ -211,6 +211,7 @@ newinpS, newinpP = 'SN' + newinp, 'P' + newinp
 
 # 入力したファイルベースネームをフルパスと拡張しつけて返す
 inplist = [oldinpS, oldinpP, newinpS, newinpP]
+# inplistの各要素を引数に、'.csv'の文字を足してcsvlistに返す
 csvlist = [oldcsvS,
            oldcsvP,
            newcsvS,
@@ -218,10 +219,21 @@ csvlist = [oldcsvS,
     lambda inplist_element: param['out_csv'] + inplist_element + '.csv', inplist)
 
 # ____________________________
-print('SN value :\n\tRead from %s\n\tWrite to %s' %
+print('SN value :\n\t読込元 %s\n\t書込先: %s' %
       (oldcsvS, newcsvS))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
-print('Power value :\n\tRead from %s\n\tWrite to %s' %
+print('Power value :\n\t読込元 %s\n\t書込先: %s' %
       (oldcsvP, newcsvP))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+
+
+# __fitting parameterの読み込み、結果の初期化__________________________
+freqFreq = np.r_[param['freqWave'], param['freqCarrier']]   # np.r_クラスで行列の横向き結合
+freqFreq = np.unique(freqFreq)  # np.unique重複する値削除
+freqFreq.sort()  # 周波数のソート
+# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
+print('fitting対象の周波数: %s' % freqFreq)
+
+SNResult, powerResult = {}, {}  # fitting結果の初期化
+# freqFreq=param['freqWave']+param['freqCarrier']
 
 
 # __MAKE CSV__________________________
@@ -230,16 +242,6 @@ oldcsvSを読み込んでnewcsvSに入れる
 SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
 freqFreqで見出し行を作る
 '''
-SNResult, powerResult = {}, {}
-# freqFreq=param['freqWave']+param['freqCarrier']
-
-freqFreq = np.r_[param['freqWave'], param['freqCarrier']]   # np.r_クラスで行列の横向き結合
-freqFreq = np.unique(freqFreq)
-freqFreq.sort()
-# np.unique重複する値削除
-# 周波数のソート
-# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
-
 c.editCSV(oldcsvS, newcsvS, SNResult, freqFreq)
 c.editCSV(oldcsvP, newcsvP, powerResult, freqFreq)
 
@@ -263,7 +265,7 @@ ___________________________________
             if not len(data):
                 continue  # dataが空なら次のループ
 
-            fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
+            fitRtn = fitting.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
 
             SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
             powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
