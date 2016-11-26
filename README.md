@@ -152,7 +152,7 @@ none
 
 
 
-## confidential.py ver1.0
+## parameter.py ver1.0
 
 __INTRODUCTION__
 データの入ったrootディレクトリと注目する周波数を指定するpy
@@ -175,6 +175,21 @@ first commit
 __PLAN__
 none
 
+
+```
+import numpy as np
+def param():
+	return {
+	'in':'C:/directory/hoge/',
+	'out':'C:/directory/hoge/',
+	'out_png':'C:/directory/hoge/',
+	'out_csv':'C:/directory/hoge/',
+	'freqWave': np.around(np.arange(start, stop, step),1),
+	'freqCarrier':[val1, val2, val3, ...],
+	'freqM':[(val1,val2)],
+	'country':{values:' str'},   # ココにないやつはUNK(UNKnown)と表示される
+	}
+```
 
 
 
@@ -557,55 +572,44 @@ none
 
 
 
-## fittingDiv.py ver0.3.8
-
-__UPDATE0.3.8__
-datayとyyを比較することでS/N比が大体どれくらいか見積もることでfittingにかけるべきか否かわかる
->fittingかけなくてすめば時間短縮
->何故かfittingされちゃう1.0e+8みたいなデータもなくなる
+## fitting.py
 
 __INTRODUCTION__
-タイムスタンプを引数にフィッティング結果を返すpy
+タイムスタンプと周波数を引数にフィッティング結果を返すpy
 
 __ACTION__
-引数:
+引数:filebasename:タイムスタンプのこと。例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
+	freqWave:帯域を持つ周波数のリスト
+	freqCarrier:帯域を持たない周波数のリスト
+戻り値:タプル形式
+	1. SNのディクショナリ in ディクショナリ形式のフィッティング結果{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}}
+	2. Powerのディクショナリ in ディクショナリ形式のフィッティング結果{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}}
 
-+ rawdata_directory
->生データ置き場
->rootディレクトリ+日付(yymmdd形式)
->>SAtraceGraphで作成されたディレクトリ
-+ filebasename
-> 拡張子を除いたファイル名
-> SAtraceによってタイムスタンプとされている
-> 例えば'2015年01月01日12時35分06秒'を表す'20150101_123506'
-+ freqWave
-> フィッティングする周波数
 
-戻り値:フィッティング結果(ディクショナリ in ディクショナリ形式{タイムスタンプ:{周波数1:出力1,周波数2:出力2,...}})
-
-1. データをテキスト形式で読み込みdataにリストとして読み込む
-1. 下からの四分位境界値(小さい順に並べて全体の1/4番目にある値)をノイズフロアと定義する
-2. freqWaveで指定した周波数の分だけfittingを行う
+1. データをテキスト形式で読み込みdataにリストとして読み込み
+2. freqで指定した周波数の分だけfittingを行い
 3. データとフィッティング曲線をプロットする
-> 内部処理なので表示はしない
-4. ガウス曲線に従ってfittingする
+4. waveに格納された周波数をfittingする
+5. waveとしてみるか判断(OKだったらプロット)>>>indicatecondition
+6. carrierに格納された周波数をfittingする
+7. carrierとしてみるか判断(OKだったらプロット)
+8. ノイズフロアをプロット
+9. 測定データのプロット
+10. pngを吐き出す(オプションでプロットして表示)
+11. ディクショナリ in ディクショナリを返す
+
+__TODO__
+plotshowing()
+plotするかしないか
+showするかsavepngするか
+条件分岐
+dictionary使う？inputでmain.py空の命令に従う
 
 
 
 
 
-```math
-\frac{\pi}{2}
-```
 
-
-5. 表示するかしないか判断
-6. プロットして表示(オプション)
-7. ログを吐き出す
-8. ディクショナリ in ディクショナリを返す
-
-__PLAN__
-None
 
 
 

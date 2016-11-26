@@ -17,6 +17,7 @@ param*
 /old/
 /doc/
 /log/
+/test/
 /__pycache__/
 UserManual.*
 *.sublime-project

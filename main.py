@@ -69,7 +69,34 @@ __ACTION__
     7. フィッティング日時表示
     8. フィッティング結果表示(5の日付指定が最後に来るまで繰り返し)
 
-
+__UPDATE7.3.0__
+| * e191401 (HEAD -> release/v7.2.0) fitting call as fitting (not as f)
+| * 28561c7 @main.py : input message modify
+| * 40c27aa PEP8 CSV_IO.py csv_dict_transfer.py globname.py
+| * 367eefb fitting.py comment
+| * 7d415f2 fitting.py: PEP8 modify, listdic.py: around function using func argument
+| * f23663f remove logprint, use tab-->space
+| * 2206988 fitting.py chuncked
+| * f11a989 readme
+|/
+* e0b5e2d readme
+* e564bf7 main v7.2.0
+* 18b69ba csv out each
+* 0ab16fc 逐一書き込む方式at for state
+*   6e3361a Merge remote-tracking branch 'origin/develop' into develop
+|\
+| * 6759545 datelist.date_range_input() shorter modify
+* | e37dead import tqdm
+|/
+* 5e0c61d out_csv, put_png directory added, fitting README modity
+*   238246d Merge branch 'feature/allrange' into develop
+|\
+| * 2598004 unused 'outPath', freqM label commentouted
+| * c47aad0 plot close, get method
+| * 126d119 ラベル条件変更 type not float==> type ==tuple
+| * 763cd66 return integer
+| * 6c4d975 pep8 at globname
+| * cdc2633 input方式plot
 __UPDATE7.2.0__
 * 逐一読み込む方式再度廃止(コメントアウトで残してある)
 * 1ヵ月ごとに読み込むのがやはり遅い
@@ -78,6 +105,13 @@ __UPDATE7.2.0__
     * してから保存する(pandas.DataFrame.to_csv())ことでcsvにするのが
     * SAtraceView save_table.concat_table()の仕事
 
+
+__UPDATE7.1.0__
+データの引継ぎ機能復活
+old, newのファイル名を入力する
+ファイル名の頭につける文字列は
+    'SN': SN比
+    'P': power
 
 __UPDATE7.1.0__
 データの引継ぎ機能復活
@@ -183,7 +217,7 @@ import glob
 from tqdm import tqdm
 import simplejson
 # __USER MODULES__________________________
-import fitting as f
+import fitting
 import CSV_IO as c
 
 # __PARAMETER DEFINITION__________________________
@@ -193,10 +227,10 @@ with open('parameter.json', 'r') as pa:
 
 # __CSV NAME__________________________
 '''
-# コンソールからファイル名を指定
-# 新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
-# 新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
-# '''
+コンソールからファイル名を指定
+新規にファイルを作成するときは古いファイルと新しいファイルの名前を同一にする
+新しいファイルの入力を省けば自動的に古い名前と同一にしてくれる
+'''
 oldinp = input('データ引き継ぎ元: 拡張子抜きのファイル名 >> ')
 oldinpS, oldinpP = 'SN' + oldinp, 'P' + oldinp
 
@@ -211,6 +245,7 @@ newinpS, newinpP = 'SN' + newinp, 'P' + newinp
 
 # 入力したファイルベースネームをフルパスと拡張しつけて返す
 inplist = [oldinpS, oldinpP, newinpS, newinpP]
+# inplistの各要素を引数に、'.csv'の文字を足してcsvlistに返す
 csvlist = [oldcsvS,
            oldcsvP,
            newcsvS,
@@ -218,10 +253,21 @@ csvlist = [oldcsvS,
     lambda inplist_element: param['out_csv'] + inplist_element + '.csv', inplist)
 
 # ____________________________
-print('SN value :\n\tRead from %s\n\tWrite to %s' %
+print('SN value :\n\t読込元 %s\n\t書込先: %s' %
       (oldcsvS, newcsvS))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
-print('Power value :\n\tRead from %s\n\tWrite to %s' %
+print('Power value :\n\t読込元 %s\n\t書込先: %s' %
       (oldcsvP, newcsvP))  # 読み込み元ファイル名(フルパス)、書き込み先ファイル名(フルパス)表示
+
+
+# __fitting parameterの読み込み、結果の初期化__________________________
+freqFreq = np.r_[param['freqWave'], param['freqCarrier']]   # np.r_クラスで行列の横向き結合
+freqFreq = np.unique(freqFreq)  # np.unique重複する値削除
+freqFreq.sort()  # 周波数のソート
+# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
+print('fitting対象の周波数: %s' % freqFreq)
+
+SNResult, powerResult = {}, {}  # fitting結果の初期化
+# freqFreq=param['freqWave']+param['freqCarrier']
 
 
 # __MAKE CSV__________________________
@@ -230,16 +276,6 @@ oldcsvSを読み込んでnewcsvSに入れる
 SNResultは空なのでoldcsvSがnewcsvSにコピーされるだけ
 freqFreqで見出し行を作る
 '''
-SNResult, powerResult = {}, {}
-# freqFreq=param['freqWave']+param['freqCarrier']
-
-freqFreq = np.r_[param['freqWave'], param['freqCarrier']]   # np.r_クラスで行列の横向き結合
-freqFreq = np.unique(freqFreq)
-freqFreq.sort()
-# np.unique重複する値削除
-# 周波数のソート
-# np.r_[freqFreq,['%s_0kHz,%s_1kHz'%(i,i) for i in param['freqM']]]   # freqMのラベル作成
-
 c.editCSV(oldcsvS, newcsvS, SNResult, freqFreq)
 c.editCSV(oldcsvP, newcsvP, powerResult, freqFreq)
 
@@ -248,7 +284,7 @@ try:
     # __FITTING__________________________
     plot = True if input('プロットしますか？ y/n >') == 'y' else False
     # for date in dl.date_range_input():  # pd.date_rangeの引数をinput方式にカスタマイズした
-    inp_date = input('最初の日付, 最後の日付>>').split(',')  # カンマ区切りでリストの要素として拾う
+    inp_date = input('最初の日付, 最後の日付(カンマ区切りでyymmdd形式) >> ').split(',')  # カンマ区切りでリストの要素として拾う
     inp_date_nospace = [i.strip() for i in inp_date]  # リスト各要素の両端の空白を削除
     for da in tqdm(pd.date_range(*inp_date_nospace)):
         randate = da.strftime('%Y%m%d')
@@ -263,7 +299,7 @@ ___________________________________
             if not len(data):
                 continue  # dataが空なら次のループ
 
-            fitRtn = f.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
+            fitRtn = fitting.fitting(fitfile, plot_switch=plot)  # fitting.pyへフルパス渡す
 
             SNResult.update(fitRtn[0])  # fittingを行い、結果をSNResultに貯める
             powerResult.update(fitRtn[1])  # fittingを行い、結果をpowerResultに貯める
