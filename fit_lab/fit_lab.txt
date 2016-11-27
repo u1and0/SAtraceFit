@@ -1,0 +1,136 @@
+
+def gauss(x, a, mu, si, noisef=nf):
+    """
+    a: 最大値
+    mu: 位置
+    si: 線幅
+    noisef: 最低値
+    """
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
+
+nf=0.5
+n=1001
+x = np.linspace(0,100,n)
+a, mu, si = 1, 50, 1
+
+g= gauss(x, a, mu, si); g
+
+plt.plot(x, g)
+
+from  scipy.stats import norm
+
+z=norm.pdf(x, loc=50, scale=1)-0.5; z
+
+plt.plot(x,z)
+
+a, mu, si=1, 50, 1
+df=pd.DataFrame({'norm': a*norm.pdf(x, loc=mu, scale=si)+nf,
+                 			'gauss': gauss(x, a, mu, si, nf)})
+df.plot(style=['-', '--'])
+
+%timeit gauss(x, a, mu, si)
+
+%timeit norm.pdf(x, loc=50, scale=1)-0.5
+
+g = gauss(x, a, mu, si)
+gnoise = g + 0.1 * np.random.randn(n)
+
+plt.plot(x, gnoise, '-')
+plt.plot(x, g,'b-' )
+
+from scipy.optimize import curve_fit
+
+(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
+yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+
+_
+
+plt.plot(x, gnoise, 'r-')
+plt.plot(x, yfit, 'b-') 
+
+from  scipy.stats import norm
+
+n=1001
+xx = np.linspace(0,100,n)
+aa, mu, si = 5, 50, 1
+
+def gauss2(x, a, mu, si):
+    return a*norm.pdf(x, loc=mu, scale=si)-noisef
+
+g = gauss2(xx, aa, mu, si)
+gnoise = g + 0.1 * np.random.randn(n)
+
+plt.plot(xx, gnoise, '.-')
+plt.plot(xx, g,'r-' )
+
+from scipy.optimize import curve_fit
+(aa_, mu_, si_), _ = curve_fit(gauss2, xx, gnoise, (aa, mu, si))
+yfit = gauss2(xx,aa_, mu_, si_)
+
+plt.plot(xx, gnoise, '.-')
+plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitであることに注意
+
+r=np.random
+
+g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
+plt.plot(x, g)
+
+%%timeit
+df = pd.DataFrame([], index=range(1000))
+for i in np.arange(min(x), max(x), 10):
+    g = gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
+    df[i] = pd.DataFrame(g)
+
+# %%timeit
+garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
+for i in np.arange(min(x), max(x), 10)]).T
+df = pd.DataFrame(garray)
+
+df.plot()
+
+noisedf =df +0.05 * r.randn(*df.shape)
+noisedf.plot()
+
+sumdf = noisedf.sum(axis=1)
+sumdf.plot()
+
+sumdf
+
+param = (a, mu, si) = 5, 300, 3
+param
+
+def choice(array, center, span):
+    """特定の範囲を抜き出す
+    引数: 
+        array: 抜き出し対象のarrayっぽいの(arraylike)
+        center: 抜き出し中央(float)
+        span: 抜き出しスパン(float)
+    戻り値:
+        rarray:
+    """
+    x1 = int(center - span / 2)
+    x2 = int(center + span / 2)
+    return array[x1:x2]
+
+ch = (300, 300)  # 中央値300でスパン300で取り出したい
+fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
+plt.plot(fitx, fity)
+
+popt, pcov = curve_fit(gauss, fitx, fity, p0=param)
+print('a, mu, si = ', popt)
+
+gg = gauss(sumdf.index,*popt)
+
+sumdf.plot()
+plt.plot(fitx, choice(gg, *ch), 'k-')
+
+fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
+
+sumdf.apply(fit)
+
+
+
+Bfit = noisedf.T
+Bfit.index=pd.date_range('20161111', freq='H', periods=10)
+Bfit
