@@ -550,7 +550,7 @@ plt.plot(fitx, fity)
 
 
 ```
-popt, pcov = curve_fit(gauss, fitx, fity, p0=param)
+popt, _pcov = curve_fit(gauss, fitx, fity, p0=param)
 print('a, mu, si = ', popt)
 ```
 
@@ -583,9 +583,38 @@ plt.plot(fitx, choice(gg, *ch), 'k-')
 
 fittingの結果を用いてガウシアン描いてみる。
 
-___
-
 ## 連続的にfitting
+
+
+```
+fitting_list = (300, 500, 600, 700)  # 目測どのあたりに波があるか
+fitdf=pd.DataFrame(np.empty(1000))
+for i in fitting_list:
+    param = (a, mu, si) = 5, i, 3
+    ch = (i, 300)
+    fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
+    popt, _pcov = curve_fit(gauss, fitx, fity, p0=param, maxfev = 10000)
+    gg = gauss(sumdf.index,*popt)
+    fitdf[i] = pd.DataFrame(choice(gg, *ch), index=fitx)
+del fitdf[0]
+```
+
+
+```
+fitdf['sumdf'] = sumdf
+fitdf.plot(style = ['-', '-', '-', '-', '.'])
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x148d6b39518>
+
+
+
+
+![png](fit_lab_files/fit_lab_68_1.png)
+
 
 
 ```

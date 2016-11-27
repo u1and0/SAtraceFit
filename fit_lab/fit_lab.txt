@@ -117,13 +117,27 @@ ch = (300, 300)  # 中央値300でスパン300で取り出したい
 fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
 plt.plot(fitx, fity)
 
-popt, pcov = curve_fit(gauss, fitx, fity, p0=param)
+popt, _pcov = curve_fit(gauss, fitx, fity, p0=param)
 print('a, mu, si = ', popt)
 
 gg = gauss(sumdf.index,*popt)
 
 sumdf.plot()
 plt.plot(fitx, choice(gg, *ch), 'k-')
+
+fitting_list = (300, 500, 600, 700)  # 目測どのあたりに波があるか
+fitdf=pd.DataFrame(np.empty(1000))
+for i in fitting_list:
+    param = (a, mu, si) = 5, i, 3
+    ch = (i, 300)
+    fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
+    popt, _pcov = curve_fit(gauss, fitx, fity, p0=param, maxfev = 10000)
+    gg = gauss(sumdf.index,*popt)
+    fitdf[i] = pd.DataFrame(choice(gg, *ch), index=fitx)
+del fitdf[0]
+
+fitdf['sumdf'] = sumdf
+fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
 
