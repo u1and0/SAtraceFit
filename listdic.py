@@ -22,19 +22,33 @@ aroundはfittingモジュールのdataxを最初からpnt2freqかけておかな
 '''
 
 
+def around(li, c, r, func=None):
+    '''リストの一部を抜き出す'''
+    if func:
+        return li[func(c - r):func(c + r)]
+    else:
+        return li[c - r:c + r]
 
-def around(li,c,r):    #listx,yはdatax,yだから0,1,2,3...と-89,-90,-87,...
-	'''リストの一部を抜き出す'''
-	return li[c-r:c+r]
+
+'''TEST around
 
 
+def f(x):
+    return x**2
 
-def twoList2dic(keyList,valList):
-	'''2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする'''
-	return dict(zip(keyList, valList))
-		# ゴリゴリ書くとこんな感じ
-		# for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
-		# 	datadict1[pnt2freq(datax[i])]=datay[i]
+
+ll = [i for i in range(100)]
+print(around_map(ll, 5, 2, f))  # means [i for i in range(100)][9:49]
+print(around(ll, 5, 2))  # means [i for i in range(100)][3:7]
+'''
+
+
+def twoList2dic(keyList, valList):
+    '''2つのリスト(それぞれの要素同士は対応しているはず)をディクショナリ形式にする'''
+    return dict(zip(keyList, valList))
+    # ゴリゴリ書くとこんな感じ
+    # for i in datax[freq2pnt(freqFit[1]-0.02):freq2pnt(freqFit[1]+0.02)]:    #iはdataxの限られたポイント数
+    #   datadict1[pnt2freq(datax[i])]=datay[i]
 
 
 '''
@@ -50,6 +64,7 @@ print(twoList2dic(around(a,1,1),around(b,1,1)))
 # >>{'b': 8, 'a': 9}
 '''
 
+
 def search_maxy_returnx(dic):
-	'''ディクショナリの値の最大値を探し、そのときのキーを返す'''
-	return max(dic.items(), key=lambda x:x[1])[0]
+    '''ディクショナリの値の最大値を探し、そのときのキーを返す'''
+    return max(dic.items(), key=lambda x: x[1])[0]
