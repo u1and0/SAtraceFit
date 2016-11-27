@@ -3,9 +3,9 @@
 
 # # 自作ガウシアン
 
-# In[9]:
+# In[85]:
 
-def gauss(x, a, mu, si):
+def gauss(x, a, mu, si, noisef):
     """
     a: 最大値
     mu: 位置
@@ -15,32 +15,32 @@ def gauss(x, a, mu, si):
     return aa * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
 
 
-# In[13]:
+# In[87]:
 
-noisef=0.5
+nf=0.5
 n=1001
 x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 
 
-# In[21]:
+# In[88]:
 
-g= gauss(x, a, mu, si); g
+g= gauss(x, a, mu, si, nf); g
 
 
-# In[22]:
+# In[89]:
 
 plt.plot(x, g)
 
 
 # ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
 
-# In[15]:
+# In[90]:
 
 from  scipy.stats import norm
 
 
-# In[23]:
+# In[91]:
 
 z=norm.pdf(x, loc=50, scale=1)-0.5; z
 
@@ -77,9 +77,9 @@ get_ipython().magic('timeit norm.pdf(x, loc=50, scale=1)-0.5')
 # 
 # ということで自作のガウシアンを使っていきます。
 
-# In[50]:
+# In[92]:
 
-g = gauss(x, a, mu, si)
+g = gauss(x, a, mu, si, nf)
 gnoise = g + 0.1 * np.random.randn(n)
 
 
@@ -106,15 +106,32 @@ from scipy.optimize import curve_fit
 
 # 次にフィッティングパラメータを定める。
 
-# In[60]:
+# In[75]:
 
-(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, (aa, mu, si))
-yfit = gauss(x, a_, mu_, si_)
+(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
+yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
 
 
-# In[58]:
+# In[76]:
 
-plt.plot(xx, gnoise, '-')
+print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+
+
+# In[77]:
+
+_
+
+
+# curve_fitの戻り値アンダーバーは共分散？
+# 
+#     pcov : 2d array
+#     The estimated covariance of popt. The diagonals provide the variance
+#     of the parameter estimate. To compute one standard deviation errors
+#     on the parameters use ``perr = np.sqrt(np.diag(pcov))``.
+
+# In[78]:
+
+plt.plot(xx, gnoise, 'r-')
 plt.plot(xx, yfit, 'b-') 
 
 
@@ -123,11 +140,6 @@ plt.plot(xx, yfit, 'b-')
 # 同じグラフに見えるということはフィッティングできたということ。
 # 
 # ノイズgnoiseをカーブフィットの引数に、aa_ ,
-
-# In[41]:
-
-curve_fit(gauss, xx, g, )
-
 
 # # scipy.stats.normを使った場合
 
@@ -187,10 +199,25 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 # ランダムデータフレームの作成
 
-# In[107]:
+# In[ ]:
 
-r=np.random.rand
-df=pd.DataFrame([gauss(xx, r(), 10*_, 10*r()) + 0.1 * np.random.randn(n) for _ in range(10)]).T
+
+
+
+# In[ ]:
+
+
+
+
+# In[93]:
+
+gauss(x, r.rand(), 10*_, 10*r(), nf*r())# + 0.1 * r.randn(n)# for _ in range(10)  # 10このランダムガウシアン発生
+
+
+# In[79]:
+
+r=np.random
+df=pd.DataFrame([gauss(x, r.rand(), 10*_, 10*r()) + 0.1 * r.randn(n) for _ in range(10)]).T
 df.plot()
 
 

@@ -2,27 +2,27 @@
 # 自作ガウシアン
 
 
-```python
-def gauss(x, a, mu, si):
+```
+def gauss(x, a, mu, si, noisef=nf):
     """
     a: 最大値
     mu: 位置
     si: 線幅
     noisef: 最低値
     """
-    return aa * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
 ```
 
 
-```python
-noisef=0.5
+```
+nf=0.5
 n=1001
 x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 ```
 
 
-```python
+```
 g= gauss(x, a, mu, si); g
 ```
 
@@ -34,14 +34,14 @@ g= gauss(x, a, mu, si); g
 
 
 
-```python
+```
 plt.plot(x, g)
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x1771acb7898>]
+    [<matplotlib.lines.Line2D at 0x148c87bcba8>]
 
 
 
@@ -52,12 +52,12 @@ plt.plot(x, g)
 ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
 
 
-```python
+```
 from  scipy.stats import norm
 ```
 
 
-```python
+```
 z=norm.pdf(x, loc=50, scale=1)-0.5; z
 ```
 
@@ -69,14 +69,14 @@ z=norm.pdf(x, loc=50, scale=1)-0.5; z
 
 
 
-```python
+```
 plt.plot(x,z)
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x1771ad63fd0>]
+    [<matplotlib.lines.Line2D at 0x148c88209b0>]
 
 
 
@@ -85,17 +85,17 @@ plt.plot(x,z)
 
 
 
-```python
+```
 a, mu, si=1, 50, 1
-df=pd.DataFrame({'norm': a*norm.pdf(x, loc=mu, scale=si)+noisef,
-                 			'gauss': gauss(xx, a, mu, si)})
+df=pd.DataFrame({'norm': a*norm.pdf(x, loc=mu, scale=si)+nf,
+                 			'gauss': gauss(x, a, mu, si, nf)})
 df.plot(style=['-', '--'])
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1771af913c8>
+    <matplotlib.axes._subplots.AxesSubplot at 0x148c87f5710>
 
 
 
@@ -107,19 +107,21 @@ df.plot(style=['-', '--'])
 normでも自作gaussでも中でnp使っているんで実行速度あんま変わらないだろうとテスト
 
 
-```python
+```
 %timeit gauss(x, a, mu, si)
 ```
 
-    10000 loops, best of 3: 61.2 µs per loop
+    The slowest run took 5.79 times longer than the fastest. This could mean that an intermediate result is being cached.
+    10000 loops, best of 3: 59.8 µs per loop
     
 
 
-```python
+```
 %timeit norm.pdf(x, loc=50, scale=1)-0.5
 ```
 
-    1000 loops, best of 3: 208 µs per loop
+    The slowest run took 5.26 times longer than the fastest. This could mean that an intermediate result is being cached.
+    1000 loops, best of 3: 218 µs per loop
     
 
 自作ガウスのほうが早い…！
@@ -129,7 +131,7 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
 ということで自作のガウシアンを使っていきます。
 
 
-```python
+```
 g = gauss(x, a, mu, si)
 gnoise = g + 0.1 * np.random.randn(n)
 ```
@@ -137,7 +139,7 @@ gnoise = g + 0.1 * np.random.randn(n)
 ノイズを発生させる
 
 
-```python
+```
 plt.plot(x, gnoise, '-')
 plt.plot(x, g,'b-' )
 ```
@@ -145,7 +147,7 @@ plt.plot(x, g,'b-' )
 
 
 
-    [<matplotlib.lines.Line2D at 0x1771d604a90>]
+    [<matplotlib.lines.Line2D at 0x148c883ad68>]
 
 
 
@@ -162,92 +164,96 @@ gからgnoiseを導き出したのだけれども、ここで急にgを未知の
 scipy.optimizeからcurve_fitをインポートしてくる。
 
 
-```python
+```
 from scipy.optimize import curve_fit
 ```
 
-次にフィッティングパラメータを定める。
+<div class="mark">
+次にフィッティングパラメータを定める。</div><i class="fa fa-lightbulb-o "></i>
 
 
-```python
-(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, (aa, mu, si))
-yfit = gauss(x, a_, mu_, si_)
+```
+(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
+yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 ```
 
-    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
-      category=OptimizeWarning)
+    元パラメータ:(1, 50, 1)
+    フィッティングで求めたパラメータ: (0.98497122782178148, 49.973664385975219, 0.97612666304535545)
     
 
 
-```python
-plt.plot(xx, gnoise, '-')
-plt.plot(xx, yfit, 'b-') 
+```
+_
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x1771d6c0128>]
+    array([[  8.87235438e-04,   4.49809686e-10,  -5.86253148e-04],
+           [  4.49809686e-10,   1.16212476e-03,  -4.46876918e-10],
+           [ -5.86253148e-04,  -4.46876918e-10,   1.16212476e-03]])
+
+
+
+curve_fitの戻り値アンダーバーは共分散？
+
+    pcov : 2d array
+    The estimated covariance of popt. The diagonals provide the variance
+    of the parameter estimate. To compute one standard deviation errors
+    on the parameters use ``perr = np.sqrt(np.diag(pcov))``.
+
+
+```
+plt.plot(x, gnoise, 'r-')
+plt.plot(x, yfit, 'b-') 
+```
 
 
 
 
-![png](fit_lab_files/fit_lab_22_1.png)
+    [<matplotlib.lines.Line2D at 0x148c8933c50>]
+
+
+
+
+![png](fit_lab_files/fit_lab_24_1.png)
 
 
 さっきと同じグラフに見えるが、描いているのはgではなくyfitであることに注意
 
 同じグラフに見えるということはフィッティングできたということ。
 
-ノイズgnoiseをカーブフィットの引数に、aa_ ,
-
-
-```python
-curve_fit(gauss, xx, g, )
-```
-
-
-    ---------------------------------------------------------------------------
-
-    NameError                                 Traceback (most recent call last)
-
-    <ipython-input-41-7effad868376> in <module>()
-    ----> 1 curve_fit(gauss, xx, g, )
-    
-
-    NameError: name 'curve_fit' is not defined
-
-
 # scipy.stats.normを使った場合
 
 ## ガウシアンに沿ってノイズを作る
 
 
-```python
+```
 from  scipy.stats import norm
 ```
 
 
-```python
+```
 n=1001
 xx = np.linspace(0,100,n)
 aa, mu, si = 5, 50, 1
 ```
 
 
-```python
+```
 def gauss2(x, a, mu, si):
     return a*norm.pdf(x, loc=mu, scale=si)-noisef
 ```
 
 
-```python
+```
 g = gauss2(xx, aa, mu, si)
 gnoise = g + 0.1 * np.random.randn(n)
 ```
 
 
-```python
+```
 plt.plot(xx, gnoise, '.-')
 plt.plot(xx, g,'r-' )
 ```
@@ -260,7 +266,7 @@ plt.plot(xx, g,'r-' )
 
 
 
-![png](fit_lab_files/fit_lab_31_1.png)
+![png](fit_lab_files/fit_lab_32_1.png)
 
 
 ## カーブフィッティングをかけて、ノイズをフィッティングする
@@ -269,14 +275,14 @@ gからgnoiseを導き出したのだけれども、ここで急にgを未知の
 今あなたはgnoiseだけを知っていて、gのような関数を得たいとき、どうするか。
 
 
-```python
+```
 from scipy.optimize import curve_fit
 (aa_, mu_, si_), _ = curve_fit(gauss2, xx, gnoise, (aa, mu, si))
 yfit = gauss2(xx,aa_, mu_, si_)
 ```
 
 
-```python
+```
 plt.plot(xx, gnoise, '.-')
 plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitであることに注意
 ```
@@ -289,36 +295,353 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 
 
-![png](fit_lab_files/fit_lab_34_1.png)
+![png](fit_lab_files/fit_lab_35_1.png)
 
 
 ちゃんとフィッティングできた。
 
 # 自作ガウスをノイズのあるデータフレームにcarve_fitをapply
 
-ランダムデータフレームの作成
+## ランダムデータフレームの作成
 
 
-```python
-r=np.random.rand
-df=pd.DataFrame([gauss(xx, r(), 10*_, 10*r()) + 0.1 * np.random.randn(n) for _ in range(10)]).T
+```
+r=np.random
+```
+
+いっぱい使うから乱数生成をrに縮めちゃう
+
+
+```
+g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
+plt.plot(x, g)
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x148cf05d048>]
+
+
+
+
+![png](fit_lab_files/fit_lab_41_1.png)
+
+
+ランダムな値を使って発生させたガウシアン
+
+
+```
+%%timeit
+df = pd.DataFrame([], index=range(1000))
+for i in np.arange(min(x), max(x), 10):
+    g = gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
+    df[i] = pd.DataFrame(g)
+```
+
+    100 loops, best of 3: 9.79 ms per loop
+    
+
+まず思いつくforループ
+
+
+```
+# %%timeit
+garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
+for i in np.arange(min(x), max(x), 10)]).T
+df = pd.DataFrame(garray)
+```
+
+    1000 loops, best of 3: 903 µs per loop
+    
+
+より高速
+
+
+```
 df.plot()
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1ca7edf1b38>
+    <matplotlib.axes._subplots.AxesSubplot at 0x148cf178ac8>
 
 
 
 
-![png](fit_lab_files/fit_lab_38_1.png)
+![png](fit_lab_files/fit_lab_47_1.png)
+
+
+様々な形のガウシアン。
+
+ノイズフロアは一定にした。
+
+こいつらにノイズを載せる。
+
+## ランダムデータフレームにノイズのせてサンプルデータ作成
+
+
+```
+noisedf =df +0.05 * r.randn(*df.shape)
+noisedf.plot()
+```
 
 
 
-```python
-df
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x148d2a4eba8>
+
+
+
+
+![png](fit_lab_files/fit_lab_50_1.png)
+
+
+5%のノイズをのせた。
+`np.randn(*df.shape)`でデータフレームと同じ行列を持ったランダムデータフレームを生成させている。
+スターを`df.shape`の前につけてタプルを展開して`randn`に渡す。
+
+
+```
+sumdf = noisedf.sum(axis=1)
+sumdf.plot()
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x148d2b4c588>
+
+
+
+
+![png](fit_lab_files/fit_lab_52_1.png)
+
+
+
+```
+sumdf
+```
+
+
+
+
+    0      5.787823
+    1      5.844201
+    2      5.649158
+    3      5.858712
+    4      5.649082
+    5      5.668082
+    6      5.721880
+    7      5.799648
+    8      5.643667
+    9      5.843835
+    10     5.935265
+    11     5.720044
+    12     5.537058
+    13     5.245885
+    14     5.396977
+    15     5.686164
+    16     5.774004
+    17     5.474217
+    18     5.496124
+    19     5.355029
+    20     5.472915
+    21     5.758243
+    22     5.176296
+    23     5.487734
+    24     5.199490
+    25     5.571278
+    26     5.347202
+    27     5.515283
+    28     5.239639
+    29     5.127778
+             ...   
+    970    4.709422
+    971    4.774488
+    972    4.734391
+    973    4.689422
+    974    4.957229
+    975    4.956173
+    976    5.091661
+    977    5.185160
+    978    5.149931
+    979    4.915803
+    980    4.890884
+    981    4.914116
+    982    4.896102
+    983    4.671823
+    984    5.210647
+    985    4.948862
+    986    5.148135
+    987    4.834577
+    988    4.759693
+    989    4.788015
+    990    5.038984
+    991    4.975161
+    992    4.707990
+    993    4.899676
+    994    4.976002
+    995    5.209907
+    996    4.702604
+    997    4.819293
+    998    5.090502
+    999    4.725422
+    dtype: float64
+
+
+
+indexはそのままにカラムをすべて足す。この中でindexいくつの位置にガウシアンが立つかを調べる。
+
+# データフレームに一斉にフィッティングかける
+一番やりたかったこと　ここから。
+
+
+```
+param = (a, mu, si) = 5, 300, 3
+param
+```
+
+
+
+
+    (5, 300, 3)
+
+
+
+パラメータ再設定
+
+## 試しに波を一つ選んでfitting
+
+
+```
+def choice(array, center, span):
+    """特定の範囲を抜き出す
+    引数: 
+        array: 抜き出し対象のarrayっぽいの(arraylike)
+        center: 抜き出し中央(float)
+        span: 抜き出しスパン(float)
+    戻り値:
+        rarray:
+    """
+    x1 = int(center - span / 2)
+    x2 = int(center + span / 2)
+    return array[x1:x2]
+```
+
+
+```
+ch = (300, 300)  # 中央値300でスパン300で取り出したい
+fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
+plt.plot(fitx, fity)
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x148d3f0b908>]
+
+
+
+
+![png](fit_lab_files/fit_lab_60_1.png)
+
+
+
+```
+popt, pcov = curve_fit(gauss, fitx, fity, p0=param)
+print('a, mu, si = ', popt)
+```
+
+    a, mu, si =  [   5.33304014  272.51733965  288.27265293]
+    
+
+fittingの結果
+
+
+```
+gg = gauss(sumdf.index,*popt)
+```
+
+
+```
+sumdf.plot()
+plt.plot(fitx, choice(gg, *ch), 'k-')
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x148d44ee5c0>]
+
+
+
+
+![png](fit_lab_files/fit_lab_64_1.png)
+
+
+fittingの結果を用いてガウシアン描いてみる。
+
+___
+
+## 連続的にfitting
+
+
+```
+fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
+```
+
+
+```
+sumdf.apply(fit)
+```
+
+
+    ---------------------------------------------------------------------------
+
+    RuntimeError                              Traceback (most recent call last)
+
+    <ipython-input-231-bded205048ed> in <module>()
+    ----> 1 sumdf.apply(fit)
+    
+
+    C:\tools\Anaconda3\lib\site-packages\pandas\core\series.py in apply(self, func, convert_dtype, args, **kwds)
+       2290             else:
+       2291                 values = self.asobject
+    -> 2292                 mapped = lib.map_infer(values, f, convert=convert_dtype)
+       2293 
+       2294         if len(mapped) and isinstance(mapped[0], Series):
+    
+
+    pandas\src\inference.pyx in pandas.lib.map_infer (pandas\lib.c:66116)()
+    
+
+    <ipython-input-152-76f4b7321d41> in <lambda>(df)
+    ----> 1 fit=lambda df: curve_fit(gauss, x[:-1], df, p0=(a, mu, si))
+    
+
+    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
+        678         cost = np.sum(infodict['fvec'] ** 2)
+        679         if ier not in [1, 2, 3, 4]:
+    --> 680             raise RuntimeError("Optimal parameters not found: " + errmsg)
+        681     else:
+        682         res = least_squares(func, p0, jac=jac, bounds=bounds, method=method,
+    
+
+    RuntimeError: Optimal parameters not found: Number of calls to function has reached maxfev = 800.
+
+
+
+```
+
+```
+
+
+```
+Bfit = noisedf.T
+Bfit.index=pd.date_range('20161111', freq='H', periods=10)
+Bfit
 ```
 
 
@@ -339,841 +662,265 @@ df
       <th>7</th>
       <th>8</th>
       <th>9</th>
+      <th>...</th>
+      <th>990</th>
+      <th>991</th>
+      <th>992</th>
+      <th>993</th>
+      <th>994</th>
+      <th>995</th>
+      <th>996</th>
+      <th>997</th>
+      <th>998</th>
+      <th>999</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>5.597369</td>
-      <td>2.491744</td>
-      <td>0.733125</td>
-      <td>0.426366</td>
-      <td>0.419702</td>
-      <td>0.227654</td>
-      <td>0.403233</td>
-      <td>0.533165</td>
-      <td>0.389243</td>
-      <td>0.483341</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>5.371493</td>
-      <td>2.283525</td>
-      <td>0.672589</td>
-      <td>0.358017</td>
-      <td>0.513576</td>
-      <td>0.348201</td>
-      <td>0.381719</td>
-      <td>0.475466</td>
-      <td>0.679071</td>
-      <td>0.472378</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>5.404454</td>
-      <td>2.408595</td>
-      <td>0.666219</td>
-      <td>0.305359</td>
-      <td>0.462288</td>
-      <td>0.508339</td>
-      <td>0.589907</td>
-      <td>0.627878</td>
-      <td>0.480787</td>
-      <td>0.534739</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>5.442112</td>
-      <td>2.614937</td>
-      <td>0.538710</td>
-      <td>0.368864</td>
-      <td>0.582577</td>
-      <td>0.654597</td>
-      <td>0.605478</td>
-      <td>0.618958</td>
-      <td>0.699994</td>
-      <td>0.654372</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5.470499</td>
-      <td>2.577172</td>
-      <td>0.699745</td>
-      <td>0.730829</td>
-      <td>0.521940</td>
-      <td>0.470914</td>
-      <td>0.273079</td>
-      <td>0.400499</td>
-      <td>0.345927</td>
-      <td>0.656044</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>5.540406</td>
-      <td>2.702523</td>
-      <td>0.876437</td>
-      <td>0.512963</td>
-      <td>0.519345</td>
-      <td>0.581214</td>
-      <td>0.394593</td>
-      <td>0.327367</td>
-      <td>0.378928</td>
-      <td>0.540116</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>5.310536</td>
-      <td>2.602038</td>
-      <td>0.876960</td>
-      <td>0.538471</td>
-      <td>0.435745</td>
-      <td>0.516698</td>
-      <td>0.585007</td>
-      <td>0.433421</td>
-      <td>0.428050</td>
-      <td>0.582952</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>5.468482</td>
-      <td>2.680944</td>
-      <td>0.846918</td>
-      <td>0.435142</td>
-      <td>0.471336</td>
-      <td>0.615319</td>
-      <td>0.572898</td>
-      <td>0.469384</td>
-      <td>0.498061</td>
-      <td>0.309730</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>5.462557</td>
-      <td>2.936858</td>
-      <td>0.845211</td>
-      <td>0.511337</td>
-      <td>0.722132</td>
-      <td>0.492076</td>
-      <td>0.587620</td>
-      <td>0.725781</td>
-      <td>0.454297</td>
-      <td>0.537739</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>5.585699</td>
-      <td>2.722369</td>
-      <td>0.702719</td>
-      <td>0.454148</td>
-      <td>0.677273</td>
-      <td>0.575513</td>
-      <td>0.462599</td>
-      <td>0.350746</td>
-      <td>0.567357</td>
-      <td>0.466152</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>5.451803</td>
-      <td>3.007855</td>
-      <td>0.680204</td>
-      <td>0.414993</td>
-      <td>0.444310</td>
-      <td>0.631139</td>
-      <td>0.410763</td>
-      <td>0.629340</td>
-      <td>0.523540</td>
-      <td>0.509943</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>5.375439</td>
-      <td>3.048622</td>
-      <td>0.664393</td>
-      <td>0.464717</td>
-      <td>0.375013</td>
-      <td>0.436689</td>
-      <td>0.601983</td>
-      <td>0.371233</td>
-      <td>0.516394</td>
-      <td>0.488176</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>5.361794</td>
-      <td>2.751884</td>
-      <td>0.784254</td>
-      <td>0.395592</td>
-      <td>0.177046</td>
-      <td>0.429038</td>
-      <td>0.615890</td>
-      <td>0.358666</td>
-      <td>0.418843</td>
-      <td>0.431901</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>5.411583</td>
-      <td>2.994537</td>
-      <td>0.806360</td>
-      <td>0.629417</td>
-      <td>0.648305</td>
-      <td>0.521529</td>
-      <td>0.509157</td>
-      <td>0.523809</td>
-      <td>0.562637</td>
-      <td>0.711773</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>5.256608</td>
-      <td>2.982252</td>
-      <td>0.838890</td>
-      <td>0.618449</td>
-      <td>0.289400</td>
-      <td>0.418421</td>
-      <td>0.523785</td>
-      <td>0.493413</td>
-      <td>0.506701</td>
-      <td>0.514231</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>5.342818</td>
-      <td>3.007603</td>
-      <td>0.997556</td>
-      <td>0.433702</td>
-      <td>0.523265</td>
-      <td>0.533067</td>
-      <td>0.563150</td>
-      <td>0.641980</td>
-      <td>0.535740</td>
-      <td>0.331411</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>5.244125</td>
-      <td>3.111454</td>
-      <td>0.918999</td>
-      <td>0.535001</td>
-      <td>0.471404</td>
-      <td>0.483314</td>
-      <td>0.514697</td>
-      <td>0.444800</td>
-      <td>0.543031</td>
-      <td>0.449403</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>5.508224</td>
-      <td>2.940717</td>
-      <td>0.804261</td>
-      <td>0.288440</td>
-      <td>0.644840</td>
-      <td>0.458704</td>
-      <td>0.638245</td>
-      <td>0.795494</td>
-      <td>0.487640</td>
-      <td>0.431087</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>5.482285</td>
-      <td>3.143831</td>
-      <td>0.892610</td>
-      <td>0.553807</td>
-      <td>0.735834</td>
-      <td>0.297176</td>
-      <td>0.559478</td>
-      <td>0.469441</td>
-      <td>0.579071</td>
-      <td>0.586415</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>5.318173</td>
-      <td>3.215015</td>
-      <td>0.966214</td>
-      <td>0.519508</td>
-      <td>0.420968</td>
-      <td>0.650899</td>
-      <td>0.412799</td>
-      <td>0.537406</td>
-      <td>0.513715</td>
-      <td>0.509629</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>5.357420</td>
-      <td>3.272429</td>
-      <td>0.907049</td>
-      <td>0.645977</td>
-      <td>0.443294</td>
-      <td>0.498471</td>
-      <td>0.455462</td>
-      <td>0.379580</td>
-      <td>0.392029</td>
-      <td>0.407147</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>5.122213</td>
-      <td>3.216044</td>
-      <td>0.956133</td>
-      <td>0.502512</td>
-      <td>0.427497</td>
-      <td>0.513943</td>
-      <td>0.566202</td>
-      <td>0.374241</td>
-      <td>0.603917</td>
-      <td>0.473370</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>5.305494</td>
-      <td>3.512360</td>
-      <td>0.779527</td>
-      <td>0.466461</td>
-      <td>0.412243</td>
-      <td>0.463515</td>
-      <td>0.503193</td>
-      <td>0.382609</td>
-      <td>0.517925</td>
-      <td>0.608052</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>5.301713</td>
-      <td>3.412254</td>
-      <td>1.103316</td>
-      <td>0.664051</td>
-      <td>0.516016</td>
-      <td>0.639328</td>
-      <td>0.493205</td>
-      <td>0.620014</td>
-      <td>0.327077</td>
-      <td>0.279768</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>5.425871</td>
-      <td>3.380619</td>
-      <td>0.907209</td>
-      <td>0.438601</td>
-      <td>0.472873</td>
-      <td>0.506405</td>
-      <td>0.688849</td>
-      <td>0.545242</td>
-      <td>0.516321</td>
-      <td>0.495138</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>5.087005</td>
-      <td>3.401140</td>
-      <td>0.948291</td>
-      <td>0.487906</td>
-      <td>0.535692</td>
-      <td>0.610918</td>
-      <td>0.411415</td>
-      <td>0.484561</td>
-      <td>0.573590</td>
-      <td>0.514847</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>5.229490</td>
-      <td>3.619952</td>
-      <td>1.026871</td>
-      <td>0.534270</td>
-      <td>0.452990</td>
-      <td>0.644539</td>
-      <td>0.619545</td>
-      <td>0.364258</td>
-      <td>0.409429</td>
-      <td>0.544966</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>5.344814</td>
-      <td>3.701071</td>
-      <td>0.971408</td>
-      <td>0.472486</td>
-      <td>0.469725</td>
-      <td>0.465522</td>
-      <td>0.468515</td>
-      <td>0.565667</td>
-      <td>0.498264</td>
-      <td>0.344183</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>5.155957</td>
-      <td>3.503784</td>
-      <td>1.116167</td>
-      <td>0.417715</td>
-      <td>0.614832</td>
-      <td>0.546313</td>
-      <td>0.482737</td>
-      <td>0.534665</td>
-      <td>0.599544</td>
-      <td>0.576264</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>5.240593</td>
-      <td>3.730122</td>
-      <td>1.126189</td>
-      <td>0.425476</td>
-      <td>0.469525</td>
-      <td>0.539609</td>
-      <td>0.548304</td>
-      <td>0.531256</td>
-      <td>0.488020</td>
-      <td>0.474191</td>
-    </tr>
-    <tr>
-      <th>...</th>
+      <th>2016-11-11 00:00:00</th>
+      <td>1.212010</td>
+      <td>1.258258</td>
+      <td>1.209776</td>
+      <td>1.288453</td>
+      <td>1.312047</td>
+      <td>1.208359</td>
+      <td>1.235260</td>
+      <td>1.076348</td>
+      <td>1.234967</td>
+      <td>1.137405</td>
       <td>...</td>
+      <td>0.514774</td>
+      <td>0.428211</td>
+      <td>0.598484</td>
+      <td>0.522549</td>
+      <td>0.519271</td>
+      <td>0.520157</td>
+      <td>0.412700</td>
+      <td>0.448095</td>
+      <td>0.461003</td>
+      <td>0.485658</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 01:00:00</th>
+      <td>0.493312</td>
+      <td>0.565844</td>
+      <td>0.421950</td>
+      <td>0.566338</td>
+      <td>0.429704</td>
+      <td>0.490249</td>
+      <td>0.477613</td>
+      <td>0.543168</td>
+      <td>0.509640</td>
+      <td>0.466321</td>
       <td>...</td>
+      <td>0.429264</td>
+      <td>0.449661</td>
+      <td>0.472302</td>
+      <td>0.450089</td>
+      <td>0.532711</td>
+      <td>0.497850</td>
+      <td>0.444576</td>
+      <td>0.510375</td>
+      <td>0.542243</td>
+      <td>0.559332</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 02:00:00</th>
+      <td>0.617668</td>
+      <td>0.504491</td>
+      <td>0.506655</td>
+      <td>0.629424</td>
+      <td>0.459623</td>
+      <td>0.550356</td>
+      <td>0.552120</td>
+      <td>0.517778</td>
+      <td>0.474713</td>
+      <td>0.492209</td>
       <td>...</td>
+      <td>0.459309</td>
+      <td>0.579805</td>
+      <td>0.506900</td>
+      <td>0.461104</td>
+      <td>0.452450</td>
+      <td>0.535329</td>
+      <td>0.465263</td>
+      <td>0.535872</td>
+      <td>0.549523</td>
+      <td>0.442362</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 03:00:00</th>
+      <td>0.534732</td>
+      <td>0.434818</td>
+      <td>0.452569</td>
+      <td>0.429995</td>
+      <td>0.550611</td>
+      <td>0.552787</td>
+      <td>0.470041</td>
+      <td>0.503814</td>
+      <td>0.536437</td>
+      <td>0.526805</td>
       <td>...</td>
+      <td>0.507729</td>
+      <td>0.510552</td>
+      <td>0.523317</td>
+      <td>0.480549</td>
+      <td>0.537138</td>
+      <td>0.477658</td>
+      <td>0.510539</td>
+      <td>0.461372</td>
+      <td>0.454722</td>
+      <td>0.471645</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 04:00:00</th>
+      <td>0.410273</td>
+      <td>0.480496</td>
+      <td>0.535665</td>
+      <td>0.476028</td>
+      <td>0.496251</td>
+      <td>0.497739</td>
+      <td>0.532563</td>
+      <td>0.579697</td>
+      <td>0.466402</td>
+      <td>0.458867</td>
       <td>...</td>
+      <td>0.452442</td>
+      <td>0.539615</td>
+      <td>0.476664</td>
+      <td>0.465095</td>
+      <td>0.469500</td>
+      <td>0.567530</td>
+      <td>0.465824</td>
+      <td>0.543424</td>
+      <td>0.524870</td>
+      <td>0.597768</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 05:00:00</th>
+      <td>0.504844</td>
+      <td>0.585218</td>
+      <td>0.436708</td>
+      <td>0.510879</td>
+      <td>0.534301</td>
+      <td>0.533283</td>
+      <td>0.486974</td>
+      <td>0.505978</td>
+      <td>0.457899</td>
+      <td>0.416528</td>
       <td>...</td>
+      <td>0.512470</td>
+      <td>0.516137</td>
+      <td>0.471788</td>
+      <td>0.485482</td>
+      <td>0.477160</td>
+      <td>0.424786</td>
+      <td>0.461915</td>
+      <td>0.421985</td>
+      <td>0.521713</td>
+      <td>0.534520</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 06:00:00</th>
+      <td>0.417943</td>
+      <td>0.510378</td>
+      <td>0.561102</td>
+      <td>0.473348</td>
+      <td>0.547520</td>
+      <td>0.501062</td>
+      <td>0.538977</td>
+      <td>0.506837</td>
+      <td>0.576644</td>
+      <td>0.429382</td>
       <td>...</td>
+      <td>0.538923</td>
+      <td>0.543066</td>
+      <td>0.634124</td>
+      <td>0.437527</td>
+      <td>0.546653</td>
+      <td>0.428585</td>
+      <td>0.503116</td>
+      <td>0.488980</td>
+      <td>0.513469</td>
+      <td>0.465994</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 07:00:00</th>
+      <td>0.456581</td>
+      <td>0.578147</td>
+      <td>0.534539</td>
+      <td>0.437597</td>
+      <td>0.494838</td>
+      <td>0.445275</td>
+      <td>0.459347</td>
+      <td>0.466767</td>
+      <td>0.550208</td>
+      <td>0.408358</td>
       <td>...</td>
+      <td>0.596552</td>
+      <td>0.572876</td>
+      <td>0.421376</td>
+      <td>0.626990</td>
+      <td>0.540775</td>
+      <td>0.502943</td>
+      <td>0.534820</td>
+      <td>0.420050</td>
+      <td>0.515703</td>
+      <td>0.511490</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 08:00:00</th>
+      <td>0.487674</td>
+      <td>0.527124</td>
+      <td>0.462124</td>
+      <td>0.519189</td>
+      <td>0.478155</td>
+      <td>0.535298</td>
+      <td>0.458398</td>
+      <td>0.579006</td>
+      <td>0.470864</td>
+      <td>0.533235</td>
       <td>...</td>
+      <td>0.572156</td>
+      <td>0.622233</td>
+      <td>0.477770</td>
+      <td>0.568988</td>
+      <td>0.541956</td>
+      <td>0.573163</td>
+      <td>0.493426</td>
+      <td>0.543387</td>
+      <td>0.540880</td>
+      <td>0.535761</td>
+    </tr>
+    <tr>
+      <th>2016-11-11 09:00:00</th>
+      <td>0.499399</td>
+      <td>0.443160</td>
+      <td>0.370964</td>
+      <td>0.410643</td>
+      <td>0.460746</td>
+      <td>0.571716</td>
+      <td>0.487904</td>
+      <td>0.524689</td>
+      <td>0.585601</td>
+      <td>0.635540</td>
       <td>...</td>
-    </tr>
-    <tr>
-      <th>971</th>
-      <td>0.529527</td>
-      <td>0.358364</td>
-      <td>0.518804</td>
-      <td>0.508925</td>
-      <td>0.469721</td>
-      <td>0.517780</td>
-      <td>0.401886</td>
-      <td>0.503037</td>
-      <td>0.455741</td>
-      <td>3.513332</td>
-    </tr>
-    <tr>
-      <th>972</th>
-      <td>0.570905</td>
-      <td>0.570684</td>
-      <td>0.485860</td>
-      <td>0.531205</td>
-      <td>0.531835</td>
-      <td>0.455022</td>
-      <td>0.411613</td>
-      <td>0.576960</td>
-      <td>0.567804</td>
-      <td>3.465799</td>
-    </tr>
-    <tr>
-      <th>973</th>
-      <td>0.538151</td>
-      <td>0.492142</td>
-      <td>0.434020</td>
-      <td>0.517494</td>
-      <td>0.405069</td>
-      <td>0.502615</td>
-      <td>0.528098</td>
-      <td>0.535034</td>
-      <td>0.688973</td>
-      <td>3.552700</td>
-    </tr>
-    <tr>
-      <th>974</th>
-      <td>0.695607</td>
-      <td>0.464005</td>
-      <td>0.589509</td>
-      <td>0.382336</td>
-      <td>0.284839</td>
-      <td>0.546475</td>
-      <td>0.448177</td>
-      <td>0.522426</td>
-      <td>0.571570</td>
-      <td>3.440994</td>
-    </tr>
-    <tr>
-      <th>975</th>
-      <td>0.467149</td>
-      <td>0.480584</td>
-      <td>0.730452</td>
-      <td>0.529331</td>
-      <td>0.316480</td>
-      <td>0.652525</td>
-      <td>0.699035</td>
-      <td>0.379110</td>
-      <td>0.735272</td>
-      <td>3.425690</td>
-    </tr>
-    <tr>
-      <th>976</th>
-      <td>0.486802</td>
-      <td>0.621752</td>
-      <td>0.466356</td>
-      <td>0.424038</td>
-      <td>0.436477</td>
-      <td>0.393675</td>
-      <td>0.588680</td>
-      <td>0.289292</td>
-      <td>0.413897</td>
-      <td>3.543143</td>
-    </tr>
-    <tr>
-      <th>977</th>
-      <td>0.597498</td>
-      <td>0.524932</td>
-      <td>0.378288</td>
-      <td>0.686271</td>
-      <td>0.604843</td>
-      <td>0.645858</td>
-      <td>0.428697</td>
-      <td>0.437891</td>
-      <td>0.390546</td>
-      <td>3.421482</td>
-    </tr>
-    <tr>
-      <th>978</th>
-      <td>0.504545</td>
-      <td>0.488356</td>
-      <td>0.565382</td>
-      <td>0.561487</td>
-      <td>0.401006</td>
-      <td>0.246389</td>
-      <td>0.637548</td>
-      <td>0.527797</td>
-      <td>0.526253</td>
-      <td>3.091326</td>
-    </tr>
-    <tr>
-      <th>979</th>
-      <td>0.588539</td>
-      <td>0.445362</td>
-      <td>0.610363</td>
-      <td>0.416822</td>
-      <td>0.423090</td>
-      <td>0.480760</td>
-      <td>0.521885</td>
-      <td>0.639860</td>
-      <td>0.473672</td>
-      <td>3.329477</td>
-    </tr>
-    <tr>
-      <th>980</th>
-      <td>0.363860</td>
-      <td>0.595131</td>
-      <td>0.460711</td>
-      <td>0.414400</td>
-      <td>0.499292</td>
-      <td>0.350316</td>
-      <td>0.593611</td>
-      <td>0.580763</td>
-      <td>0.367872</td>
-      <td>3.116402</td>
-    </tr>
-    <tr>
-      <th>981</th>
-      <td>0.510585</td>
-      <td>0.458049</td>
-      <td>0.506779</td>
-      <td>0.331216</td>
-      <td>0.603508</td>
-      <td>0.714678</td>
-      <td>0.482229</td>
-      <td>0.692771</td>
-      <td>0.545456</td>
-      <td>3.207887</td>
-    </tr>
-    <tr>
-      <th>982</th>
-      <td>0.523079</td>
-      <td>0.478417</td>
-      <td>0.481810</td>
-      <td>0.698801</td>
-      <td>0.619204</td>
-      <td>0.443535</td>
-      <td>0.768091</td>
-      <td>0.488256</td>
-      <td>0.569622</td>
-      <td>3.238895</td>
-    </tr>
-    <tr>
-      <th>983</th>
-      <td>0.487650</td>
-      <td>0.174102</td>
-      <td>0.460394</td>
-      <td>0.497958</td>
-      <td>0.281023</td>
-      <td>0.420088</td>
-      <td>0.503620</td>
-      <td>0.566762</td>
-      <td>0.505168</td>
-      <td>3.019683</td>
-    </tr>
-    <tr>
-      <th>984</th>
-      <td>0.661865</td>
-      <td>0.494130</td>
-      <td>0.374135</td>
-      <td>0.391099</td>
-      <td>0.406086</td>
-      <td>0.470165</td>
-      <td>0.615145</td>
-      <td>0.521005</td>
-      <td>0.556195</td>
-      <td>3.060549</td>
-    </tr>
-    <tr>
-      <th>985</th>
-      <td>0.400929</td>
-      <td>0.445215</td>
-      <td>0.376943</td>
-      <td>0.399289</td>
-      <td>0.445184</td>
-      <td>0.440187</td>
-      <td>0.509358</td>
-      <td>0.319576</td>
-      <td>0.440069</td>
-      <td>3.086088</td>
-    </tr>
-    <tr>
-      <th>986</th>
-      <td>0.507672</td>
-      <td>0.338248</td>
-      <td>0.545798</td>
-      <td>0.332737</td>
-      <td>0.450288</td>
-      <td>0.398284</td>
-      <td>0.522222</td>
-      <td>0.520412</td>
-      <td>0.446365</td>
-      <td>2.966154</td>
-    </tr>
-    <tr>
-      <th>987</th>
-      <td>0.516138</td>
-      <td>0.465051</td>
-      <td>0.537397</td>
-      <td>0.400523</td>
-      <td>0.359414</td>
-      <td>0.578210</td>
-      <td>0.570657</td>
-      <td>0.360520</td>
-      <td>0.527551</td>
-      <td>2.855009</td>
-    </tr>
-    <tr>
-      <th>988</th>
-      <td>0.458368</td>
-      <td>0.644095</td>
-      <td>0.304990</td>
-      <td>0.713620</td>
-      <td>0.395202</td>
-      <td>0.575578</td>
-      <td>0.504727</td>
-      <td>0.382075</td>
-      <td>0.534081</td>
-      <td>2.882697</td>
-    </tr>
-    <tr>
-      <th>989</th>
-      <td>0.578799</td>
-      <td>0.544700</td>
-      <td>0.432208</td>
-      <td>0.632347</td>
-      <td>0.473547</td>
-      <td>0.492220</td>
-      <td>0.512959</td>
-      <td>0.414103</td>
-      <td>0.421339</td>
-      <td>2.893854</td>
-    </tr>
-    <tr>
-      <th>990</th>
-      <td>0.507931</td>
-      <td>0.564896</td>
-      <td>0.561564</td>
-      <td>0.632974</td>
-      <td>0.456140</td>
-      <td>0.593617</td>
-      <td>0.599453</td>
-      <td>0.577719</td>
-      <td>0.583834</td>
-      <td>2.746718</td>
-    </tr>
-    <tr>
-      <th>991</th>
-      <td>0.386961</td>
-      <td>0.610369</td>
-      <td>0.604871</td>
-      <td>0.546918</td>
-      <td>0.431926</td>
-      <td>0.497580</td>
-      <td>0.317693</td>
-      <td>0.494314</td>
-      <td>0.504280</td>
-      <td>2.694819</td>
-    </tr>
-    <tr>
-      <th>992</th>
-      <td>0.345045</td>
-      <td>0.674554</td>
-      <td>0.716921</td>
-      <td>0.409767</td>
-      <td>0.592302</td>
-      <td>0.586203</td>
-      <td>0.409655</td>
-      <td>0.517307</td>
-      <td>0.383445</td>
-      <td>2.690836</td>
-    </tr>
-    <tr>
-      <th>993</th>
-      <td>0.486019</td>
-      <td>0.625405</td>
-      <td>0.406408</td>
-      <td>0.503068</td>
-      <td>0.539495</td>
-      <td>0.424461</td>
-      <td>0.650300</td>
-      <td>0.439676</td>
-      <td>0.499172</td>
-      <td>2.537751</td>
-    </tr>
-    <tr>
-      <th>994</th>
-      <td>0.277675</td>
-      <td>0.568684</td>
-      <td>0.539973</td>
-      <td>0.464318</td>
-      <td>0.585494</td>
-      <td>0.562993</td>
-      <td>0.290822</td>
-      <td>0.449345</td>
-      <td>0.501448</td>
-      <td>2.781229</td>
-    </tr>
-    <tr>
-      <th>995</th>
-      <td>0.589740</td>
-      <td>0.513033</td>
-      <td>0.434523</td>
-      <td>0.474935</td>
-      <td>0.547204</td>
-      <td>0.518632</td>
-      <td>0.322042</td>
-      <td>0.512121</td>
-      <td>0.469037</td>
-      <td>2.628345</td>
-    </tr>
-    <tr>
-      <th>996</th>
-      <td>0.520975</td>
-      <td>0.478294</td>
-      <td>0.480557</td>
-      <td>0.484006</td>
-      <td>0.492193</td>
-      <td>0.573760</td>
-      <td>0.404691</td>
-      <td>0.453396</td>
-      <td>0.505707</td>
-      <td>2.635399</td>
-    </tr>
-    <tr>
-      <th>997</th>
-      <td>0.632657</td>
-      <td>0.574674</td>
-      <td>0.426212</td>
-      <td>0.407222</td>
-      <td>0.546620</td>
-      <td>0.636246</td>
-      <td>0.486812</td>
-      <td>0.467546</td>
-      <td>0.505422</td>
-      <td>2.339973</td>
-    </tr>
-    <tr>
-      <th>998</th>
-      <td>0.610188</td>
-      <td>0.413633</td>
-      <td>0.415747</td>
-      <td>0.572865</td>
-      <td>0.491659</td>
-      <td>0.618372</td>
-      <td>0.432174</td>
-      <td>0.594590</td>
-      <td>0.525399</td>
-      <td>2.344469</td>
-    </tr>
-    <tr>
-      <th>999</th>
-      <td>0.619413</td>
-      <td>0.470054</td>
-      <td>0.313583</td>
-      <td>0.452011</td>
-      <td>0.584379</td>
-      <td>0.397621</td>
-      <td>0.491145</td>
-      <td>0.573142</td>
-      <td>0.508595</td>
-      <td>2.453842</td>
-    </tr>
-    <tr>
-      <th>1000</th>
-      <td>0.478073</td>
-      <td>0.519888</td>
-      <td>0.412258</td>
-      <td>0.438218</td>
-      <td>0.469740</td>
-      <td>0.327760</td>
-      <td>0.541827</td>
-      <td>0.364946</td>
-      <td>0.655199</td>
-      <td>2.413007</td>
+      <td>0.421390</td>
+      <td>0.476703</td>
+      <td>0.492336</td>
+      <td>0.474076</td>
+      <td>0.417654</td>
+      <td>0.580822</td>
+      <td>0.522962</td>
+      <td>0.434270</td>
+      <td>0.505289</td>
+      <td>0.437671</td>
     </tr>
   </tbody>
 </table>
-<p>1001 rows × 10 columns</p>
+<p>10 rows × 1000 columns</p>
 </div>
 
 
 
-
-```python
-f=lambda x: curve_fit(gauss, xx, x, (aa, mu, si), maxfev = 100000000)
-```
-
-
-```python
-fit_param, convariance = df.apply(f)
-```
-
-    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
-      category=OptimizeWarning)
-    
-
-
-    ---------------------------------------------------------------------------
-
-    ValueError                                Traceback (most recent call last)
-
-    <ipython-input-115-73129f1102c1> in <module>()
-    ----> 1 fit_param, convariance = df.apply(f)
-    
-
-    ValueError: too many values to unpack (expected 2)
-
-
-
-```python
-fit_
-```
-
-
-```python
-
-```
+実際fittingかけたいデータフレームはindexが時間、カラムが
