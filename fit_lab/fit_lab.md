@@ -2,7 +2,7 @@
 # 自作ガウシアン
 
 
-```
+```python
 def gauss(x, a, mu, si, noisef=nf):
     """
     a: 最大値
@@ -14,7 +14,7 @@ def gauss(x, a, mu, si, noisef=nf):
 ```
 
 
-```
+```python
 nf=0.5
 n=1001
 x = np.linspace(0,100,n)
@@ -22,7 +22,7 @@ a, mu, si = 1, 50, 1
 ```
 
 
-```
+```python
 g= gauss(x, a, mu, si); g
 ```
 
@@ -34,7 +34,7 @@ g= gauss(x, a, mu, si); g
 
 
 
-```
+```python
 plt.plot(x, g)
 ```
 
@@ -52,12 +52,12 @@ plt.plot(x, g)
 ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
 
 
-```
+```python
 from  scipy.stats import norm
 ```
 
 
-```
+```python
 z=norm.pdf(x, loc=50, scale=1)-0.5; z
 ```
 
@@ -69,7 +69,7 @@ z=norm.pdf(x, loc=50, scale=1)-0.5; z
 
 
 
-```
+```python
 plt.plot(x,z)
 ```
 
@@ -85,7 +85,7 @@ plt.plot(x,z)
 
 
 
-```
+```python
 a, mu, si=1, 50, 1
 df=pd.DataFrame({'norm': a*norm.pdf(x, loc=mu, scale=si)+nf,
                  			'gauss': gauss(x, a, mu, si, nf)})
@@ -107,7 +107,7 @@ df.plot(style=['-', '--'])
 normでも自作gaussでも中でnp使っているんで実行速度あんま変わらないだろうとテスト
 
 
-```
+```python
 %timeit gauss(x, a, mu, si)
 ```
 
@@ -116,7 +116,7 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
     
 
 
-```
+```python
 %timeit norm.pdf(x, loc=50, scale=1)-0.5
 ```
 
@@ -131,7 +131,7 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
 ということで自作のガウシアンを使っていきます。
 
 
-```
+```python
 g = gauss(x, a, mu, si)
 gnoise = g + 0.1 * np.random.randn(n)
 ```
@@ -139,7 +139,7 @@ gnoise = g + 0.1 * np.random.randn(n)
 ノイズを発生させる
 
 
-```
+```python
 plt.plot(x, gnoise, '-')
 plt.plot(x, g,'b-' )
 ```
@@ -164,7 +164,7 @@ gからgnoiseを導き出したのだけれども、ここで急にgを未知の
 scipy.optimizeからcurve_fitをインポートしてくる。
 
 
-```
+```python
 from scipy.optimize import curve_fit
 ```
 
@@ -172,7 +172,7 @@ from scipy.optimize import curve_fit
 次にフィッティングパラメータを定める。</div><i class="fa fa-lightbulb-o "></i>
 
 
-```
+```python
 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
@@ -183,7 +183,7 @@ print('元パラメータ:%s\nフィッティングで求めたパラメータ: 
     
 
 
-```
+```python
 _
 ```
 
@@ -204,7 +204,7 @@ curve_fitの戻り値アンダーバーは共分散？
     on the parameters use ``perr = np.sqrt(np.diag(pcov))``.
 
 
-```
+```python
 plt.plot(x, gnoise, 'r-')
 plt.plot(x, yfit, 'b-') 
 ```
@@ -229,31 +229,31 @@ plt.plot(x, yfit, 'b-')
 ## ガウシアンに沿ってノイズを作る
 
 
-```
+```python
 from  scipy.stats import norm
 ```
 
 
-```
+```python
 n=1001
 xx = np.linspace(0,100,n)
 aa, mu, si = 5, 50, 1
 ```
 
 
-```
+```python
 def gauss2(x, a, mu, si):
     return a*norm.pdf(x, loc=mu, scale=si)-noisef
 ```
 
 
-```
+```python
 g = gauss2(xx, aa, mu, si)
 gnoise = g + 0.1 * np.random.randn(n)
 ```
 
 
-```
+```python
 plt.plot(xx, gnoise, '.-')
 plt.plot(xx, g,'r-' )
 ```
@@ -275,14 +275,14 @@ gからgnoiseを導き出したのだけれども、ここで急にgを未知の
 今あなたはgnoiseだけを知っていて、gのような関数を得たいとき、どうするか。
 
 
-```
+```python
 from scipy.optimize import curve_fit
 (aa_, mu_, si_), _ = curve_fit(gauss2, xx, gnoise, (aa, mu, si))
 yfit = gauss2(xx,aa_, mu_, si_)
 ```
 
 
-```
+```python
 plt.plot(xx, gnoise, '.-')
 plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitであることに注意
 ```
@@ -305,14 +305,14 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 ## ランダムデータフレームの作成
 
 
-```
+```python
 r=np.random
 ```
 
 いっぱい使うから乱数生成をrに縮めちゃう
 
 
-```
+```python
 g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
 plt.plot(x, g)
 ```
@@ -331,7 +331,7 @@ plt.plot(x, g)
 ランダムな値を使って発生させたガウシアン
 
 
-```
+```python
 %%timeit
 df = pd.DataFrame([], index=range(1000))
 for i in np.arange(min(x), max(x), 10):
@@ -345,7 +345,7 @@ for i in np.arange(min(x), max(x), 10):
 まず思いつくforループ
 
 
-```
+```python
 # %%timeit
 garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
 for i in np.arange(min(x), max(x), 10)]).T
@@ -358,7 +358,7 @@ df = pd.DataFrame(garray)
 より高速
 
 
-```
+```python
 df.plot()
 ```
 
@@ -382,7 +382,7 @@ df.plot()
 ## ランダムデータフレームにノイズのせてサンプルデータ作成
 
 
-```
+```python
 noisedf =df +0.05 * r.randn(*df.shape)
 noisedf.plot()
 ```
@@ -403,7 +403,7 @@ noisedf.plot()
 スターを`df.shape`の前につけてタプルを展開して`randn`に渡す。
 
 
-```
+```python
 sumdf = noisedf.sum(axis=1)
 sumdf.plot()
 ```
@@ -420,7 +420,7 @@ sumdf.plot()
 
 
 
-```
+```python
 sumdf
 ```
 
@@ -498,7 +498,7 @@ indexはそのままにカラムをすべて足す。この中でindexいくつ�
 一番やりたかったこと　ここから。
 
 
-```
+```python
 param = (a, mu, si) = 5, 300, 3
 param
 ```
@@ -515,7 +515,7 @@ param
 ## 試しに波を一つ選んでfitting
 
 
-```
+```python
 def choice(array, center, span):
     """特定の範囲を抜き出す
     引数: 
@@ -531,7 +531,7 @@ def choice(array, center, span):
 ```
 
 
-```
+```python
 ch = (300, 300)  # 中央値300でスパン300で取り出したい
 fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
 plt.plot(fitx, fity)
@@ -549,7 +549,7 @@ plt.plot(fitx, fity)
 
 
 
-```
+```python
 popt, _pcov = curve_fit(gauss, fitx, fity, p0=param)
 print('a, mu, si = ', popt)
 ```
@@ -560,12 +560,12 @@ print('a, mu, si = ', popt)
 fittingの結果
 
 
-```
+```python
 gg = gauss(sumdf.index,*popt)
 ```
 
 
-```
+```python
 sumdf.plot()
 plt.plot(fitx, choice(gg, *ch), 'k-')
 ```
@@ -586,7 +586,7 @@ fittingの結果を用いてガウシアン描いてみる。
 ## 連続的にfitting
 
 
-```
+```python
 fitting_list = (300, 500, 600, 700)  # 目測どのあたりに波があるか
 fitdf=pd.DataFrame(np.empty(1000))
 for i in fitting_list:
@@ -600,7 +600,7 @@ del fitdf[0]
 ```
 
 
-```
+```python
 fitdf['sumdf'] = sumdf
 fitdf.plot(style = ['-', '-', '-', '-', '.'])
 ```
@@ -617,12 +617,12 @@ fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 
 
-```
+```python
 fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
 ```
 
 
-```
+```python
 sumdf.apply(fit)
 ```
 
@@ -662,12 +662,12 @@ sumdf.apply(fit)
 
 
 
-```
+```python
 
 ```
 
 
-```
+```python
 Bfit = noisedf.T
 Bfit.index=pd.date_range('20161111', freq='H', periods=10)
 Bfit
@@ -953,3 +953,66 @@ Bfit
 
 
 実際fittingかけたいデータフレームはindexが時間、カラムが
+
+___
+
+
+```python
+import sys
+sys.path.append('../')
+```
+
+
+```python
+from fitclass import *
+```
+
+
+```python
+# giving initial parameters
+mu = Parameter(7)
+sigma = Parameter(3)
+height = Parameter(5)
+```
+
+
+```python
+# define your function:
+def f(x, h=height(), mu=mu(), si=sigma()): return h * np.exp(-((x-mu)/si)**2)
+```
+
+
+```python
+# fit! (given that data is an array with the data to fit)
+data = 10*np.exp(-np.linspace(0, 10, 100)**2) + np.random.rand(100)
+fitp, _ = fit(f, [mu, sigma, height], data); fitp
+```
+
+
+
+
+    array([ -1.89549379,  12.09140583,  11.17214325])
+
+
+
+
+```python
+plt.plot(data)
+plt.plot(f(data, *fitp))
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0xc1785f8>]
+
+
+
+
+![png](fit_lab_files/fit_lab_80_1.png)
+
+
+
+```python
+
+```
