@@ -3,19 +3,24 @@
 
 # # 自作ガウシアン
 
-# In[2]:
+# In[164]:
 
-def gauss(x, a, mu, si, noisef):
+def gauss(x, a, mu, si):
     """
     a: 最大値
     mu: 位置
     si: 線幅
     noisef: 最低値
     """
-    return a * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
+    return a * np.exp(-(x - mu)**2 / 2 / si**2)
 
 
-# In[3]:
+# In[165]:
+
+f = lambda x, a, mu, si, nf: gauss(x, a, mu, si) + nf 
+
+
+# In[166]:
 
 nf=0.5
 n=1001
@@ -23,9 +28,9 @@ x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 
 
-# In[4]:
+# In[167]:
 
-g= gauss(x, a, mu, si, nf); g
+g= f(x, a, mu, si, nf); g
 
 
 # In[5]:
@@ -77,15 +82,15 @@ get_ipython().magic('timeit norm.pdf(x, loc=50, scale=1)-0.5')
 # 
 # ということで自作のガウシアンを使っていきます。
 
-# In[39]:
+# In[158]:
 
-g = gauss(x, a, mu, si)
-gnoise = g + 0.1 * np.random.randn(n)
+g = gauss(x, a, mu, si, 0.5)
+gnoise = g + 0.1 * g * np.random.randn(n)
 
 
 # ノイズを発生させる
 
-# In[40]:
+# In[159]:
 
 plt.plot(x, gnoise, '-')
 plt.plot(x, g,'b-' )
@@ -99,15 +104,23 @@ plt.plot(x, g,'b-' )
 # こういう時はカーブフィットを取る。
 # scipy.optimizeからcurve_fitをインポートしてくる。
 
-# In[41]:
+# In[150]:
 
 from scipy.optimize import curve_fit
+from scipy.optimize import leastsq
+from scipy.optimize import least_squares
 
 
-# <div class="mark">
-# 次にフィッティングパラメータを定める。</div><i class="fa fa-lightbulb-o "></i>
+# 次にフィッティングパラメータを定める。
 
-# In[113]:
+# In[160]:
+
+(a_, mu_, si_), _ = leastsq(gauss, x, gnoise, p0=(a, mu, si))
+yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+
+
+# In[160]:
 
 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
@@ -294,9 +307,9 @@ waves().plot()
 get_ipython().magic('timeit waves()')
 
 
-# In[146]:
+# In[148]:
 
-pd.DataFrame([waves(i) for i in range(10)])
+df = pd.DataFrame([waves(i) for i in range(10)]); df
 
 
 # # データフレームに一斉にフィッティングかける

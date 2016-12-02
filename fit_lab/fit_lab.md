@@ -3,14 +3,19 @@
 
 
 ```python
-def gauss(x, a, mu, si, noisef):
+def gauss(x, a, mu, si):
     """
     a: 最大値
     mu: 位置
     si: 線幅
     noisef: 最低値
     """
-    return a * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
+    return a * np.exp(-(x - mu)**2 / 2 / si**2)
+```
+
+
+```python
+f = lambda x, a, mu, si, nf: gauss(x, a, mu, si) + nf 
 ```
 
 
@@ -23,7 +28,7 @@ a, mu, si = 1, 50, 1
 
 
 ```python
-g= gauss(x, a, mu, si, nf); g
+g= f(x, a, mu, si, nf); g
 ```
 
 
@@ -46,7 +51,7 @@ plt.plot(x, g)
 
 
 
-![png](fit_lab_files/fit_lab_4_1.png)
+![png](fit_lab_files/fit_lab_5_1.png)
 
 
 ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
@@ -81,7 +86,7 @@ plt.plot(x,z)
 
 
 
-![png](fit_lab_files/fit_lab_8_1.png)
+![png](fit_lab_files/fit_lab_9_1.png)
 
 
 
@@ -100,7 +105,7 @@ df.plot(style=['-', '--'])
 
 
 
-![png](fit_lab_files/fit_lab_9_1.png)
+![png](fit_lab_files/fit_lab_10_1.png)
 
 
 ## norm vs my_gauss
@@ -132,8 +137,8 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
 
 
 ```python
-g = gauss(x, a, mu, si)
-gnoise = g + 0.1 * np.random.randn(n)
+g = gauss(x, a, mu, si, 0.5)
+gnoise = g + 0.1 * g * np.random.randn(n)
 ```
 
 ノイズを発生させる
@@ -147,12 +152,12 @@ plt.plot(x, g,'b-' )
 
 
 
-    [<matplotlib.lines.Line2D at 0x148c883ad68>]
+    [<matplotlib.lines.Line2D at 0x1de4fd26748>]
 
 
 
 
-![png](fit_lab_files/fit_lab_17_1.png)
+![png](fit_lab_files/fit_lab_18_1.png)
 
 
 ## カーブフィッティングをかけて、ノイズをフィッティングする
@@ -166,10 +171,64 @@ scipy.optimizeからcurve_fitをインポートしてくる。
 
 ```python
 from scipy.optimize import curve_fit
+from scipy.optimize import leastsq
+from scipy.optimize import least_squares
 ```
 
-<div class="mark">
-次にフィッティングパラメータを定める。</div><i class="fa fa-lightbulb-o "></i>
+次にフィッティングパラメータを定める。
+
+
+```python
+(a_, mu_, si_), _ = leastsq(gauss, x, gnoise, p0=(a, mu, si))
+yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+```
+
+
+    ---------------------------------------------------------------------------
+
+    TypeError                                 Traceback (most recent call last)
+
+    <ipython-input-160-edebaa9a838c> in <module>()
+    ----> 1 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
+          2 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+          3 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
+        674         # Remove full_output from kwargs, otherwise we're passing it in twice.
+        675         return_full = kwargs.pop('full_output', False)
+    --> 676         res = leastsq(func, p0, Dfun=jac, full_output=1, **kwargs)
+        677         popt, pcov, infodict, errmsg, ier = res
+        678         cost = np.sum(infodict['fvec'] ** 2)
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in leastsq(func, x0, args, Dfun, full_output, col_deriv, ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
+        375     if not isinstance(args, tuple):
+        376         args = (args,)
+    --> 377     shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
+        378     m = shape[0]
+        379     if n > m:
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape)
+         24 def _check_func(checker, argname, thefunc, x0, args, numinputs,
+         25                 output_shape=None):
+    ---> 26     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
+         27     if (output_shape is not None) and (shape(res) != output_shape):
+         28         if (output_shape[0] != 1):
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in func_wrapped(params)
+        453     if weights is None:
+        454         def func_wrapped(params):
+    --> 455             return func(xdata, *params) - ydata
+        456     else:
+        457         def func_wrapped(params):
+    
+
+    TypeError: gauss() missing 1 required positional argument: 'noisef'
+
 
 
 ```python
@@ -178,9 +237,51 @@ yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出され�
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 ```
 
-    元パラメータ:(1, 50, 1)
-    フィッティングで求めたパラメータ: (0.98497122782178148, 49.973664385975219, 0.97612666304535545)
+
+    ---------------------------------------------------------------------------
+
+    TypeError                                 Traceback (most recent call last)
+
+    <ipython-input-160-edebaa9a838c> in <module>()
+    ----> 1 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
+          2 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+          3 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
     
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
+        674         # Remove full_output from kwargs, otherwise we're passing it in twice.
+        675         return_full = kwargs.pop('full_output', False)
+    --> 676         res = leastsq(func, p0, Dfun=jac, full_output=1, **kwargs)
+        677         popt, pcov, infodict, errmsg, ier = res
+        678         cost = np.sum(infodict['fvec'] ** 2)
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in leastsq(func, x0, args, Dfun, full_output, col_deriv, ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
+        375     if not isinstance(args, tuple):
+        376         args = (args,)
+    --> 377     shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
+        378     m = shape[0]
+        379     if n > m:
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape)
+         24 def _check_func(checker, argname, thefunc, x0, args, numinputs,
+         25                 output_shape=None):
+    ---> 26     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
+         27     if (output_shape is not None) and (shape(res) != output_shape):
+         28         if (output_shape[0] != 1):
+    
+
+    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in func_wrapped(params)
+        453     if weights is None:
+        454         def func_wrapped(params):
+    --> 455             return func(xdata, *params) - ydata
+        456     else:
+        457         def func_wrapped(params):
+    
+
+    TypeError: gauss() missing 1 required positional argument: 'noisef'
+
 
 
 ```python
@@ -217,7 +318,7 @@ plt.plot(x, yfit, 'b-')
 
 
 
-![png](fit_lab_files/fit_lab_24_1.png)
+![png](fit_lab_files/fit_lab_26_1.png)
 
 
 さっきと同じグラフに見えるが、描いているのはgではなくyfitであることに注意
@@ -266,7 +367,7 @@ plt.plot(xx, g,'r-' )
 
 
 
-![png](fit_lab_files/fit_lab_32_1.png)
+![png](fit_lab_files/fit_lab_34_1.png)
 
 
 ## カーブフィッティングをかけて、ノイズをフィッティングする
@@ -295,7 +396,7 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 
 
-![png](fit_lab_files/fit_lab_35_1.png)
+![png](fit_lab_files/fit_lab_37_1.png)
 
 
 ちゃんとフィッティングできた。
@@ -325,7 +426,7 @@ plt.plot(x, g)
 
 
 
-![png](fit_lab_files/fit_lab_41_1.png)
+![png](fit_lab_files/fit_lab_43_1.png)
 
 
 ランダムな値を使って発生させたガウシアン
@@ -386,7 +487,7 @@ gdf.plot()
 
 
 
-![png](fit_lab_files/fit_lab_49_1.png)
+![png](fit_lab_files/fit_lab_51_1.png)
 
 
 ## 足し合わせた複数の波があるdf
@@ -413,7 +514,7 @@ noisedf.plot()
 
 
 
-![png](fit_lab_files/fit_lab_53_1.png)
+![png](fit_lab_files/fit_lab_55_1.png)
 
 
 5%のノイズをのせた。
@@ -434,7 +535,7 @@ sumdf.plot()
 
 
 
-![png](fit_lab_files/fit_lab_55_1.png)
+![png](fit_lab_files/fit_lab_57_1.png)
 
 
 
@@ -541,7 +642,7 @@ waves().plot()
 
 
 
-![png](fit_lab_files/fit_lab_59_1.png)
+![png](fit_lab_files/fit_lab_61_1.png)
 
 
 
@@ -554,7 +655,7 @@ waves().plot()
 
 
 ```python
-pd.DataFrame([waves(i) for i in range(10)])
+df = pd.DataFrame([waves(i) for i in range(10)]); df
 ```
 
 
@@ -887,7 +988,7 @@ plt.plot(fitx, fity)
 
 
 
-![png](fit_lab_files/fit_lab_67_1.png)
+![png](fit_lab_files/fit_lab_69_1.png)
 
 
 
@@ -920,7 +1021,7 @@ plt.plot(fitx, choice(gg, *ch), 'k-')
 
 
 
-![png](fit_lab_files/fit_lab_71_1.png)
+![png](fit_lab_files/fit_lab_73_1.png)
 
 
 fittingの結果を用いてガウシアン描いてみる。
@@ -955,7 +1056,7 @@ fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 
 
-![png](fit_lab_files/fit_lab_75_1.png)
+![png](fit_lab_files/fit_lab_77_1.png)
 
 
 
@@ -1351,7 +1452,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_87_1.png)
+![png](fit_lab_files/fit_lab_89_1.png)
 
 
 
