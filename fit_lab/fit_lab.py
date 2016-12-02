@@ -268,6 +268,37 @@ sumdf
 
 # indexはそのままにカラムをすべて足す。この中でindexいくつの位置にガウシアンが立つかを調べる。
 
+# ## 複数のランダムウェーブを生成
+
+# In[133]:
+
+def waves(seed: int=np.random.randint(100)):
+    """ランダムノイズを発生させたウェーブを作成する
+    引数: seed: ランダムステートを初期化する整数。デフォルトでseedをランダムに発生させる
+    戻り値: noisedf.sum(1): pd.Series型"""
+    r = np.random
+    r.seed(seed)  # ランダム初期化
+    xa = np.tile(x, (10,1))
+    aa = abs(r.randn(10))
+    mua = np.arange(min(x), max(x), 10)
+    sia = 10 * abs(r.randn(10))
+
+    df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+    noisedf = df + df * 0.05 * r.randn(*df.shape)
+    return noisedf.sum(1)
+waves().plot()
+
+
+# In[147]:
+
+get_ipython().magic('timeit waves()')
+
+
+# In[146]:
+
+pd.DataFrame([waves(i) for i in range(10)])
+
+
 # # データフレームに一斉にフィッティングかける
 # 一番やりたかったこと　ここから。
 

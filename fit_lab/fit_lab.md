@@ -512,6 +512,330 @@ sumdf
 
 indexはそのままにカラムをすべて足す。この中でindexいくつの位置にガウシアンが立つかを調べる。
 
+## 複数のランダムウェーブを生成
+
+
+```python
+def waves(seed: int=np.random.randint(100)):
+    """ランダムノイズを発生させたウェーブを作成する
+    引数: seed: ランダムステートを初期化する整数。デフォルトでseedをランダムに発生させる
+    戻り値: noisedf.sum(1): pd.Series型"""
+    r = np.random
+    r.seed(seed)  # ランダム初期化
+    xa = np.tile(x, (10,1))
+    aa = abs(r.randn(10))
+    mua = np.arange(min(x), max(x), 10)
+    sia = 10 * abs(r.randn(10))
+
+    df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+    noisedf = df + df * 0.05 * r.randn(*df.shape)
+    return noisedf.sum(1)
+waves().plot()
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x1de4eae4400>
+
+
+
+
+![png](fit_lab_files/fit_lab_59_1.png)
+
+
+
+```python
+%timeit waves()
+```
+
+    100 loops, best of 3: 2.33 ms per loop
+    
+
+
+```python
+pd.DataFrame([waves(i) for i in range(10)])
+```
+
+
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>...</th>
+      <th>991</th>
+      <th>992</th>
+      <th>993</th>
+      <th>994</th>
+      <th>995</th>
+      <th>996</th>
+      <th>997</th>
+      <th>998</th>
+      <th>999</th>
+      <th>1000</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>6.945187</td>
+      <td>7.108197</td>
+      <td>6.845565</td>
+      <td>6.948541</td>
+      <td>6.845199</td>
+      <td>7.055347</td>
+      <td>6.977616</td>
+      <td>7.056927</td>
+      <td>7.079365</td>
+      <td>7.138362</td>
+      <td>...</td>
+      <td>5.352165</td>
+      <td>5.237588</td>
+      <td>5.368697</td>
+      <td>5.147199</td>
+      <td>5.197124</td>
+      <td>5.213663</td>
+      <td>5.317618</td>
+      <td>5.263670</td>
+      <td>5.266836</td>
+      <td>5.319199</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>7.133442</td>
+      <td>7.059512</td>
+      <td>7.190294</td>
+      <td>7.232617</td>
+      <td>7.261932</td>
+      <td>7.016845</td>
+      <td>7.189088</td>
+      <td>7.295845</td>
+      <td>7.185489</td>
+      <td>7.022073</td>
+      <td>...</td>
+      <td>5.166897</td>
+      <td>5.017208</td>
+      <td>5.075220</td>
+      <td>5.214620</td>
+      <td>5.136346</td>
+      <td>5.049252</td>
+      <td>5.014033</td>
+      <td>5.049660</td>
+      <td>5.022505</td>
+      <td>5.217068</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5.348248</td>
+      <td>5.553449</td>
+      <td>5.548598</td>
+      <td>5.538164</td>
+      <td>5.430301</td>
+      <td>5.412686</td>
+      <td>5.579073</td>
+      <td>5.552572</td>
+      <td>5.647116</td>
+      <td>5.415833</td>
+      <td>...</td>
+      <td>5.104680</td>
+      <td>5.207193</td>
+      <td>5.014641</td>
+      <td>5.061536</td>
+      <td>5.125885</td>
+      <td>5.072221</td>
+      <td>5.181555</td>
+      <td>4.908350</td>
+      <td>5.057412</td>
+      <td>5.102178</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>7.274488</td>
+      <td>7.426611</td>
+      <td>7.076638</td>
+      <td>7.595002</td>
+      <td>7.723684</td>
+      <td>7.506426</td>
+      <td>7.210183</td>
+      <td>7.406186</td>
+      <td>7.584276</td>
+      <td>7.486866</td>
+      <td>...</td>
+      <td>5.332370</td>
+      <td>5.272767</td>
+      <td>5.421780</td>
+      <td>5.499642</td>
+      <td>5.210076</td>
+      <td>5.363444</td>
+      <td>5.385211</td>
+      <td>5.220253</td>
+      <td>5.466960</td>
+      <td>5.286162</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5.086649</td>
+      <td>5.070892</td>
+      <td>5.054293</td>
+      <td>5.011917</td>
+      <td>5.164769</td>
+      <td>5.146161</td>
+      <td>4.921866</td>
+      <td>5.057269</td>
+      <td>5.123093</td>
+      <td>5.084757</td>
+      <td>...</td>
+      <td>5.065826</td>
+      <td>5.150936</td>
+      <td>5.078083</td>
+      <td>5.028696</td>
+      <td>5.064742</td>
+      <td>5.037380</td>
+      <td>5.331177</td>
+      <td>5.131369</td>
+      <td>5.206482</td>
+      <td>5.235898</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5.380750</td>
+      <td>5.546886</td>
+      <td>5.502097</td>
+      <td>5.557626</td>
+      <td>5.416009</td>
+      <td>5.364240</td>
+      <td>5.585252</td>
+      <td>5.475956</td>
+      <td>5.528495</td>
+      <td>5.392496</td>
+      <td>...</td>
+      <td>5.354433</td>
+      <td>5.439949</td>
+      <td>5.550969</td>
+      <td>5.281462</td>
+      <td>5.491426</td>
+      <td>5.382127</td>
+      <td>5.453180</td>
+      <td>5.208387</td>
+      <td>5.277590</td>
+      <td>5.423068</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>5.629440</td>
+      <td>5.443759</td>
+      <td>5.531657</td>
+      <td>5.720805</td>
+      <td>5.500641</td>
+      <td>5.665483</td>
+      <td>5.582582</td>
+      <td>5.677595</td>
+      <td>5.435612</td>
+      <td>5.648220</td>
+      <td>...</td>
+      <td>5.288703</td>
+      <td>5.109035</td>
+      <td>5.229636</td>
+      <td>5.267676</td>
+      <td>5.134689</td>
+      <td>5.277698</td>
+      <td>5.236259</td>
+      <td>5.066652</td>
+      <td>5.206823</td>
+      <td>5.181833</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>6.827328</td>
+      <td>6.582126</td>
+      <td>6.744212</td>
+      <td>6.905696</td>
+      <td>6.514176</td>
+      <td>6.890059</td>
+      <td>6.824137</td>
+      <td>6.794166</td>
+      <td>6.634765</td>
+      <td>6.680948</td>
+      <td>...</td>
+      <td>5.532310</td>
+      <td>5.495926</td>
+      <td>5.500994</td>
+      <td>5.431254</td>
+      <td>5.448915</td>
+      <td>5.520323</td>
+      <td>5.463009</td>
+      <td>5.670345</td>
+      <td>5.523788</td>
+      <td>5.370447</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>6.417707</td>
+      <td>6.429011</td>
+      <td>6.475284</td>
+      <td>6.290368</td>
+      <td>6.670582</td>
+      <td>6.636257</td>
+      <td>6.427363</td>
+      <td>6.455692</td>
+      <td>6.620168</td>
+      <td>6.508548</td>
+      <td>...</td>
+      <td>4.998059</td>
+      <td>4.907901</td>
+      <td>4.900991</td>
+      <td>4.984814</td>
+      <td>5.011483</td>
+      <td>4.939173</td>
+      <td>5.053548</td>
+      <td>4.868739</td>
+      <td>4.874232</td>
+      <td>4.905128</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>5.285603</td>
+      <td>5.404935</td>
+      <td>5.279550</td>
+      <td>5.060339</td>
+      <td>5.276347</td>
+      <td>5.236848</td>
+      <td>5.305694</td>
+      <td>5.347108</td>
+      <td>5.337980</td>
+      <td>5.361805</td>
+      <td>...</td>
+      <td>5.626433</td>
+      <td>5.572625</td>
+      <td>5.647371</td>
+      <td>5.480810</td>
+      <td>5.495603</td>
+      <td>5.535284</td>
+      <td>5.492852</td>
+      <td>5.550408</td>
+      <td>5.592165</td>
+      <td>5.344825</td>
+    </tr>
+  </tbody>
+</table>
+<p>10 rows × 1001 columns</p>
+</div>
+
+
+
 # データフレームに一斉にフィッティングかける
 一番やりたかったこと　ここから。
 
@@ -563,7 +887,7 @@ plt.plot(fitx, fity)
 
 
 
-![png](fit_lab_files/fit_lab_63_1.png)
+![png](fit_lab_files/fit_lab_67_1.png)
 
 
 
@@ -596,7 +920,7 @@ plt.plot(fitx, choice(gg, *ch), 'k-')
 
 
 
-![png](fit_lab_files/fit_lab_67_1.png)
+![png](fit_lab_files/fit_lab_71_1.png)
 
 
 fittingの結果を用いてガウシアン描いてみる。
@@ -631,7 +955,7 @@ fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 
 
-![png](fit_lab_files/fit_lab_71_1.png)
+![png](fit_lab_files/fit_lab_75_1.png)
 
 
 
@@ -1027,7 +1351,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_83_1.png)
+![png](fit_lab_files/fit_lab_87_1.png)
 
 
 
