@@ -3,9 +3,9 @@
 
 # # 自作ガウシアン
 
-# In[29]:
+# In[2]:
 
-def gauss(x, a, mu, si, noisef=nf):
+def gauss(x, a, mu, si, noisef):
     """
     a: 最大値
     mu: 位置
@@ -15,7 +15,7 @@ def gauss(x, a, mu, si, noisef=nf):
     return a * np.exp(-(x - mu)**2 / 2 / si**2) + noisef
 
 
-# In[30]:
+# In[3]:
 
 nf=0.5
 n=1001
@@ -23,12 +23,12 @@ x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 
 
-# In[32]:
+# In[4]:
 
-g= gauss(x, a, mu, si); g
+g= gauss(x, a, mu, si, nf); g
 
 
-# In[33]:
+# In[5]:
 
 plt.plot(x, g)
 
@@ -194,14 +194,14 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 # ## ランダムデータフレームの作成
 
-# In[50]:
+# In[6]:
 
 r=np.random
 
 
 # いっぱい使うから乱数生成をrに縮めちゃう
 
-# In[79]:
+# In[7]:
 
 g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
 plt.plot(x, g)
@@ -209,27 +209,33 @@ plt.plot(x, g)
 
 # ランダムな値を使って発生させたガウシアン
 
-# In[84]:
+# In[8]:
 
 get_ipython().run_cell_magic('timeit', '', 'df = pd.DataFrame([], index=range(1000))\nfor i in np.arange(min(x), max(x), 10):\n    g = gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)\n    df[i] = pd.DataFrame(g)')
 
 
 # まず思いつくforループ
 
-# In[85]:
+# In[12]:
 
-# %%timeit
-garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
-for i in np.arange(min(x), max(x), 10)]).T
-df = pd.DataFrame(garray)
+get_ipython().run_cell_magic('timeit', '', 'garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)\n                    for i in np.arange(min(x), max(x), 10)]).T\ndf = pd.DataFrame(garray)')
 
 
-# より高速
+# リスト内包表記を使うことでより高速
 
-# In[86]:
+# In[81]:
 
-df.plot()
+get_ipython().run_cell_magic('timeit', '', 'xa = np.tile(x, (10,1))\naa = abs(r.randn(10))\nmua = np.arange(min(x), max(x), 10)\nsia = 10 * abs(r.randn(10))\n\ndf = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))')
 
+
+# np.arrayで変数作るともっともっと高速
+
+# In[82]:
+
+gdf.plot()
+
+
+# ## 足し合わせた複数の波があるdf
 
 # 様々な形のガウシアン。
 # 
@@ -239,9 +245,9 @@ df.plot()
 
 # ## ランダムデータフレームにノイズのせてサンプルデータ作成
 
-# In[226]:
+# In[89]:
 
-noisedf =df +0.05 * r.randn(*df.shape)
+noisedf =df + df * 0.05 * r.randn(*df.shape)
 noisedf.plot()
 
 
@@ -249,13 +255,13 @@ noisedf.plot()
 # `np.randn(*df.shape)`でデータフレームと同じ行列を持ったランダムデータフレームを生成させている。
 # スターを`df.shape`の前につけてタプルを展開して`randn`に渡す。
 
-# In[228]:
+# In[90]:
 
 sumdf = noisedf.sum(axis=1)
 sumdf.plot()
 
 
-# In[227]:
+# In[85]:
 
 sumdf
 

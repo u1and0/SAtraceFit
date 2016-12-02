@@ -3,7 +3,7 @@
 
 
 ```python
-def gauss(x, a, mu, si, noisef=nf):
+def gauss(x, a, mu, si, noisef):
     """
     a: 最大値
     mu: 位置
@@ -23,7 +23,7 @@ a, mu, si = 1, 50, 1
 
 
 ```python
-g= gauss(x, a, mu, si); g
+g= gauss(x, a, mu, si, nf); g
 ```
 
 
@@ -41,7 +41,7 @@ plt.plot(x, g)
 
 
 
-    [<matplotlib.lines.Line2D at 0x148c87bcba8>]
+    [<matplotlib.lines.Line2D at 0x1de4319fb70>]
 
 
 
@@ -320,7 +320,7 @@ plt.plot(x, g)
 
 
 
-    [<matplotlib.lines.Line2D at 0x148cf05d048>]
+    [<matplotlib.lines.Line2D at 0x1de436ccfd0>]
 
 
 
@@ -339,39 +339,57 @@ for i in np.arange(min(x), max(x), 10):
     df[i] = pd.DataFrame(g)
 ```
 
-    100 loops, best of 3: 9.79 ms per loop
+    100 loops, best of 3: 8.69 ms per loop
     
 
 まず思いつくforループ
 
 
 ```python
-# %%timeit
+%%timeit
 garray = np.array([gauss(x, a=r.rand(), mu=i, si=10*r.rand(), noisef=nf)
-for i in np.arange(min(x), max(x), 10)]).T
+                    for i in np.arange(min(x), max(x), 10)]).T
 df = pd.DataFrame(garray)
 ```
 
-    1000 loops, best of 3: 903 µs per loop
+    1000 loops, best of 3: 743 µs per loop
     
 
-より高速
+リスト内包表記を使うことでより高速
 
 
 ```python
-df.plot()
+%%timeit
+xa = np.tile(x, (10,1))
+aa = abs(r.randn(10))
+mua = np.arange(min(x), max(x), 10)
+sia = 10 * abs(r.randn(10))
+
+df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+```
+
+    1000 loops, best of 3: 693 µs per loop
+    
+
+np.arrayで変数作るともっともっと高速
+
+
+```python
+gdf.plot()
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x148cf178ac8>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1de4b011c18>
 
 
 
 
-![png](fit_lab_files/fit_lab_47_1.png)
+![png](fit_lab_files/fit_lab_49_1.png)
 
+
+## 足し合わせた複数の波があるdf
 
 様々な形のガウシアン。
 
@@ -383,19 +401,19 @@ df.plot()
 
 
 ```python
-noisedf =df +0.05 * r.randn(*df.shape)
+noisedf =df + df * 0.05 * r.randn(*df.shape)
 noisedf.plot()
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x148d2a4eba8>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1de4c37d320>
 
 
 
 
-![png](fit_lab_files/fit_lab_50_1.png)
+![png](fit_lab_files/fit_lab_53_1.png)
 
 
 5%のノイズをのせた。
@@ -411,12 +429,12 @@ sumdf.plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x148d2b4c588>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1de4c436320>
 
 
 
 
-![png](fit_lab_files/fit_lab_52_1.png)
+![png](fit_lab_files/fit_lab_55_1.png)
 
 
 
@@ -427,67 +445,67 @@ sumdf
 
 
 
-    0      5.787823
-    1      5.844201
-    2      5.649158
-    3      5.858712
-    4      5.649082
-    5      5.668082
-    6      5.721880
-    7      5.799648
-    8      5.643667
-    9      5.843835
-    10     5.935265
-    11     5.720044
-    12     5.537058
-    13     5.245885
-    14     5.396977
-    15     5.686164
-    16     5.774004
-    17     5.474217
-    18     5.496124
-    19     5.355029
-    20     5.472915
-    21     5.758243
-    22     5.176296
-    23     5.487734
-    24     5.199490
-    25     5.571278
-    26     5.347202
-    27     5.515283
-    28     5.239639
-    29     5.127778
-             ...   
-    970    4.709422
-    971    4.774488
-    972    4.734391
-    973    4.689422
-    974    4.957229
-    975    4.956173
-    976    5.091661
-    977    5.185160
-    978    5.149931
-    979    4.915803
-    980    4.890884
-    981    4.914116
-    982    4.896102
-    983    4.671823
-    984    5.210647
-    985    4.948862
-    986    5.148135
-    987    4.834577
-    988    4.759693
-    989    4.788015
-    990    5.038984
-    991    4.975161
-    992    4.707990
-    993    4.899676
-    994    4.976002
-    995    5.209907
-    996    4.702604
-    997    4.819293
-    998    5.090502
-    999    4.725422
+    0       5.432676
+    1       5.605698
+    2       5.298539
+    3       5.522210
+    4       5.598536
+    5       5.628876
+    6       5.590488
+    7       5.520159
+    8       5.357040
+    9       5.524325
+    10      5.352305
+    11      5.252700
+    12      5.442083
+    13      5.357631
+    14      5.633205
+    15      5.394023
+    16      5.485547
+    17      5.300434
+    18      5.472389
+    19      5.403377
+    20      4.983068
+    21      5.330210
+    22      5.274541
+    23      5.166913
+    24      5.551668
+    25      5.476331
+    26      5.108893
+    27      4.984221
+    28      5.214877
+    29      5.402299
+              ...   
+    971     5.363341
+    972     5.478791
+    973     5.665920
+    974     5.777761
+    975     5.737976
+    976     5.659097
+    977     5.625246
+    978     5.545209
+    979     5.726983
+    980     5.747878
+    981     5.479815
+    982     5.714544
+    983     5.406541
+    984     5.325538
+    985     5.532115
+    986     5.222370
+    987     5.502674
+    988     5.481744
+    989     5.548988
+    990     5.690841
+    991     5.502521
+    992     5.599736
+    993     5.366537
+    994     5.508551
+    995     5.497639
+    996     5.128502
+    997     5.403535
+    998     5.350118
+    999     5.540160
+    1000    5.401792
     dtype: float64
 
 
@@ -545,7 +563,7 @@ plt.plot(fitx, fity)
 
 
 
-![png](fit_lab_files/fit_lab_60_1.png)
+![png](fit_lab_files/fit_lab_63_1.png)
 
 
 
@@ -578,7 +596,7 @@ plt.plot(fitx, choice(gg, *ch), 'k-')
 
 
 
-![png](fit_lab_files/fit_lab_64_1.png)
+![png](fit_lab_files/fit_lab_67_1.png)
 
 
 fittingの結果を用いてガウシアン描いてみる。
@@ -613,7 +631,7 @@ fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 
 
-![png](fit_lab_files/fit_lab_68_1.png)
+![png](fit_lab_files/fit_lab_71_1.png)
 
 
 
@@ -1009,7 +1027,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_80_1.png)
+![png](fit_lab_files/fit_lab_83_1.png)
 
 
 
