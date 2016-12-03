@@ -46,7 +46,7 @@ plt.plot(x, g)
 
 
 
-    [<matplotlib.lines.Line2D at 0x1de4319fb70>]
+    [<matplotlib.lines.Line2D at 0x1e4a955d438>]
 
 
 
@@ -81,7 +81,7 @@ plt.plot(x,z)
 
 
 
-    [<matplotlib.lines.Line2D at 0x148c88209b0>]
+    [<matplotlib.lines.Line2D at 0x1e4a95df9e8>]
 
 
 
@@ -137,7 +137,7 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
 
 
 ```python
-g = gauss(x, a, mu, si, 0.5)
+g = f(x, a, mu, si, 0.5)
 gnoise = g + 0.1 * g * np.random.randn(n)
 ```
 
@@ -152,7 +152,7 @@ plt.plot(x, g,'b-' )
 
 
 
-    [<matplotlib.lines.Line2D at 0x1de4fd26748>]
+    [<matplotlib.lines.Line2D at 0x1e4a95b1908>]
 
 
 
@@ -233,55 +233,13 @@ print('元パラメータ:%s\nフィッティングで求めたパラメータ: 
 
 ```python
 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+yfit = f(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 ```
 
-
-    ---------------------------------------------------------------------------
-
-    TypeError                                 Traceback (most recent call last)
-
-    <ipython-input-160-edebaa9a838c> in <module>()
-    ----> 1 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-          2 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
-          3 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
+    元パラメータ:(1, 50, 1)
+    フィッティングで求めたパラメータ: (0.55668807561175548, 50.673260608313456, 82.458709637370987)
     
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
-        674         # Remove full_output from kwargs, otherwise we're passing it in twice.
-        675         return_full = kwargs.pop('full_output', False)
-    --> 676         res = leastsq(func, p0, Dfun=jac, full_output=1, **kwargs)
-        677         popt, pcov, infodict, errmsg, ier = res
-        678         cost = np.sum(infodict['fvec'] ** 2)
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in leastsq(func, x0, args, Dfun, full_output, col_deriv, ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
-        375     if not isinstance(args, tuple):
-        376         args = (args,)
-    --> 377     shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
-        378     m = shape[0]
-        379     if n > m:
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape)
-         24 def _check_func(checker, argname, thefunc, x0, args, numinputs,
-         25                 output_shape=None):
-    ---> 26     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
-         27     if (output_shape is not None) and (shape(res) != output_shape):
-         28         if (output_shape[0] != 1):
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in func_wrapped(params)
-        453     if weights is None:
-        454         def func_wrapped(params):
-    --> 455             return func(xdata, *params) - ydata
-        456     else:
-        457         def func_wrapped(params):
-    
-
-    TypeError: gauss() missing 1 required positional argument: 'noisef'
-
 
 
 ```python
@@ -291,9 +249,9 @@ _
 
 
 
-    array([[  8.87235438e-04,   4.49809686e-10,  -5.86253148e-04],
-           [  4.49809686e-10,   1.16212476e-03,  -4.46876918e-10],
-           [ -5.86253148e-04,  -4.46876918e-10,   1.16212476e-03]])
+    array([[  4.53012688e-05,  -2.83810158e-04,  -3.17019703e-02],
+           [ -2.83810158e-04,   4.25235857e+00,   6.20661977e-01],
+           [ -3.17019703e-02,   6.20661977e-01,   4.22500916e+01]])
 
 
 
@@ -313,7 +271,7 @@ plt.plot(x, yfit, 'b-')
 
 
 
-    [<matplotlib.lines.Line2D at 0x148c8933c50>]
+    [<matplotlib.lines.Line2D at 0x1e4a9f1c4e0>]
 
 
 

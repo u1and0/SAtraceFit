@@ -3,7 +3,7 @@
 
 # # 自作ガウシアン
 
-# In[164]:
+# In[4]:
 
 def gauss(x, a, mu, si):
     """
@@ -15,12 +15,12 @@ def gauss(x, a, mu, si):
     return a * np.exp(-(x - mu)**2 / 2 / si**2)
 
 
-# In[165]:
+# In[5]:
 
 f = lambda x, a, mu, si, nf: gauss(x, a, mu, si) + nf 
 
 
-# In[166]:
+# In[6]:
 
 nf=0.5
 n=1001
@@ -28,29 +28,29 @@ x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 
 
-# In[167]:
+# In[7]:
 
 g= f(x, a, mu, si, nf); g
 
 
-# In[5]:
+# In[8]:
 
 plt.plot(x, g)
 
 
 # ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
 
-# In[34]:
+# In[9]:
 
 from  scipy.stats import norm
 
 
-# In[35]:
+# In[10]:
 
 z=norm.pdf(x, loc=50, scale=1)-0.5; z
 
 
-# In[36]:
+# In[11]:
 
 plt.plot(x,z)
 
@@ -82,15 +82,15 @@ get_ipython().magic('timeit norm.pdf(x, loc=50, scale=1)-0.5')
 # 
 # ということで自作のガウシアンを使っていきます。
 
-# In[158]:
+# In[13]:
 
-g = gauss(x, a, mu, si, 0.5)
+g = f(x, a, mu, si, 0.5)
 gnoise = g + 0.1 * g * np.random.randn(n)
 
 
 # ノイズを発生させる
 
-# In[159]:
+# In[14]:
 
 plt.plot(x, gnoise, '-')
 plt.plot(x, g,'b-' )
@@ -104,7 +104,7 @@ plt.plot(x, g,'b-' )
 # こういう時はカーブフィットを取る。
 # scipy.optimizeからcurve_fitをインポートしてくる。
 
-# In[150]:
+# In[15]:
 
 from scipy.optimize import curve_fit
 from scipy.optimize import leastsq
@@ -120,14 +120,14 @@ yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出され�
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 
 
-# In[160]:
+# In[22]:
 
 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+yfit = f(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 
 
-# In[46]:
+# In[23]:
 
 _
 
@@ -139,7 +139,7 @@ _
 #     of the parameter estimate. To compute one standard deviation errors
 #     on the parameters use ``perr = np.sqrt(np.diag(pcov))``.
 
-# In[48]:
+# In[24]:
 
 plt.plot(x, gnoise, 'r-')
 plt.plot(x, yfit, 'b-') 
