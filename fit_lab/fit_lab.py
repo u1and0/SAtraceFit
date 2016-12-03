@@ -3,24 +3,19 @@
 
 # # 自作ガウシアン
 
-# In[4]:
+# In[1]:
 
-def gauss(x, a, mu, si):
+def gauss(x, a, mu, si, nf):
     """
     a: 最大値
     mu: 位置
     si: 線幅
     noisef: 最低値
     """
-    return a * np.exp(-(x - mu)**2 / 2 / si**2)
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + nf
 
 
-# In[5]:
-
-f = lambda x, a, mu, si, nf: gauss(x, a, mu, si) + nf 
-
-
-# In[6]:
+# In[55]:
 
 nf=0.5
 n=1001
@@ -28,12 +23,12 @@ x = np.linspace(0,100,n)
 a, mu, si = 1, 50, 1
 
 
-# In[7]:
+# In[3]:
 
-g= f(x, a, mu, si, nf); g
+g= gauss(x, a, mu, si, nf); g
 
 
-# In[8]:
+# In[4]:
 
 plt.plot(x, g)
 
@@ -82,19 +77,19 @@ get_ipython().magic('timeit norm.pdf(x, loc=50, scale=1)-0.5')
 # 
 # ということで自作のガウシアンを使っていきます。
 
-# In[13]:
+# In[5]:
 
-g = f(x, a, mu, si, 0.5)
+g = gauss(x, a, mu, si, 0.5)
 gnoise = g + 0.1 * g * np.random.randn(n)
 
 
-# ノイズを発生させる
-
-# In[14]:
+# In[6]:
 
 plt.plot(x, gnoise, '-')
 plt.plot(x, g,'b-' )
 
+
+# ノイズを発生させる
 
 # ## カーブフィッティングをかけて、ノイズをフィッティングする
 # 
@@ -104,30 +99,24 @@ plt.plot(x, g,'b-' )
 # こういう時はカーブフィットを取る。
 # scipy.optimizeからcurve_fitをインポートしてくる。
 
-# In[15]:
+# In[59]:
 
 from scipy.optimize import curve_fit
 from scipy.optimize import leastsq
 from scipy.optimize import least_squares
+from scipy.stats import scoreatpercentile
 
 
 # 次にフィッティングパラメータを定める。
 
-# In[160]:
+# In[56]:
 
-(a_, mu_, si_), _ = leastsq(gauss, x, gnoise, p0=(a, mu, si))
-yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
+(a_, mu_, si_, nf_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si, nf))
+yfit = gauss(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 
 
-# In[22]:
-
-(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-yfit = f(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
-print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
-
-
-# In[23]:
+# In[28]:
 
 _
 
@@ -139,7 +128,7 @@ _
 #     of the parameter estimate. To compute one standard deviation errors
 #     on the parameters use ``perr = np.sqrt(np.diag(pcov))``.
 
-# In[24]:
+# In[57]:
 
 plt.plot(x, gnoise, 'r-')
 plt.plot(x, yfit, 'b-') 
@@ -207,16 +196,16 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 # ## ランダムデータフレームの作成
 
-# In[6]:
+# In[12]:
 
 r=np.random
 
 
 # いっぱい使うから乱数生成をrに縮めちゃう
 
-# In[7]:
+# In[13]:
 
-g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
+g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), nf=nf*r.rand())
 plt.plot(x, g)
 
 
@@ -236,19 +225,27 @@ get_ipython().run_cell_magic('timeit', '', 'garray = np.array([gauss(x, a=r.rand
 
 # リスト内包表記を使うことでより高速
 
-# In[81]:
+# In[14]:
 
 get_ipython().run_cell_magic('timeit', '', 'xa = np.tile(x, (10,1))\naa = abs(r.randn(10))\nmua = np.arange(min(x), max(x), 10)\nsia = 10 * abs(r.randn(10))\n\ndf = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))')
 
 
 # np.arrayで変数作るともっともっと高速
 
-# In[82]:
+# In[20]:
 
-gdf.plot()
+xa = np.tile(x, (10,1))
+aa = abs(r.randn(10))
+mua = np.arange(min(x), max(x), 10)
+sia = 10 * abs(r.randn(10))
+
+df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
 
 
-# ## 足し合わせた複数の波があるdf
+# In[21]:
+
+df.plot()
+
 
 # 様々な形のガウシアン。
 # 
@@ -258,7 +255,7 @@ gdf.plot()
 
 # ## ランダムデータフレームにノイズのせてサンプルデータ作成
 
-# In[89]:
+# In[22]:
 
 noisedf =df + df * 0.05 * r.randn(*df.shape)
 noisedf.plot()
@@ -283,7 +280,7 @@ sumdf
 
 # ## 複数のランダムウェーブを生成
 
-# In[133]:
+# In[23]:
 
 def waves(seed: int=np.random.randint(100)):
     """ランダムノイズを発生させたウェーブを作成する
@@ -307,7 +304,7 @@ waves().plot()
 get_ipython().magic('timeit waves()')
 
 
-# In[148]:
+# In[24]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 
@@ -315,17 +312,11 @@ df = pd.DataFrame([waves(i) for i in range(10)]); df
 # # データフレームに一斉にフィッティングかける
 # 一番やりたかったこと　ここから。
 
-# In[242]:
-
-param = (a, mu, si) = 5, 300, 3
-param
-
-
-# パラメータ再設定
-
 # ## 試しに波を一つ選んでfitting
 
-# In[254]:
+# ### 特定範囲を抽出する関数を作成
+
+# In[26]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -341,33 +332,111 @@ def choice(array, center, span):
     return array[x1:x2]
 
 
-# In[256]:
+# In[37]:
 
-ch = (300, 300)  # 中央値300でスパン300で取り出したい
-fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
-plt.plot(fitx, fity)
+ch = (300, 200)  # 中央値300でスパン200で取り出したい
+df0 = choice(df.iloc[0], *ch)
+df0.plot()
 
 
-# In[275]:
+# ### 一つの波をfitting
 
-popt, _pcov = curve_fit(gauss, fitx, fity, p0=param)
-print('a, mu, si = ', popt)
+# In[62]:
+
+param = (a, mu, si, nf) = 5, 300, 3, scoreatpercentile(df0, 25)
+param
+
+
+# パラメータ再設定
+
+# In[66]:
+
+fitx, fity = df0.index, df0.values,
+popt, _pcov = curve_fit(gauss, np.array(fitx), fity, p0=param)
+print('a, mu, si, nf = ', popt)
 
 
 # fittingの結果
 
-# In[274]:
+# In[83]:
 
-gg = gauss(sumdf.index,*popt)
-
-
-# In[273]:
-
-sumdf.plot()
-plt.plot(fitx, choice(gg, *ch), 'k-')
+df.iloc[0].plot(color='gray', lw=0.5)
+plt.plot(df0.index, gauss(df0.index, *popt))
+plt.plot(popt[1], popt[0]+popt[3] , 'D', fillstyle='none', mew=2)
 
 
-# fittingの結果を用いてガウシアン描いてみる。
+# プロットするときは`mu`が横軸、　`a+nf`が縦軸
+
+# ## df縦方向にfitting
+# axis=0方向にfitting
+# 
+# 意味的には特定周波数を別時間軸上で同時に実行。
+# `df.apply(curve_fit, args=())`使いたい。
+
+# In[205]:
+
+ax=df.T.plot()
+plt.plot((100,100, 300, 300, 100), (4.5, 10.5, 10.5, 4.5, 4.5), 'r-')  # 枠線
+
+
+# 赤枠の中だけ拡大。(その中だけがフィッティング対象)
+
+# In[106]:
+
+dfe = df.apply(choice,axis=1, args=ch)
+dfe.T.plot(legend=False)
+
+
+# 拡大した図
+
+# ### fitting関数作成
+
+# In[149]:
+
+fit = lambda x: curve_fit(gauss, x.index, x.values, p0=param)  # fitting function
+fita = dfe.apply(fit, axis=1)
+
+
+# フィッティング関数はlambda式で定義して、
+# applyでデータフレームの各行に適用。
+
+# In[150]:
+
+type(fita)
+
+
+# In[207]:
+
+fita
+
+
+# fitaはpandas.Seriesだが、一つの要素にタプル形式でフィッティングのパラメータと分散が入っている。
+# 
+# そこで以下のようにして内法表記で分解して第0要素だけ取り出す。
+
+# In[208]:
+
+result = pd.DataFrame((i[0] for i in fita), columns=['a', 'mu', 'si', 'nf']); result
+
+
+# フィッティング結果のデータフレーム
+
+# ### fitting結果を描く
+
+# In[216]:
+
+df.T.plot()
+
+
+# In[220]:
+
+defit = lambda a, mu, si ,nf: gauss(np.array(df.columns), a, mu, si ,nf)
+
+
+# In[221]:
+
+result.apply(defit, axis=1)
+
 
 # ## 連続的にfitting
 

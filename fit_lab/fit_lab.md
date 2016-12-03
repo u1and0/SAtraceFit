@@ -3,19 +3,14 @@
 
 
 ```python
-def gauss(x, a, mu, si):
+def gauss(x, a, mu, si, nf):
     """
     a: 最大値
     mu: 位置
     si: 線幅
     noisef: 最低値
     """
-    return a * np.exp(-(x - mu)**2 / 2 / si**2)
-```
-
-
-```python
-f = lambda x, a, mu, si, nf: gauss(x, a, mu, si) + nf 
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + nf
 ```
 
 
@@ -28,7 +23,7 @@ a, mu, si = 1, 50, 1
 
 
 ```python
-g= f(x, a, mu, si, nf); g
+g= gauss(x, a, mu, si, nf); g
 ```
 
 
@@ -46,12 +41,12 @@ plt.plot(x, g)
 
 
 
-    [<matplotlib.lines.Line2D at 0x1e4a955d438>]
+    [<matplotlib.lines.Line2D at 0x1a177d2bc88>]
 
 
 
 
-![png](fit_lab_files/fit_lab_5_1.png)
+![png](fit_lab_files/fit_lab_4_1.png)
 
 
 ## 自作ガウシアンじゃなくてscipy.stats.normを使うべきでは
@@ -86,7 +81,7 @@ plt.plot(x,z)
 
 
 
-![png](fit_lab_files/fit_lab_9_1.png)
+![png](fit_lab_files/fit_lab_8_1.png)
 
 
 
@@ -105,7 +100,7 @@ df.plot(style=['-', '--'])
 
 
 
-![png](fit_lab_files/fit_lab_10_1.png)
+![png](fit_lab_files/fit_lab_9_1.png)
 
 
 ## norm vs my_gauss
@@ -137,11 +132,9 @@ normでも自作gaussでも中でnp使っているんで実行速度あんま変
 
 
 ```python
-g = f(x, a, mu, si, 0.5)
+g = gauss(x, a, mu, si, 0.5)
 gnoise = g + 0.1 * g * np.random.randn(n)
 ```
-
-ノイズを発生させる
 
 
 ```python
@@ -152,13 +145,15 @@ plt.plot(x, g,'b-' )
 
 
 
-    [<matplotlib.lines.Line2D at 0x1e4a95b1908>]
+    [<matplotlib.lines.Line2D at 0x1a177c5bcf8>]
 
 
 
 
-![png](fit_lab_files/fit_lab_18_1.png)
+![png](fit_lab_files/fit_lab_16_1.png)
 
+
+ノイズを発生させる
 
 ## カーブフィッティングをかけて、ノイズをフィッティングする
 
@@ -173,72 +168,20 @@ scipy.optimizeからcurve_fitをインポートしてくる。
 from scipy.optimize import curve_fit
 from scipy.optimize import leastsq
 from scipy.optimize import least_squares
+from scipy.stats import scoreatpercentile
 ```
 
 次にフィッティングパラメータを定める。
 
 
 ```python
-(a_, mu_, si_), _ = leastsq(gauss, x, gnoise, p0=(a, mu, si))
-yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
-print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
-```
-
-
-    ---------------------------------------------------------------------------
-
-    TypeError                                 Traceback (most recent call last)
-
-    <ipython-input-160-edebaa9a838c> in <module>()
-    ----> 1 (a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-          2 yfit = gauss(x, a_, mu_, si_)  # フィッティングにより導き出されたa,mu,siを代入
-          3 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
-        674         # Remove full_output from kwargs, otherwise we're passing it in twice.
-        675         return_full = kwargs.pop('full_output', False)
-    --> 676         res = leastsq(func, p0, Dfun=jac, full_output=1, **kwargs)
-        677         popt, pcov, infodict, errmsg, ier = res
-        678         cost = np.sum(infodict['fvec'] ** 2)
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in leastsq(func, x0, args, Dfun, full_output, col_deriv, ftol, xtol, gtol, maxfev, epsfcn, factor, diag)
-        375     if not isinstance(args, tuple):
-        376         args = (args,)
-    --> 377     shape, dtype = _check_func('leastsq', 'func', func, x0, args, n)
-        378     m = shape[0]
-        379     if n > m:
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in _check_func(checker, argname, thefunc, x0, args, numinputs, output_shape)
-         24 def _check_func(checker, argname, thefunc, x0, args, numinputs,
-         25                 output_shape=None):
-    ---> 26     res = atleast_1d(thefunc(*((x0[:numinputs],) + args)))
-         27     if (output_shape is not None) and (shape(res) != output_shape):
-         28         if (output_shape[0] != 1):
-    
-
-    C:\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in func_wrapped(params)
-        453     if weights is None:
-        454         def func_wrapped(params):
-    --> 455             return func(xdata, *params) - ydata
-        456     else:
-        457         def func_wrapped(params):
-    
-
-    TypeError: gauss() missing 1 required positional argument: 'noisef'
-
-
-
-```python
-(a_, mu_, si_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si))
-yfit = f(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
+(a_, mu_, si_, nf_), _ = curve_fit(gauss, x, gnoise, p0=(a, mu, si, nf))
+yfit = gauss(x, a_, mu_, si_, nf)  # フィッティングにより導き出されたa,mu,siを代入
 print('元パラメータ:%s\nフィッティングで求めたパラメータ: %s' % ((a, mu , si), (a_, mu_, si_)))
 ```
 
     元パラメータ:(1, 50, 1)
-    フィッティングで求めたパラメータ: (0.55668807561175548, 50.673260608313456, 82.458709637370987)
+    フィッティングで求めたパラメータ: (0.98288835192385138, 49.983822066353746, 0.99222230410189216)
     
 
 
@@ -249,9 +192,14 @@ _
 
 
 
-    array([[  4.53012688e-05,  -2.83810158e-04,  -3.17019703e-02],
-           [ -2.83810158e-04,   4.25235857e+00,   6.20661977e-01],
-           [ -3.17019703e-02,   6.20661977e-01,   4.22500916e+01]])
+    array([[  2.69528582e-04,   1.34053555e-10,  -1.71228319e-04,
+             -2.27783859e-06],
+           [  1.34053555e-10,   3.40470185e-04,  -1.30160080e-10,
+             -1.16627832e-14],
+           [ -1.71228319e-04,  -1.30160080e-10,   3.46610735e-04,
+             -4.44756457e-06],
+           [ -2.27783859e-06,  -1.16627832e-14,  -4.44756457e-06,
+              3.22135030e-06]])
 
 
 
@@ -271,12 +219,12 @@ plt.plot(x, yfit, 'b-')
 
 
 
-    [<matplotlib.lines.Line2D at 0x1e4a9f1c4e0>]
+    [<matplotlib.lines.Line2D at 0x1a1796a6828>]
 
 
 
 
-![png](fit_lab_files/fit_lab_26_1.png)
+![png](fit_lab_files/fit_lab_24_1.png)
 
 
 さっきと同じグラフに見えるが、描いているのはgではなくyfitであることに注意
@@ -325,7 +273,7 @@ plt.plot(xx, g,'r-' )
 
 
 
-![png](fit_lab_files/fit_lab_34_1.png)
+![png](fit_lab_files/fit_lab_32_1.png)
 
 
 ## カーブフィッティングをかけて、ノイズをフィッティングする
@@ -354,7 +302,7 @@ plt.plot(xx, yfit, 'r-')  # 描いているのはgではなく、yfitである�
 
 
 
-![png](fit_lab_files/fit_lab_37_1.png)
+![png](fit_lab_files/fit_lab_35_1.png)
 
 
 ちゃんとフィッティングできた。
@@ -372,19 +320,19 @@ r=np.random
 
 
 ```python
-g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), noisef=nf*r.rand())
+g = gauss(x, a=r.rand(), mu=10*1, si=10*r.rand(), nf=nf*r.rand())
 plt.plot(x, g)
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x1de436ccfd0>]
+    [<matplotlib.lines.Line2D at 0x1a1782dae80>]
 
 
 
 
-![png](fit_lab_files/fit_lab_43_1.png)
+![png](fit_lab_files/fit_lab_41_1.png)
 
 
 ランダムな値を使って発生させたガウシアン
@@ -427,28 +375,36 @@ sia = 10 * abs(r.randn(10))
 df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
 ```
 
-    1000 loops, best of 3: 693 µs per loop
+    1000 loops, best of 3: 604 µs per loop
     
 
 np.arrayで変数作るともっともっと高速
 
 
 ```python
-gdf.plot()
+xa = np.tile(x, (10,1))
+aa = abs(r.randn(10))
+mua = np.arange(min(x), max(x), 10)
+sia = 10 * abs(r.randn(10))
+
+df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+```
+
+
+```python
+df.plot()
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1de4b011c18>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a1782ad518>
 
 
 
 
-![png](fit_lab_files/fit_lab_51_1.png)
+![png](fit_lab_files/fit_lab_50_1.png)
 
-
-## 足し合わせた複数の波があるdf
 
 様々な形のガウシアン。
 
@@ -467,12 +423,12 @@ noisedf.plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1de4c37d320>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a1783d5198>
 
 
 
 
-![png](fit_lab_files/fit_lab_55_1.png)
+![png](fit_lab_files/fit_lab_53_1.png)
 
 
 5%のノイズをのせた。
@@ -493,7 +449,7 @@ sumdf.plot()
 
 
 
-![png](fit_lab_files/fit_lab_57_1.png)
+![png](fit_lab_files/fit_lab_55_1.png)
 
 
 
@@ -595,12 +551,12 @@ waves().plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1de4eae4400>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a17946eb38>
 
 
 
 
-![png](fit_lab_files/fit_lab_61_1.png)
+![png](fit_lab_files/fit_lab_59_1.png)
 
 
 
@@ -898,22 +854,9 @@ df = pd.DataFrame([waves(i) for i in range(10)]); df
 # データフレームに一斉にフィッティングかける
 一番やりたかったこと　ここから。
 
-
-```python
-param = (a, mu, si) = 5, 300, 3
-param
-```
-
-
-
-
-    (5, 300, 3)
-
-
-
-パラメータ再設定
-
 ## 試しに波を一つ選んでfitting
+
+### 特定範囲を抽出する関数を作成
 
 
 ```python
@@ -933,56 +876,317 @@ def choice(array, center, span):
 
 
 ```python
-ch = (300, 300)  # 中央値300でスパン300で取り出したい
-fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
-plt.plot(fitx, fity)
+ch = (300, 200)  # 中央値300でスパン200で取り出したい
+df0 = choice(df.iloc[0], *ch)
+df0.plot()
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x148d3f0b908>]
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a1781ca898>
 
 
 
 
-![png](fit_lab_files/fit_lab_69_1.png)
+![png](fit_lab_files/fit_lab_66_1.png)
 
+
+### 一つの波をfitting
 
 
 ```python
-popt, _pcov = curve_fit(gauss, fitx, fity, p0=param)
-print('a, mu, si = ', popt)
+param = (a, mu, si, nf) = 5, 300, 3, scoreatpercentile(df0, 25)
+param
 ```
 
-    a, mu, si =  [   5.33304014  272.51733965  288.27265293]
+
+
+
+    (5, 300, 3, 6.1943784193082427)
+
+
+
+パラメータ再設定
+
+
+```python
+fitx, fity = df0.index, df0.values,
+popt, _pcov = curve_fit(gauss, np.array(fitx), fity, p0=param)
+print('a, mu, si, nf = ', popt)
+```
+
+    a, mu, si, nf =  [   1.64608234  299.80613945    8.94731799    6.44094237]
     
 
 fittingの結果
 
 
 ```python
-gg = gauss(sumdf.index,*popt)
+df.iloc[0].plot(color='gray', lw=0.5)
+plt.plot(df0.index, gauss(df0.index, *popt))
+plt.plot(popt[1], popt[0]+popt[3] , 'D', fillstyle='none', mew=2)
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x1a1013407b8>]
+
+
+
+
+![png](fit_lab_files/fit_lab_72_1.png)
+
+
+プロットするときは`mu`が横軸、　`a+nf`が縦軸
+
+## df縦方向にfitting
+axis=0方向にfitting
+
+意味的には特定周波数を別時間軸上で同時に実行。
+`df.apply(curve_fit, args=())`使いたい。
+
+
+```python
+ax=df.T.plot()
+plt.plot((100,100, 300, 300, 100), (4.5, 10.5, 10.5, 4.5, 4.5), 'r-')  # 枠線
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x1a1032e00b8>]
+
+
+
+
+![png](fit_lab_files/fit_lab_75_1.png)
+
+
+赤枠の中だけ拡大。(その中だけがフィッティング対象)
+
+
+```python
+dfe = df.apply(choice,axis=1, args=ch)
+dfe.T.plot(legend=False)
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a103575c88>
+
+
+
+
+![png](fit_lab_files/fit_lab_77_1.png)
+
+
+拡大した図
+
+### fitting関数作成
+
+
+```python
+fit = lambda x: curve_fit(gauss, x.index, x.values, p0=param)  # fitting function
+fita = dfe.apply(fit, axis=1)
+```
+
+フィッティング関数はlambda式で定義して、
+applyでデータフレームの各行に適用。
+
+
+```python
+type(fita)
+```
+
+
+
+
+    pandas.core.series.Series
+
+
+
+
+```python
+fita
+```
+
+
+
+
+    0    ([1.64608233941, 299.806139455, 8.94731798894,...
+    1    ([1.06720581454, 342.175948763, 77.8097497546,...
+    2    ([-1.86034853457, 247.618524866, 71.1429284505...
+    3    ([0.119213086912, 301.166378566, 1.38645305185...
+    4    ([603.417204075, 231.312304775, 3682.28745173,...
+    5    ([-8214.48961119, 324.777372988, 5187.93270244...
+    6    ([-10834.1282713, 288.175702378, 7442.99563502...
+    7    ([0.167421897449, 299.669427889, 11.8363393835...
+    8    ([-10855.5095368, 267.685530085, 9114.65805152...
+    9    ([-5964.08199733, 311.71632169, 6258.82944108,...
+    dtype: object
+
+
+
+fitaはpandas.Seriesだが、一つの要素にタプル形式でフィッティングのパラメータと分散が入っている。
+
+そこで以下のようにして内法表記で分解して第0要素だけ取り出す。
+
+
+```python
+result = pd.DataFrame((i[0] for i in fita), columns=['a', 'mu', 'si', 'nf']); result
+```
+
+
+
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>mu</th>
+      <th>si</th>
+      <th>nf</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.646082</td>
+      <td>299.806139</td>
+      <td>8.947318</td>
+      <td>6.440942</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.067206</td>
+      <td>342.175949</td>
+      <td>77.809750</td>
+      <td>6.611884</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.860349</td>
+      <td>247.618525</td>
+      <td>71.142928</td>
+      <td>8.390693</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.119213</td>
+      <td>301.166379</td>
+      <td>1.386453</td>
+      <td>7.093136</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>603.417204</td>
+      <td>231.312305</td>
+      <td>3682.287452</td>
+      <td>-597.375350</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-8214.489611</td>
+      <td>324.777373</td>
+      <td>5187.932702</td>
+      <td>8219.951273</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-10834.128271</td>
+      <td>288.175702</td>
+      <td>7442.995635</td>
+      <td>10840.016757</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.167422</td>
+      <td>299.669428</td>
+      <td>11.836339</td>
+      <td>5.240607</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>-10855.509537</td>
+      <td>267.685530</td>
+      <td>9114.658052</td>
+      <td>10863.926883</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>-5964.081997</td>
+      <td>311.716322</td>
+      <td>6258.829441</td>
+      <td>5969.772154</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+フィッティング結果のデータフレーム
+
+### fitting結果を描く
+
+
+```python
+df.T.plot()
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a104821b00>
+
+
+
+
+![png](fit_lab_files/fit_lab_88_1.png)
+
+
+
+```python
+defit = lambda a, mu, si ,nf: gauss(np.array(df.columns), a, mu, si ,nf)
 ```
 
 
 ```python
-sumdf.plot()
-plt.plot(fitx, choice(gg, *ch), 'k-')
+result.apply(defit, axis=1)
 ```
 
 
+    ---------------------------------------------------------------------------
 
+    TypeError                                 Traceback (most recent call last)
 
-    [<matplotlib.lines.Line2D at 0x148d44ee5c0>]
+    <ipython-input-221-2f75387b7c33> in <module>()
+    ----> 1 result.apply(defit, axis=1)
+    
 
+    C:\tools\Anaconda3\lib\site-packages\pandas\core\frame.py in apply(self, func, axis, broadcast, raw, reduce, args, **kwds)
+       4161                     if reduce is None:
+       4162                         reduce = True
+    -> 4163                     return self._apply_standard(f, axis, reduce=reduce)
+       4164             else:
+       4165                 return self._apply_broadcast(f, axis)
+    
 
+    C:\tools\Anaconda3\lib\site-packages\pandas\core\frame.py in _apply_standard(self, func, axis, ignore_failures, reduce)
+       4257             try:
+       4258                 for i, v in enumerate(series_gen):
+    -> 4259                     results[i] = func(v)
+       4260                     keys.append(v.name)
+       4261             except Exception as e:
+    
 
+    TypeError: ("<lambda>() missing 3 required positional arguments: 'mu', 'si', and 'nf'", 'occurred at index 0')
 
-![png](fit_lab_files/fit_lab_73_1.png)
-
-
-fittingの結果を用いてガウシアン描いてみる。
 
 ## 連続的にfitting
 
@@ -1014,7 +1218,7 @@ fitdf.plot(style = ['-', '-', '-', '-', '.'])
 
 
 
-![png](fit_lab_files/fit_lab_77_1.png)
+![png](fit_lab_files/fit_lab_93_1.png)
 
 
 
@@ -1410,7 +1614,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_89_1.png)
+![png](fit_lab_files/fit_lab_105_1.png)
 
 
 
