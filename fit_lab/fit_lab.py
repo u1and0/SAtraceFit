@@ -474,7 +474,7 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 # ## モジュール
 
-# In[24]:
+# In[1]:
 
 from scipy.optimize import curve_fit
 from scipy.stats import scoreatpercentile
@@ -499,25 +499,25 @@ def gauss(x, a, mu, si, nf):
 
 # ## パラメータ
 
-# In[9]:
+# In[3]:
 
 param = a, mu, si = 5, 300, 3
 
 
 # ### フィッティング関数
 
-# In[82]:
+# In[22]:
 
 def fit(series, a, mu, si):
     """fitting function"""
     x, y =  series.index, series.values
     nf = scoreatpercentile(series, 25)
-    return curve_fit(gauss, x, y, p0=(a, mu, si, nf), maxfev=10000)
+    return curve_fit(gauss, x, y, p0=(a, mu, si, nf))
 
 
 # ### デフィット関数
 
-# In[14]:
+# In[5]:
 
 def defit(row):
     """return fitting result as plot point"""
@@ -526,7 +526,7 @@ def defit(row):
 
 # ### choice関数
 
-# In[15]:
+# In[6]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -544,7 +544,7 @@ def choice(array, center, span):
 
 # ## データ
 
-# In[65]:
+# In[45]:
 
 def waves(seed: int=np.random.randint(100), rows=10):
     """ランダムノイズを発生させたウェーブを作成する
@@ -560,33 +560,55 @@ def waves(seed: int=np.random.randint(100), rows=10):
     nf = 0.01 * r.randn(rows)
 
     df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
-    noisedf = df + df * 0.05 * r.randn(*df.shape)
+    noisedf = df +  0.05 * r.randn(*df.shape)
     return noisedf.sum(1)
 
 
-# In[70]:
+# In[48]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
+df.index=pd.date_range('20160101', periods=len(df), freq='H')
 
 
-# In[76]:
+# In[51]:
+
+df.index
+
+
+# In[49]:
 
 df.T.plot(legend=False)
-w1, w2, h1, h2 = 150, 300, 0, 4
+w1, w2, h1, h2 = 150, 300, -.5, 4.5
 plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')  # 枠線
 
 
+# 赤枠内をフィッティング
+
 # ## フィッティング処理
 
-# In[83]:
+# In[52]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
-fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+try:
+	fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+except RuntimeError as e:
+    print(e)
+    
 # フィッティング結果の整理
-result = np.array([i[0] for i in fita])
-plt_pnt = np.apply_along_axis(defit, 1, result)
-plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])
+# result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+# plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+# plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+
+
+# In[54]:
+
+dfe
+
+
+# In[53]:
+
+fita
 
 
 # ## フィッティング可視化
