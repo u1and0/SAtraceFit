@@ -551,7 +551,7 @@ waves().plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1a17946eb38>
+    <matplotlib.axes._subplots.AxesSubplot at 0x28e0a0c9160>
 
 
 
@@ -884,7 +884,7 @@ df0.plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1a1781ca898>
+    <matplotlib.axes._subplots.AxesSubplot at 0x28e0a0945c0>
 
 
 
@@ -931,7 +931,7 @@ plt.plot(popt[1], popt[0]+popt[3] , 'D', fillstyle='none', mew=2)
 
 
 
-    [<matplotlib.lines.Line2D at 0x1a1013407b8>]
+    [<matplotlib.lines.Line2D at 0x28e0a53a278>]
 
 
 
@@ -949,14 +949,14 @@ axis=0方向にfitting
 
 
 ```python
-ax=df.T.plot()
+df.T.plot()
 plt.plot((100,100, 300, 300, 100), (4.5, 10.5, 10.5, 4.5, 4.5), 'r-')  # 枠線
 ```
 
 
 
 
-    [<matplotlib.lines.Line2D at 0x1a1032e00b8>]
+    [<matplotlib.lines.Line2D at 0x28e0a54a7b8>]
 
 
 
@@ -968,6 +968,7 @@ plt.plot((100,100, 300, 300, 100), (4.5, 10.5, 10.5, 4.5, 4.5), 'r-')  # 枠線
 
 
 ```python
+ch = (300, 200)
 dfe = df.apply(choice,axis=1, args=ch)
 dfe.T.plot(legend=False)
 ```
@@ -975,7 +976,7 @@ dfe.T.plot(legend=False)
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1a103575c88>
+    <matplotlib.axes._subplots.AxesSubplot at 0x28e0b874f28>
 
 
 
@@ -1132,6 +1133,39 @@ result = pd.DataFrame((i[0] for i in fita), columns=['a', 'mu', 'si', 'nf']); re
 
 フィッティング結果のデータフレーム
 
+
+```python
+result = np.array([i[0] for i in fita]); result
+```
+
+
+
+
+    array([[  1.64608234e+00,   2.99806139e+02,   8.94731799e+00,
+              6.44094237e+00],
+           [  1.06720581e+00,   3.42175949e+02,   7.78097498e+01,
+              6.61188409e+00],
+           [ -1.86034853e+00,   2.47618525e+02,   7.11429285e+01,
+              8.39069261e+00],
+           [  1.19213087e-01,   3.01166379e+02,   1.38645305e+00,
+              7.09313574e+00],
+           [  6.03417204e+02,   2.31312305e+02,   3.68228745e+03,
+             -5.97375350e+02],
+           [ -8.21448961e+03,   3.24777373e+02,   5.18793270e+03,
+              8.21995127e+03],
+           [ -1.08341283e+04,   2.88175702e+02,   7.44299564e+03,
+              1.08400168e+04],
+           [  1.67421897e-01,   2.99669428e+02,   1.18363394e+01,
+              5.24060726e+00],
+           [ -1.08555095e+04,   2.67685530e+02,   9.11465805e+03,
+              1.08639269e+04],
+           [ -5.96408200e+03,   3.11716322e+02,   6.25882944e+03,
+              5.96977215e+03]])
+
+
+
+フィッティング結果のnp.array
+
 ### fitting結果を描く
 
 
@@ -1142,140 +1176,186 @@ df.T.plot()
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1a104821b00>
+    <matplotlib.axes._subplots.AxesSubplot at 0x28e0a5ad898>
 
 
 
 
-![png](fit_lab_files/fit_lab_88_1.png)
+![png](fit_lab_files/fit_lab_90_1.png)
 
+
+この上にfitting結果を重ねていく
+
+fitting結果resultにapplyする関数を決定する。
+
+横軸の値、縦軸の値を返す関数。
 
 
 ```python
-defit = lambda a, mu, si ,nf: gauss(np.array(df.columns), a, mu, si ,nf)
+defit = lambda row: (row[1], row[0]+row[3])
 ```
 
 
 ```python
-result.apply(defit, axis=1)
-```
-
-
-    ---------------------------------------------------------------------------
-
-    TypeError                                 Traceback (most recent call last)
-
-    <ipython-input-221-2f75387b7c33> in <module>()
-    ----> 1 result.apply(defit, axis=1)
-    
-
-    C:\tools\Anaconda3\lib\site-packages\pandas\core\frame.py in apply(self, func, axis, broadcast, raw, reduce, args, **kwds)
-       4161                     if reduce is None:
-       4162                         reduce = True
-    -> 4163                     return self._apply_standard(f, axis, reduce=reduce)
-       4164             else:
-       4165                 return self._apply_broadcast(f, axis)
-    
-
-    C:\tools\Anaconda3\lib\site-packages\pandas\core\frame.py in _apply_standard(self, func, axis, ignore_failures, reduce)
-       4257             try:
-       4258                 for i, v in enumerate(series_gen):
-    -> 4259                     results[i] = func(v)
-       4260                     keys.append(v.name)
-       4261             except Exception as e:
-    
-
-    TypeError: ("<lambda>() missing 3 required positional arguments: 'mu', 'si', and 'nf'", 'occurred at index 0')
-
-
-## 連続的にfitting
-
-
-```python
-fitting_list = (300, 500, 600, 700)  # 目測どのあたりに波があるか
-fitdf=pd.DataFrame(np.empty(1000))
-for i in fitting_list:
-    param = (a, mu, si) = 5, i, 3
-    ch = (i, 300)
-    fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
-    popt, _pcov = curve_fit(gauss, fitx, fity, p0=param, maxfev = 10000)
-    gg = gauss(sumdf.index,*popt)
-    fitdf[i] = pd.DataFrame(choice(gg, *ch), index=fitx)
-del fitdf[0]
-```
-
-
-```python
-fitdf['sumdf'] = sumdf
-fitdf.plot(style = ['-', '-', '-', '-', '.'])
+result.columns
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x148d6b39518>
+    Index(['a', 'mu', 'si', 'nf'], dtype='object')
+
+
+
+プロットするときは`mu`が横軸、　`a+nf`が縦軸
+
+
+```python
+plt_pnt = np.apply_along_axis(defit, 1, result); plt_pnt
+```
 
 
 
 
-![png](fit_lab_files/fit_lab_93_1.png)
+    array([[ 299.80613945,    8.08702471],
+           [ 342.17594876,    7.6790899 ],
+           [ 247.61852487,    6.53034408],
+           [ 301.16637857,    7.21234883],
+           [ 231.31230478,    6.04185377],
+           [ 324.77737299,    5.46166178],
+           [ 288.17570238,    5.8884859 ],
+           [ 299.66942789,    5.40802915],
+           [ 267.68553009,    8.41734618],
+           [ 311.71632169,    5.69015661]])
+
 
 
 
 ```python
-fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0]); plt_pnt_se
+```
+
+
+
+
+    299.806139    8.087025
+    342.175949    7.679090
+    247.618525    6.530344
+    301.166379    7.212349
+    231.312305    6.041854
+    324.777373    5.461662
+    288.175702    5.888486
+    299.669428    5.408029
+    267.685530    8.417346
+    311.716322    5.690157
+    dtype: float64
+
+
+
+
+```python
+df.T.plot(cmap='gray')
+plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x28e0d0400b8>
+
+
+
+
+![png](fit_lab_files/fit_lab_98_1.png)
+
+
+# 特定周波数(axis=1方向)のfittingまとめ
+
+## モジュール
+
+
+```python
+from scipy.optimize import curve_fit
+from scipy.stats import scoreatpercentile
+r = np.random
+```
+
+## 関数
+
+### ガウス関数
+
+
+```python
+def gauss(x, a, mu, si, nf):
+    """
+    a: 最大値
+    mu: 位置
+    si: 線幅
+    noisef: 最低値
+    """
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + nf
+```
+
+## パラメータ
+
+
+```python
+param = a, mu, si = 5, 300, 3
+```
+
+### フィッティング関数
+
+
+```python
+def fit(series, a, mu, si):
+    """fitting function"""
+    x, y =  series.index, series.values
+    nf = scoreatpercentile(series, 25)
+    return curve_fit(gauss, x, y, p0=(a, mu, si, nf), maxfev=10000)
+```
+
+### デフィット関数
+
+
+```python
+def defit(row):
+    """return fitting result as plot point"""
+    return row[1], row[0]+row[3]
+```
+
+### choice関数
+
+
+```python
+def choice(array, center, span):↔
+
+```
+
+## データ
+
+
+```python
+def waves(seed: int=np.random.randint(100), rows=10):
+    """ランダムノイズを発生させたウェーブを作成する
+    引数: seed: ランダムステートを初期化する整数。デフォルトでseedをランダムに発生させる
+    戻り値: noisedf.sum(1): pd.Series型"""
+    r = np.random
+    r.seed(seed)  # ランダム初期化
+    x = np.linspace(1, 10, 1001)
+    xa = np.tile(x, (rows,1))
+    aa = abs(r.randn(rows))
+    mua = np.linspace(min(x), max(x), rows)
+    sia = abs(r.randn(rows))
+    nf = 0.01 * r.randn(rows)
+
+    df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+    noisedf = df + df * 0.05 * r.randn(*df.shape)
+    return noisedf.sum(1)
 ```
 
 
 ```python
-sumdf.apply(fit)
-```
-
-
-    ---------------------------------------------------------------------------
-
-    RuntimeError                              Traceback (most recent call last)
-
-    <ipython-input-231-bded205048ed> in <module>()
-    ----> 1 sumdf.apply(fit)
-    
-
-    C:\tools\Anaconda3\lib\site-packages\pandas\core\series.py in apply(self, func, convert_dtype, args, **kwds)
-       2290             else:
-       2291                 values = self.asobject
-    -> 2292                 mapped = lib.map_infer(values, f, convert=convert_dtype)
-       2293 
-       2294         if len(mapped) and isinstance(mapped[0], Series):
-    
-
-    pandas\src\inference.pyx in pandas.lib.map_infer (pandas\lib.c:66116)()
-    
-
-    <ipython-input-152-76f4b7321d41> in <lambda>(df)
-    ----> 1 fit=lambda df: curve_fit(gauss, x[:-1], df, p0=(a, mu, si))
-    
-
-    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py in curve_fit(f, xdata, ydata, p0, sigma, absolute_sigma, check_finite, bounds, method, jac, **kwargs)
-        678         cost = np.sum(infodict['fvec'] ** 2)
-        679         if ier not in [1, 2, 3, 4]:
-    --> 680             raise RuntimeError("Optimal parameters not found: " + errmsg)
-        681     else:
-        682         res = least_squares(func, p0, jac=jac, bounds=bounds, method=method,
-    
-
-    RuntimeError: Optimal parameters not found: Number of calls to function has reached maxfev = 800.
-
-
-
-```python
-
-```
-
-
-```python
-Bfit = noisedf.T
-Bfit.index=pd.date_range('20161111', freq='H', periods=10)
-Bfit
+df = pd.DataFrame([waves(i) for i in range(10)]); df
 ```
 
 
@@ -1297,7 +1377,6 @@ Bfit
       <th>8</th>
       <th>9</th>
       <th>...</th>
-      <th>990</th>
       <th>991</th>
       <th>992</th>
       <th>993</th>
@@ -1307,257 +1386,366 @@ Bfit
       <th>997</th>
       <th>998</th>
       <th>999</th>
+      <th>1000</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>2016-11-11 00:00:00</th>
-      <td>1.212010</td>
-      <td>1.258258</td>
-      <td>1.209776</td>
-      <td>1.288453</td>
-      <td>1.312047</td>
-      <td>1.208359</td>
-      <td>1.235260</td>
-      <td>1.076348</td>
-      <td>1.234967</td>
-      <td>1.137405</td>
+      <th>0</th>
+      <td>2.147667</td>
+      <td>2.009187</td>
+      <td>2.048485</td>
+      <td>2.041878</td>
+      <td>2.152630</td>
+      <td>1.978399</td>
+      <td>2.012554</td>
+      <td>2.108727</td>
+      <td>2.097833</td>
+      <td>1.903581</td>
       <td>...</td>
-      <td>0.514774</td>
-      <td>0.428211</td>
-      <td>0.598484</td>
-      <td>0.522549</td>
-      <td>0.519271</td>
-      <td>0.520157</td>
-      <td>0.412700</td>
-      <td>0.448095</td>
-      <td>0.461003</td>
-      <td>0.485658</td>
+      <td>0.577371</td>
+      <td>0.546062</td>
+      <td>0.565270</td>
+      <td>0.597655</td>
+      <td>0.564182</td>
+      <td>0.592561</td>
+      <td>0.555491</td>
+      <td>0.575833</td>
+      <td>0.592818</td>
+      <td>0.549183</td>
     </tr>
     <tr>
-      <th>2016-11-11 01:00:00</th>
-      <td>0.493312</td>
-      <td>0.565844</td>
-      <td>0.421950</td>
-      <td>0.566338</td>
-      <td>0.429704</td>
-      <td>0.490249</td>
-      <td>0.477613</td>
-      <td>0.543168</td>
-      <td>0.509640</td>
-      <td>0.466321</td>
+      <th>1</th>
+      <td>2.110844</td>
+      <td>2.139084</td>
+      <td>2.194056</td>
+      <td>2.155056</td>
+      <td>2.053241</td>
+      <td>2.160612</td>
+      <td>2.286589</td>
+      <td>2.183906</td>
+      <td>2.085826</td>
+      <td>2.162522</td>
       <td>...</td>
-      <td>0.429264</td>
-      <td>0.449661</td>
-      <td>0.472302</td>
-      <td>0.450089</td>
-      <td>0.532711</td>
-      <td>0.497850</td>
-      <td>0.444576</td>
-      <td>0.510375</td>
-      <td>0.542243</td>
-      <td>0.559332</td>
+      <td>0.323779</td>
+      <td>0.317658</td>
+      <td>0.343684</td>
+      <td>0.326364</td>
+      <td>0.334476</td>
+      <td>0.300983</td>
+      <td>0.327992</td>
+      <td>0.329853</td>
+      <td>0.338534</td>
+      <td>0.306671</td>
     </tr>
     <tr>
-      <th>2016-11-11 02:00:00</th>
-      <td>0.617668</td>
-      <td>0.504491</td>
-      <td>0.506655</td>
-      <td>0.629424</td>
-      <td>0.459623</td>
-      <td>0.550356</td>
-      <td>0.552120</td>
-      <td>0.517778</td>
-      <td>0.474713</td>
-      <td>0.492209</td>
+      <th>2</th>
+      <td>0.455292</td>
+      <td>0.454832</td>
+      <td>0.476137</td>
+      <td>0.450754</td>
+      <td>0.448213</td>
+      <td>0.457330</td>
+      <td>0.471555</td>
+      <td>0.485130</td>
+      <td>0.450578</td>
+      <td>0.441841</td>
       <td>...</td>
-      <td>0.459309</td>
-      <td>0.579805</td>
-      <td>0.506900</td>
-      <td>0.461104</td>
-      <td>0.452450</td>
-      <td>0.535329</td>
-      <td>0.465263</td>
-      <td>0.535872</td>
-      <td>0.549523</td>
-      <td>0.442362</td>
+      <td>0.775692</td>
+      <td>0.744529</td>
+      <td>0.746557</td>
+      <td>0.693139</td>
+      <td>0.746216</td>
+      <td>0.705819</td>
+      <td>0.680377</td>
+      <td>0.817074</td>
+      <td>1.228229</td>
+      <td>1.612025</td>
     </tr>
     <tr>
-      <th>2016-11-11 03:00:00</th>
-      <td>0.534732</td>
-      <td>0.434818</td>
-      <td>0.452569</td>
-      <td>0.429995</td>
-      <td>0.550611</td>
-      <td>0.552787</td>
-      <td>0.470041</td>
-      <td>0.503814</td>
-      <td>0.536437</td>
-      <td>0.526805</td>
+      <th>3</th>
+      <td>2.482073</td>
+      <td>2.241770</td>
+      <td>2.544196</td>
+      <td>2.571275</td>
+      <td>2.388791</td>
+      <td>2.303632</td>
+      <td>2.393379</td>
+      <td>2.523479</td>
+      <td>2.424626</td>
+      <td>2.369519</td>
       <td>...</td>
-      <td>0.507729</td>
-      <td>0.510552</td>
-      <td>0.523317</td>
-      <td>0.480549</td>
-      <td>0.537138</td>
-      <td>0.477658</td>
-      <td>0.510539</td>
-      <td>0.461372</td>
-      <td>0.454722</td>
-      <td>0.471645</td>
+      <td>0.733566</td>
+      <td>0.781966</td>
+      <td>0.765006</td>
+      <td>0.695137</td>
+      <td>0.775654</td>
+      <td>0.789423</td>
+      <td>0.735303</td>
+      <td>0.757076</td>
+      <td>0.726208</td>
+      <td>0.779925</td>
     </tr>
     <tr>
-      <th>2016-11-11 04:00:00</th>
-      <td>0.410273</td>
-      <td>0.480496</td>
-      <td>0.535665</td>
-      <td>0.476028</td>
-      <td>0.496251</td>
-      <td>0.497739</td>
-      <td>0.532563</td>
-      <td>0.579697</td>
-      <td>0.466402</td>
-      <td>0.458867</td>
+      <th>4</th>
+      <td>0.066088</td>
+      <td>0.062561</td>
+      <td>0.065974</td>
+      <td>0.072514</td>
+      <td>0.070093</td>
+      <td>0.064914</td>
+      <td>0.066893</td>
+      <td>0.070474</td>
+      <td>0.071341</td>
+      <td>0.069801</td>
       <td>...</td>
-      <td>0.452442</td>
-      <td>0.539615</td>
-      <td>0.476664</td>
-      <td>0.465095</td>
-      <td>0.469500</td>
-      <td>0.567530</td>
-      <td>0.465824</td>
-      <td>0.543424</td>
-      <td>0.524870</td>
-      <td>0.597768</td>
+      <td>0.694967</td>
+      <td>0.795132</td>
+      <td>0.889195</td>
+      <td>1.025563</td>
+      <td>1.137659</td>
+      <td>1.272863</td>
+      <td>1.384570</td>
+      <td>1.529401</td>
+      <td>1.662951</td>
+      <td>1.570989</td>
     </tr>
     <tr>
-      <th>2016-11-11 05:00:00</th>
-      <td>0.504844</td>
-      <td>0.585218</td>
-      <td>0.436708</td>
-      <td>0.510879</td>
-      <td>0.534301</td>
-      <td>0.533283</td>
-      <td>0.486974</td>
-      <td>0.505978</td>
-      <td>0.457899</td>
-      <td>0.416528</td>
+      <th>5</th>
+      <td>0.446696</td>
+      <td>0.423739</td>
+      <td>0.460351</td>
+      <td>0.420629</td>
+      <td>0.386467</td>
+      <td>0.475328</td>
+      <td>0.454456</td>
+      <td>0.447523</td>
+      <td>0.427682</td>
+      <td>0.459343</td>
       <td>...</td>
-      <td>0.512470</td>
-      <td>0.516137</td>
-      <td>0.471788</td>
-      <td>0.485482</td>
-      <td>0.477160</td>
-      <td>0.424786</td>
-      <td>0.461915</td>
-      <td>0.421985</td>
-      <td>0.521713</td>
-      <td>0.534520</td>
+      <td>0.851997</td>
+      <td>0.849832</td>
+      <td>0.837990</td>
+      <td>0.856848</td>
+      <td>0.841561</td>
+      <td>0.856533</td>
+      <td>0.798404</td>
+      <td>0.823015</td>
+      <td>0.824210</td>
+      <td>0.836648</td>
     </tr>
     <tr>
-      <th>2016-11-11 06:00:00</th>
-      <td>0.417943</td>
-      <td>0.510378</td>
-      <td>0.561102</td>
-      <td>0.473348</td>
-      <td>0.547520</td>
-      <td>0.501062</td>
-      <td>0.538977</td>
-      <td>0.506837</td>
-      <td>0.576644</td>
-      <td>0.429382</td>
+      <th>6</th>
+      <td>0.544489</td>
+      <td>0.594732</td>
+      <td>0.597669</td>
+      <td>0.586796</td>
+      <td>0.614118</td>
+      <td>0.614116</td>
+      <td>0.605732</td>
+      <td>0.592733</td>
+      <td>0.621577</td>
+      <td>0.624194</td>
       <td>...</td>
-      <td>0.538923</td>
-      <td>0.543066</td>
-      <td>0.634124</td>
-      <td>0.437527</td>
-      <td>0.546653</td>
-      <td>0.428585</td>
-      <td>0.503116</td>
-      <td>0.488980</td>
-      <td>0.513469</td>
-      <td>0.465994</td>
+      <td>1.018055</td>
+      <td>1.021927</td>
+      <td>1.002730</td>
+      <td>0.935423</td>
+      <td>0.958150</td>
+      <td>0.982077</td>
+      <td>0.937099</td>
+      <td>0.890811</td>
+      <td>0.991854</td>
+      <td>0.911308</td>
     </tr>
     <tr>
-      <th>2016-11-11 07:00:00</th>
-      <td>0.456581</td>
-      <td>0.578147</td>
-      <td>0.534539</td>
-      <td>0.437597</td>
-      <td>0.494838</td>
-      <td>0.445275</td>
-      <td>0.459347</td>
-      <td>0.466767</td>
-      <td>0.550208</td>
-      <td>0.408358</td>
+      <th>7</th>
+      <td>1.627107</td>
+      <td>1.759084</td>
+      <td>1.851777</td>
+      <td>1.660207</td>
+      <td>1.815167</td>
+      <td>1.739545</td>
+      <td>1.728329</td>
+      <td>1.606905</td>
+      <td>1.653946</td>
+      <td>1.641610</td>
       <td>...</td>
-      <td>0.596552</td>
-      <td>0.572876</td>
-      <td>0.421376</td>
-      <td>0.626990</td>
-      <td>0.540775</td>
-      <td>0.502943</td>
-      <td>0.534820</td>
-      <td>0.420050</td>
-      <td>0.515703</td>
-      <td>0.511490</td>
+      <td>0.605993</td>
+      <td>0.649902</td>
+      <td>0.600194</td>
+      <td>0.620626</td>
+      <td>0.571666</td>
+      <td>0.563146</td>
+      <td>0.633243</td>
+      <td>0.585266</td>
+      <td>0.574300</td>
+      <td>0.600938</td>
     </tr>
     <tr>
-      <th>2016-11-11 08:00:00</th>
-      <td>0.487674</td>
-      <td>0.527124</td>
-      <td>0.462124</td>
-      <td>0.519189</td>
-      <td>0.478155</td>
-      <td>0.535298</td>
-      <td>0.458398</td>
-      <td>0.579006</td>
-      <td>0.470864</td>
-      <td>0.533235</td>
+      <th>8</th>
+      <td>1.440641</td>
+      <td>1.453660</td>
+      <td>1.364248</td>
+      <td>1.567872</td>
+      <td>1.542280</td>
+      <td>1.442709</td>
+      <td>1.382348</td>
+      <td>1.516129</td>
+      <td>1.554719</td>
+      <td>1.596963</td>
       <td>...</td>
-      <td>0.572156</td>
-      <td>0.622233</td>
-      <td>0.477770</td>
-      <td>0.568988</td>
-      <td>0.541956</td>
-      <td>0.573163</td>
-      <td>0.493426</td>
-      <td>0.543387</td>
-      <td>0.540880</td>
-      <td>0.535761</td>
+      <td>0.851834</td>
+      <td>0.824033</td>
+      <td>0.964125</td>
+      <td>0.918468</td>
+      <td>0.947923</td>
+      <td>0.977472</td>
+      <td>0.911702</td>
+      <td>0.931101</td>
+      <td>0.959214</td>
+      <td>1.000199</td>
     </tr>
     <tr>
-      <th>2016-11-11 09:00:00</th>
-      <td>0.499399</td>
-      <td>0.443160</td>
-      <td>0.370964</td>
-      <td>0.410643</td>
-      <td>0.460746</td>
-      <td>0.571716</td>
-      <td>0.487904</td>
-      <td>0.524689</td>
-      <td>0.585601</td>
-      <td>0.635540</td>
+      <th>9</th>
+      <td>0.309375</td>
+      <td>0.281560</td>
+      <td>0.272654</td>
+      <td>0.262101</td>
+      <td>0.288476</td>
+      <td>0.285040</td>
+      <td>0.289349</td>
+      <td>0.291658</td>
+      <td>0.308523</td>
+      <td>0.314101</td>
       <td>...</td>
-      <td>0.421390</td>
-      <td>0.476703</td>
-      <td>0.492336</td>
-      <td>0.474076</td>
-      <td>0.417654</td>
-      <td>0.580822</td>
-      <td>0.522962</td>
-      <td>0.434270</td>
-      <td>0.505289</td>
-      <td>0.437671</td>
+      <td>0.974385</td>
+      <td>0.973217</td>
+      <td>0.916499</td>
+      <td>0.926736</td>
+      <td>0.955725</td>
+      <td>0.930928</td>
+      <td>0.855118</td>
+      <td>0.945184</td>
+      <td>0.894888</td>
+      <td>0.923491</td>
     </tr>
   </tbody>
 </table>
-<p>10 rows × 1000 columns</p>
+<p>10 rows × 1001 columns</p>
 </div>
 
 
 
-実際fittingかけたいデータフレームはindexが時間、カラムが
+
+```python
+df.T.plot(legend=False)
+w1, w2, h1, h2 = 150, 300, 0, 4
+plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')  # 枠線
+```
+
+
+
+
+    [<matplotlib.lines.Line2D at 0x189154b1470>]
+
+
+
+
+![png](fit_lab_files/fit_lab_116_1.png)
+
+
+## フィッティング処理
+
+
+```python
+ch = (220, 200)  # 中央値220でスパン200で取り出したい
+dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
+fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+# フィッティング結果の整理
+result = np.array([i[0] for i in fita])
+plt_pnt = np.apply_along_axis(defit, 1, result)
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])
+```
+
+## フィッティング可視化
+
+
+```python
+fi = a_, mu_, si_, nf_ = result.T; mu_
+```
+
+
+
+
+    array([  286.91018356,   322.45369507,   280.55193794,  8510.18135096,
+             256.75897069,   308.60128415,   303.36046948,   318.11970984,
+             288.62555619,   304.29120342])
+
+
+
+
+```python
+plt_pnt_se
+```
+
+
+
+
+    286.910184        1.018721
+    322.453695        2.560111
+    280.551938        1.663256
+    8510.181351   -1908.640985
+    256.758971        1.087070
+    308.601284        0.570254
+    303.360469        1.107958
+    318.119710        0.361722
+    288.625556        3.615527
+    304.291203        0.661452
+    dtype: float64
+
+
+
+
+```python
+ma, mi = df.values.max(), df.values.min()
+plt_pnt_se[plt_pnt_se[plt_pnt_se<ma]>mi]
+```
+
+
+
+
+    286.910184    1.018721
+    322.453695    2.560111
+    280.551938    1.663256
+    256.758971    1.087070
+    308.601284    0.570254
+    303.360469    1.107958
+    318.119710    0.361722
+    288.625556    3.615527
+    304.291203    0.661452
+    dtype: float64
+
+
+
+
+```python
+# df.T.plot(cmap='gray')
+plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x18915588048>
+
+
+
+
+![png](fit_lab_files/fit_lab_123_1.png)
+
+
+___
 
 ___
 
@@ -1614,7 +1802,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_105_1.png)
+![png](fit_lab_files/fit_lab_131_1.png)
 
 
 

@@ -15,7 +15,7 @@ def gauss(x, a, mu, si, nf):
     return a * np.exp(-(x - mu)**2 / 2 / si**2) + nf
 
 
-# In[55]:
+# In[2]:
 
 nf=0.5
 n=1001
@@ -99,7 +99,7 @@ plt.plot(x, g,'b-' )
 # こういう時はカーブフィットを取る。
 # scipy.optimizeからcurve_fitをインポートしてくる。
 
-# In[59]:
+# In[9]:
 
 from scipy.optimize import curve_fit
 from scipy.optimize import leastsq
@@ -280,7 +280,7 @@ sumdf
 
 # ## 複数のランダムウェーブを生成
 
-# In[23]:
+# In[4]:
 
 def waves(seed: int=np.random.randint(100)):
     """ランダムノイズを発生させたウェーブを作成する
@@ -304,7 +304,7 @@ waves().plot()
 get_ipython().magic('timeit waves()')
 
 
-# In[24]:
+# In[5]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 
@@ -316,7 +316,7 @@ df = pd.DataFrame([waves(i) for i in range(10)]); df
 
 # ### 特定範囲を抽出する関数を作成
 
-# In[26]:
+# In[6]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -332,7 +332,7 @@ def choice(array, center, span):
     return array[x1:x2]
 
 
-# In[37]:
+# In[7]:
 
 ch = (300, 200)  # 中央値300でスパン200で取り出したい
 df0 = choice(df.iloc[0], *ch)
@@ -341,7 +341,7 @@ df0.plot()
 
 # ### 一つの波をfitting
 
-# In[62]:
+# In[10]:
 
 param = (a, mu, si, nf) = 5, 300, 3, scoreatpercentile(df0, 25)
 param
@@ -349,7 +349,7 @@ param
 
 # パラメータ再設定
 
-# In[66]:
+# In[11]:
 
 fitx, fity = df0.index, df0.values,
 popt, _pcov = curve_fit(gauss, np.array(fitx), fity, p0=param)
@@ -358,7 +358,7 @@ print('a, mu, si, nf = ', popt)
 
 # fittingの結果
 
-# In[83]:
+# In[12]:
 
 df.iloc[0].plot(color='gray', lw=0.5)
 plt.plot(df0.index, gauss(df0.index, *popt))
@@ -373,16 +373,17 @@ plt.plot(popt[1], popt[0]+popt[3] , 'D', fillstyle='none', mew=2)
 # 意味的には特定周波数を別時間軸上で同時に実行。
 # `df.apply(curve_fit, args=())`使いたい。
 
-# In[205]:
+# In[13]:
 
-ax=df.T.plot()
+df.T.plot()
 plt.plot((100,100, 300, 300, 100), (4.5, 10.5, 10.5, 4.5, 4.5), 'r-')  # 枠線
 
 
 # 赤枠の中だけ拡大。(その中だけがフィッティング対象)
 
-# In[106]:
+# In[21]:
 
+ch = (300, 200)
 dfe = df.apply(choice,axis=1, args=ch)
 dfe.T.plot(legend=False)
 
@@ -391,7 +392,7 @@ dfe.T.plot(legend=False)
 
 # ### fitting関数作成
 
-# In[149]:
+# In[22]:
 
 fit = lambda x: curve_fit(gauss, x.index, x.values, p0=param)  # fitting function
 fita = dfe.apply(fit, axis=1)
@@ -400,12 +401,12 @@ fita = dfe.apply(fit, axis=1)
 # フィッティング関数はlambda式で定義して、
 # applyでデータフレームの各行に適用。
 
-# In[150]:
+# In[23]:
 
 type(fita)
 
 
-# In[207]:
+# In[24]:
 
 fita
 
@@ -414,75 +415,205 @@ fita
 # 
 # そこで以下のようにして内法表記で分解して第0要素だけ取り出す。
 
-# In[208]:
+# In[46]:
 
 result = pd.DataFrame((i[0] for i in fita), columns=['a', 'mu', 'si', 'nf']); result
 
 
 # フィッティング結果のデータフレーム
 
+# In[54]:
+
+result = np.array([i[0] for i in fita]); result
+
+
+# フィッティング結果のnp.array
+
 # ### fitting結果を描く
 
-# In[216]:
+# In[27]:
 
 df.T.plot()
 
 
-# In[220]:
+# この上にfitting結果を重ねていく
 
-defit = lambda a, mu, si ,nf: gauss(np.array(df.columns), a, mu, si ,nf)
+# fitting結果resultにapplyする関数を決定する。
+# 
+# 横軸の値、縦軸の値を返す関数。
 
+# In[58]:
 
-# In[221]:
-
-result.apply(defit, axis=1)
-
-
-# ## 連続的にfitting
-
-# In[303]:
-
-fitting_list = (300, 500, 600, 700)  # 目測どのあたりに波があるか
-fitdf=pd.DataFrame(np.empty(1000))
-for i in fitting_list:
-    param = (a, mu, si) = 5, i, 3
-    ch = (i, 300)
-    fitx, fity = choice(sumdf.index, *ch), choice(sumdf, *ch)
-    popt, _pcov = curve_fit(gauss, fitx, fity, p0=param, maxfev = 10000)
-    gg = gauss(sumdf.index,*popt)
-    fitdf[i] = pd.DataFrame(choice(gg, *ch), index=fitx)
-del fitdf[0]
+defit = lambda row: (row[1], row[0]+row[3])
 
 
-# In[323]:
+# In[38]:
 
-fitdf['sumdf'] = sumdf
-fitdf.plot(style = ['-', '-', '-', '-', '.'])
-
-
-# In[152]:
-
-fit=lambda df: curve_fit(gauss, x[:-1], df['0.0'], p0=(a, mu, si))
+result.columns
 
 
-# In[231]:
+# プロットするときは`mu`が横軸、　`a+nf`が縦軸
 
-sumdf.apply(fit)
+# In[61]:
 
-
-# In[ ]:
-
+plt_pnt = np.apply_along_axis(defit, 1, result); plt_pnt
 
 
+# In[96]:
 
-# In[211]:
-
-Bfit = noisedf.T
-Bfit.index=pd.date_range('20161111', freq='H', periods=10)
-Bfit
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0]); plt_pnt_se
 
 
-# 実際fittingかけたいデータフレームはindexが時間、カラムが
+# In[84]:
+
+df.T.plot(cmap='gray')
+plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+
+
+# # 特定周波数(axis=1方向)のfittingまとめ
+
+# ## モジュール
+
+# In[24]:
+
+from scipy.optimize import curve_fit
+from scipy.stats import scoreatpercentile
+r = np.random
+
+
+# ## 関数
+
+# ### ガウス関数
+
+# In[2]:
+
+def gauss(x, a, mu, si, nf):
+    """
+    a: 最大値
+    mu: 位置
+    si: 線幅
+    noisef: 最低値
+    """
+    return a * np.exp(-(x - mu)**2 / 2 / si**2) + nf
+
+
+# ## パラメータ
+
+# In[9]:
+
+param = a, mu, si = 5, 300, 3
+
+
+# ### フィッティング関数
+
+# In[82]:
+
+def fit(series, a, mu, si):
+    """fitting function"""
+    x, y =  series.index, series.values
+    nf = scoreatpercentile(series, 25)
+    return curve_fit(gauss, x, y, p0=(a, mu, si, nf), maxfev=10000)
+
+
+# ### デフィット関数
+
+# In[14]:
+
+def defit(row):
+    """return fitting result as plot point"""
+    return row[1], row[0]+row[3]
+
+
+# ### choice関数
+
+# In[15]:
+
+def choice(array, center, span):
+    """特定の範囲を抜き出す
+    引数: 
+        array: 抜き出し対象のarrayっぽいの(arraylike)
+        center: 抜き出し中央(float)
+        span: 抜き出しスパン(float)
+    戻り値:
+        rarray:
+    """
+    x1 = int(center - span / 2)
+    x2 = int(center + span / 2)
+    return array[x1:x2]
+
+
+# ## データ
+
+# In[65]:
+
+def waves(seed: int=np.random.randint(100), rows=10):
+    """ランダムノイズを発生させたウェーブを作成する
+    引数: seed: ランダムステートを初期化する整数。デフォルトでseedをランダムに発生させる
+    戻り値: noisedf.sum(1): pd.Series型"""
+    r = np.random
+    r.seed(seed)  # ランダム初期化
+    x = np.linspace(1, 10, 1001)
+    xa = np.tile(x, (rows,1))
+    aa = abs(r.randn(rows))
+    mua = np.linspace(min(x), max(x), rows)
+    sia = abs(r.randn(rows))
+    nf = 0.01 * r.randn(rows)
+
+    df = pd.DataFrame(gauss(xa.T, aa, mua, sia, nf))
+    noisedf = df + df * 0.05 * r.randn(*df.shape)
+    return noisedf.sum(1)
+
+
+# In[70]:
+
+df = pd.DataFrame([waves(i) for i in range(10)]); df
+
+
+# In[76]:
+
+df.T.plot(legend=False)
+w1, w2, h1, h2 = 150, 300, 0, 4
+plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')  # 枠線
+
+
+# ## フィッティング処理
+
+# In[83]:
+
+ch = (220, 200)  # 中央値220でスパン200で取り出したい
+dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
+fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+# フィッティング結果の整理
+result = np.array([i[0] for i in fita])
+plt_pnt = np.apply_along_axis(defit, 1, result)
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])
+
+
+# ## フィッティング可視化
+
+# In[108]:
+
+fi = a_, mu_, si_, nf_ = result.T; mu_
+
+
+# In[88]:
+
+plt_pnt_se
+
+
+# In[102]:
+
+ma, mi = df.values.max(), df.values.min()
+plt_pnt_se[plt_pnt_se[plt_pnt_se<ma]>mi]
+
+
+# In[87]:
+
+# df.T.plot(cmap='gray')
+plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+
+
+# ___
 
 # ___
 
