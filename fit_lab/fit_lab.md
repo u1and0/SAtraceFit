@@ -1991,8 +1991,8 @@ defit??
 
 ```python
 def defit(array):
-    plt_pnt = np.apply_along_axis(lambda row: row[1],
-                                  row[0]+row[3], 1, array)  # ポイントのプロットに必要な部分抜き出し
+    plt_pnt = np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
+                                  1, array)  # ポイントのプロットに必要な部分抜き出し
     plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
     return plt_pnt_se
 ```
@@ -2000,11 +2000,11 @@ def defit(array):
 
 ```python
 def fitplot(df, result):
-    fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
+    fig, ax = plt.subplots(len(df), sharex=True, figsize=(4,18))
     df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)  # オリジナルをプロット
     regaussdf = regauss(df, result)  # resultをregaussでガウシアンに戻す
     pd.DataFrame(regaussdf).T.plot(legend=False, subplots=True, ax=ax)  # ラインをプロット
-    for nu in range(len(plt_pnt_se)):
+    for nu in range(len(df)):
         pl = defit(result)
         x,y=pl.index[nu], pl.iloc[nu]
         ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
