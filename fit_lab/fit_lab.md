@@ -1439,6 +1439,56 @@ result
 
 `array[ [a, mu, si, nf],[a, mu, si, nf],[a, mu, si, nf],...]`
 
+### データフレームへのフィットを関数化
+
+resultさえあれば何とかなるので、resultをreturnする関数にする。
+
+
+```python
+def fit_df(df, center, span, param):
+    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
+    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
+    result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+    return result
+```
+
+
+```python
+mu = 780
+result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
+result
+```
+
+    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
+      category=OptimizeWarning)
+    
+
+
+
+
+    array([[  8.09300103e-01,   7.80512039e+02,   2.92779064e-01,
+              8.43631083e-01],
+           [ -1.64984009e+04,   8.62139087e+02,   1.18242571e+04,
+              1.64991574e+04],
+           [  3.65532873e-01,   7.81671029e+02,   1.20378341e+00,
+              1.59762298e+00],
+           [ -1.49314620e-01,   7.79529277e+02,   6.55857148e-03,
+              8.98314718e-01],
+           [  1.65933627e-02,   7.79531319e+02,   7.67116386e-03,
+              9.83506902e-01],
+           [ -1.35677284e+00,   7.79561434e+02,  -2.63835259e-01,
+              1.42233666e+00],
+           [  1.26228315e+00,   7.83230322e+02,   1.52730239e+01,
+              8.42733100e-01],
+           [  1.62025989e+00,   7.77949314e+02,   1.16929924e+01,
+              4.77374244e-01],
+           [  3.91145998e+00,   7.43991978e+02,   8.26737952e+01,
+             -1.12120126e+00],
+           [  5.77839205e-01,   7.13420777e+02,   8.36189323e+01,
+              1.53888500e+00]])
+
+
+
 ### 返ってきたresultで様々な表現
 
 
@@ -1634,7 +1684,7 @@ with plt.style.context(('seaborn-darkgrid')):
 ```
 
 
-![png](fit_lab_files/fit_lab_132_0.png)
+![png](fit_lab_files/fit_lab_135_0.png)
 
 
 簡単に、データフレームの上にポイントだけ打ってみた。
@@ -1653,7 +1703,7 @@ pd.DataFrame(regauss).T.plot(legend=False)
 
 
 
-![png](fit_lab_files/fit_lab_134_1.png)
+![png](fit_lab_files/fit_lab_137_1.png)
 
 
 resultをガウス関数に当てはめてウェーブを描く
@@ -1682,25 +1732,30 @@ plt_pnt_se
 
 
 ```python
-regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+def regauss(df, fitresult, axis=1):
+    return np.apply_along_axis(lambda x: gauss(df.columns, *x), axis, fitresult)
+```
 
+
+```python
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
-pd.DataFrame(regauss).T.plot(legend=False, subplots=True, ax=ax)
+regaussdf = regauss(df, result)
+pd.DataFrame(regaussdf).T.plot(legend=False, subplots=True, ax=ax)
 for nu in range(len(plt_pnt_se)):
     x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
     ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
 
-![png](fit_lab_files/fit_lab_137_0.png)
+![png](fit_lab_files/fit_lab_141_0.png)
 
 
 データフレームのインデックスごとに描画
 
 
 ```python
-df.T.plot(cmap='gray', legend=False)
+df.T.plot(lw=.5, cmap='gray', legend=False)
 for nu in range(len(df)):
     pd.Series(gauss(df.columns, *result[nu])).plot()
     x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
@@ -1721,7 +1776,7 @@ for nu in range(len(df)):
     
 
 
-![png](fit_lab_files/fit_lab_139_1.png)
+![png](fit_lab_files/fit_lab_143_1.png)
 
 
 
@@ -1735,7 +1790,7 @@ for nu in range(len(df)):
 ```
 
 
-![png](fit_lab_files/fit_lab_140_0.png)
+![png](fit_lab_files/fit_lab_144_0.png)
 
 
 ほとんどフィッティングできていないのがお分かりだろうか
@@ -1759,29 +1814,106 @@ for nu in range(len(df)):
 課題として、大きい/小さい、広い/狭い、位置が動きすぎの判定はどれだけのさじ加減か。
 機械学習できたらな...
 
-### データフレームへのフィットを関数化
-
-resultさえあれば何とかなるので、resultをreturnする関数にする。
+### aのfitcondition
 
 
 ```python
-def fit_df(df, center, span, param):
-    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
-    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
-    result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
-    return result
+def fitcondition_a(array, a_high, a_low):
+    """a_high以上、a_low未満はNaN"""
+    a = array.T[0]
+    a[a > a_high] = np.nan
+    a[a < a_low] = np.nan
+    return a
 ```
 
 
 ```python
-mu = 780
-result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
+fitcondition_a(result, a_high=df.values.max(), a_low=0)
+```
+
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:4: RuntimeWarning: invalid value encountered in greater
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
+    
+
+
+
+
+    array([ 0.8093001 ,         nan,  0.36553287,         nan,  0.01659336,
+                   nan,  1.26228315,  1.62025989,  3.91145998,  0.5778392 ])
+
+
+
+### muのfitcondition
+
+
+```python
+def fitcondition_mu(array, mu_real, mu_tol):
+    """mu_realとmuの差がmu_tol超えたらNaN"""
+    mu = array.T[1]
+    mu[abs(mu-mu_real) > mu_tol] = np.nan
+    return mu
+```
+
+
+```python
+fitcondition_mu(result, mu, mu*0.1)  # muの値の10%超えたらNaN
+```
+
+
+
+
+    array([ 780.51203915,           nan,  781.67102937,  779.52927711,
+            779.53131867,  779.56143408,  783.23032166,  777.94931365,
+            743.99197786,  713.42077665])
+
+
+
+### siのfitcondition
+
+
+```python
+def fitcondition_si(array, si_high, si_low):
+    """si_realとsiの差がsi_high超えたらNaN"""
+    si = array.T[2]
+    si[si > si_high] = np.nan
+    si[si < si_low] = np.nan
+    return si
+```
+
+
+```python
+fitcondition_si(result, si_high=80, si_low=-np.inf)
+```
+
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
+    
+
+
+
+
+    array([  2.92779064e-01,              nan,   1.20378341e+00,
+             6.55857148e-03,   7.67116386e-03,  -2.63835259e-01,
+             1.52730239e+01,   1.16929924e+01,              nan,
+                        nan])
+
+
+
+### fitcondition総合
+
+
+```python
+def fitcondition(array, **kwargs):
+    """fitconditionすべて"""
+    fitcondition_a(array, kwargs['a_high'], kwargs['a_low'])
+    fitcondition_mu(array, kwargs['mu_real'], kwargs['mu_tol'])
+    fitcondition_si(array, kwargs['si_high'], kwargs['si_low'])
+    return array
+```
+
+
+```python
 result
 ```
-
-    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
-      category=OptimizeWarning)
-    
 
 
 
@@ -1805,6 +1937,43 @@ result
            [  3.91145998e+00,   7.43991978e+02,   8.26737952e+01,
              -1.12120126e+00],
            [  5.77839205e-01,   7.13420777e+02,   8.36189323e+01,
+              1.53888500e+00]])
+
+
+
+
+```python
+fitcondition(result, a_high=df.values.max(), a_low=0,
+             mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
+result
+```
+
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:4: RuntimeWarning: invalid value encountered in greater
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
+    
+
+
+
+
+    array([[  8.09300103e-01,   7.80512039e+02,   2.92779064e-01,
+              8.43631083e-01],
+           [             nan,              nan,              nan,
+              1.64991574e+04],
+           [  3.65532873e-01,   7.81671029e+02,   1.20378341e+00,
+              1.59762298e+00],
+           [             nan,   7.79529277e+02,   6.55857148e-03,
+              8.98314718e-01],
+           [  1.65933627e-02,   7.79531319e+02,   7.67116386e-03,
+              9.83506902e-01],
+           [             nan,   7.79561434e+02,  -2.63835259e-01,
+              1.42233666e+00],
+           [  1.26228315e+00,   7.83230322e+02,   1.52730239e+01,
+              8.42733100e-01],
+           [  1.62025989e+00,   7.77949314e+02,   1.16929924e+01,
+              4.77374244e-01],
+           [  3.91145998e+00,   7.43991978e+02,              nan,
+             -1.12120126e+00],
+           [  5.77839205e-01,   7.13420777e+02,              nan,
               1.53888500e+00]])
 
 
@@ -1864,7 +2033,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_153_1.png)
+![png](fit_lab_files/fit_lab_167_1.png)
 
 
 

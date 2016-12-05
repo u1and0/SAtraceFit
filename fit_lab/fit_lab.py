@@ -597,7 +597,7 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 # ## フィッティング処理
 
-# In[13]:
+# In[207]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
@@ -609,7 +609,7 @@ plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロット�
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 
 
-# In[14]:
+# In[208]:
 
 result
 
@@ -620,6 +620,26 @@ result
 # それぞれの要素は以下のものがdfのindexの個数分出てくる
 # 
 # `array[ [a, mu, si, nf],[a, mu, si, nf],[a, mu, si, nf],...]`
+
+# ### データフレームへのフィットを関数化
+# 
+# resultさえあれば何とかなるので、resultをreturnする関数にする。
+
+# In[114]:
+
+def fit_df(df, center, span, param):
+    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
+    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
+    result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+    return result
+
+
+# In[209]:
+
+mu = 780
+result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
+result
+
 
 # ### 返ってきたresultで様々な表現
 
@@ -684,13 +704,18 @@ pd.DataFrame(regauss).T.plot(legend=False)
 plt_pnt_se
 
 
-# In[77]:
+# In[215]:
 
-regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+def regauss(df, fitresult, axis=1):
+    return np.apply_along_axis(lambda x: gauss(df.columns, *x), axis, fitresult)
+
+
+# In[216]:
 
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
-pd.DataFrame(regauss).T.plot(legend=False, subplots=True, ax=ax)
+regaussdf = regauss(df, result)
+pd.DataFrame(regaussdf).T.plot(legend=False, subplots=True, ax=ax)
 for nu in range(len(plt_pnt_se)):
     x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
     ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
@@ -698,9 +723,9 @@ for nu in range(len(plt_pnt_se)):
 
 # データフレームのインデックスごとに描画
 
-# In[39]:
+# In[82]:
 
-df.T.plot(cmap='gray', legend=False)
+df.T.plot(lw=.5, cmap='gray', legend=False)
 for nu in range(len(df)):
     pd.Series(gauss(df.columns, *result[nu])).plot()
     x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
@@ -739,23 +764,77 @@ for nu in range(len(df)):
 # 課題として、大きい/小さい、広い/狭い、位置が動きすぎの判定はどれだけのさじ加減か。
 # 機械学習できたらな...
 
-# ### データフレームへのフィットを関数化
-# 
-# resultさえあれば何とかなるので、resultをreturnする関数にする。
+# ### aのfitcondition
 
-# In[108]:
+# In[205]:
 
-def fit_df(df, center, span, param):
-    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
-    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
-    result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
-    return result
+def fitcondition_a(array, a_high, a_low):
+    """a_high以上、a_low未満はNaN"""
+    a = array.T[0]
+    a[a > a_high] = np.nan
+    a[a < a_low] = np.nan
+    return a
 
 
-# In[164]:
+# In[206]:
 
-mu = 780
-result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
+fitcondition_a(result, a_high=df.values.max(), a_low=0)
+
+
+# ### muのfitcondition
+
+# In[153]:
+
+def fitcondition_mu(array, mu_real, mu_tol):
+    """mu_realとmuの差がmu_tol超えたらNaN"""
+    mu = array.T[1]
+    mu[abs(mu-mu_real) > mu_tol] = np.nan
+    return mu
+
+
+# In[155]:
+
+fitcondition_mu(result, mu, mu*0.1)  # muの値の10%超えたらNaN
+
+
+# ### siのfitcondition
+
+# In[176]:
+
+def fitcondition_si(array, si_high, si_low):
+    """si_realとsiの差がsi_high超えたらNaN"""
+    si = array.T[2]
+    si[si > si_high] = np.nan
+    si[si < si_low] = np.nan
+    return si
+
+
+# In[177]:
+
+fitcondition_si(result, si_high=80, si_low=-np.inf)
+
+
+# ### fitcondition総合
+
+# In[210]:
+
+def fitcondition(array, **kwargs):
+    """fitconditionすべて"""
+    fitcondition_a(array, kwargs['a_high'], kwargs['a_low'])
+    fitcondition_mu(array, kwargs['mu_real'], kwargs['mu_tol'])
+    fitcondition_si(array, kwargs['si_high'], kwargs['si_low'])
+    return array
+
+
+# In[211]:
+
+result
+
+
+# In[214]:
+
+fitcondition(result, a_high=df.values.max(), a_low=0,
+             mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
 result
 
 
