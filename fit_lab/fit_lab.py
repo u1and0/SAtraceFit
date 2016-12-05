@@ -614,15 +614,26 @@ plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseri
 result
 
 
-# In[94]:
+# フィッティング結果resultはarray.
+# タプルの第一要素だけを取り出しarray化したもの。
+# 
+# それぞれの要素は以下のものがdfのindexの個数分出てくる
+# 
+# `array[ [a, mu, si, nf],[a, mu, si, nf],[a, mu, si, nf],...]`
+
+# In[191]:
 
 plt_pnt_se
 
+
+# plt_pnt_seはポイントのプロットに必要な部分をdefit関数により抜き出したもの
 
 # In[95]:
 
 fita
 
+
+# defit関数により戻したplt_pnt_seをseries化
 
 # In[74]:
 
@@ -655,6 +666,34 @@ df.T.plot(cmap='gray')
 plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 
+# In[165]:
+
+plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+
+
+# In[246]:
+
+df.T.plot(cmap='gray', legend=False)
+plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+for nu in [0,2,3,4,5,6,7,8,9]:
+    pd.Series(gauss(df.columns, *result[nu])).plot()
+
+
+# In[227]:
+
+result_df = pd.DataFrame(result, columns=['a', 'mu', 'si', 'nf'])
+result_df['x'] = [np.array(df.columns) for i in range(10)]
+
+
+# In[241]:
+
+fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
+for nu in range(len(df)):
+    df.iloc[nu].plot(cmap='gray', legend=False, ax=ax[nu])
+    pd.Series(gauss(df.columns, *result[nu])).plot(ax=ax[nu])
+
+
 # ## データフレームへのフィットを関数化
 # 
 # resultさえあれば何とかなるので、resultをreturnする関数にする。
@@ -668,18 +707,30 @@ def fit_df(df, center, span, param):
     return result
 
 
-# In[113]:
+# In[164]:
 
-mu = 200
+mu = 780
 result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 
 
-# In[114]:
+# In[141]:
 
-plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
-plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+choice(df.iloc[1], 200, 200)
 
+
+# In[133]:
+
+regauss = np.apply_along_axis(lambda x: gauss(, *x), 1, result)
+pd.DataFrame(regauss)
+
+
+# ## resultからエラーをNaNにする
+# fit関数でエラーが出てメッセージが現れていてもNaNで返ってこず、明らかに値の大きすぎるものが返ってくることがある。
+# 
+# エラー条件:
+
+# 
 
 # ___
 
