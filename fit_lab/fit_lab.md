@@ -1192,11 +1192,6 @@ fitting結果resultにapplyする関数を決定する。
 
 
 ```python
-defit = lambda row: (row[1], row[0]+row[3])
-```
-
-
-```python
 result.columns
 ```
 
@@ -1211,7 +1206,7 @@ result.columns
 
 
 ```python
-plt_pnt = np.apply_along_axis(defit, 1, result); plt_pnt
+plt_pnt = np.apply_along_axis(lambda row: (row[1], row[0]+row[3]), 1, result); plt_pnt
 ```
 
 
@@ -1266,7 +1261,7 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 
 
-![png](fit_lab_files/fit_lab_98_1.png)
+![png](fit_lab_files/fit_lab_97_1.png)
 
 
 # 特定周波数(axis=1方向)のfittingまとめ
@@ -1333,9 +1328,19 @@ def fit(series, a, mu, si):
 
 
 ```python
-def defit(row):
+# def defit(row):
+#     """return fitting result as plot point"""
+#     return row[1], row[0]+row[3]
+```
+
+
+```python
+def defit(array):
     """return fitting result as plot point"""
-    return row[1], row[0]+row[3]
+    return np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
+                                  1, array)  # ポイントのプロットに必要な部分抜き出し
+#     plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+#     return plt_pnt_se
 ```
 
 ### choice関数
@@ -1344,6 +1349,16 @@ def defit(row):
 ```python
 def choice(array, center, span):↔
 
+```
+
+### リガウス関数
+
+
+```python
+def regauss(x, fitresult, axis=1):
+    """フィッティング結果のarrayをガウシアンに適用して、
+    ガウシアンの入ったarrayを返す"""
+    return np.apply_along_axis(lambda row: gauss(x, *row), axis, fitresult)
 ```
 
 ## データ
@@ -1374,12 +1389,12 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 
 
-    [<matplotlib.lines.Line2D at 0xb7f7048>]
+    [<matplotlib.lines.Line2D at 0xb73f4e0>]
 
 
 
 
-![png](fit_lab_files/fit_lab_116_1.png)
+![png](fit_lab_files/fit_lab_118_1.png)
 
 
 赤枠内をフィッティング
@@ -1454,7 +1469,7 @@ def fit_df(df, center, span, param):
 
 
 ```python
-mu = 220
+mu = 600
 result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 ```
@@ -1462,26 +1477,26 @@ result
 
 
 
-    array([[  2.21691725e-01,   2.13580606e+02,   2.71176423e+01,
-              1.12346093e+00],
-           [  1.82872764e-01,   2.20590464e+02,   8.88599712e-01,
-              1.98918253e+00],
-           [  2.08159926e+00,   2.22439925e+02,   4.59234267e+00,
-              1.08671082e+00],
-           [ -5.75501049e-01,   2.19661573e+02,   2.67285120e-01,
-              2.43258836e+00],
-           [  1.84757841e+00,   2.57369440e+02,   1.19921676e+02,
-             -7.69187238e-01],
-           [  2.10001609e+00,   2.23559109e+02,   3.64246222e+01,
-              5.40678934e-01],
-           [  5.36912197e-01,   2.19109931e+02,  -1.06405484e-01,
-              1.27381097e+00],
-           [  2.84744125e-01,   2.20155924e+02,  -1.66996800e-01,
-              1.56364664e-01],
-           [  1.14160092e+00,   2.82278656e+02,   8.91448299e+01,
-              2.47223917e+00],
-           [  1.12007172e+00,   2.26628421e+02,   3.30471036e+01,
-              5.07641118e-01]])
+    array([[  9.04614650e-02,   6.00872798e+02,  -2.23768295e-01,
+              1.43528468e+00],
+           [ -5.42000444e-01,   6.00801600e+02,   2.21217189e+01,
+              3.19934608e+00],
+           [ -5.09763551e+03,   6.58793959e+02,   6.75339722e+03,
+              5.09875778e+03],
+           [  2.28497377e-01,   5.99911484e+02,   9.41205360e-01,
+              1.29432143e+00],
+           [  1.09474474e+00,   5.63192507e+02,   3.14429182e+01,
+              1.24801765e+00],
+           [  9.50863816e-01,   5.83665214e+02,   5.50050522e+01,
+              1.78136877e+00],
+           [ -6.52217007e-01,   6.19842514e+02,   2.19248317e+01,
+              7.12951869e-01],
+           [ -8.64822886e-01,   6.00312267e+02,   2.43255493e-01,
+              5.40863430e-02],
+           [  5.81839087e+03,   5.58818403e+02,   6.76557794e+03,
+             -5.81474590e+03],
+           [  2.81763259e-01,   5.99812242e+02,   7.44834206e-01,
+              2.04531416e+00]])
 
 
 
@@ -1489,7 +1504,28 @@ result
 
 
 ```python
-plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0]+x[3]), 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt
+```
+
+
+
+
+    array([[ 213.58060554,    1.34515266],
+           [ 220.59046389,    2.1720553 ],
+           [ 222.43992503,    3.16831008],
+           [ 219.66157289,    1.85708731],
+           [ 257.36943998,    1.07839117],
+           [ 223.55910904,    2.64069503],
+           [ 219.10993057,    1.81072316],
+           [ 220.15592395,    0.44110879],
+           [ 282.27865555,    3.6138401 ],
+           [ 226.62842067,    1.62771284]])
+
+
+
+
+```python
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 plt_pnt_se
 ```
@@ -1684,65 +1720,23 @@ fi = a_, mu_, si_, nf_ = result.T; mu_
 
 
 ```python
+fig, ax = plt.subplots()
 with plt.style.context(('seaborn-darkgrid')):
-    df.T.plot(cmap='gray', legend=False)
-    plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+    df.T.plot(cmap='gray', legend=False, ax=ax)
+    
+    plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0]+x[3]), 1, result)  
+    # ポイントのプロットに必要な部分抜き出し
+    plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+    plt_pnt_se.plot(style='D', mew=2, fillstyle='none', ax=ax)
+    
+    pd.DataFrame(regauss(df.columns, result)).T.plot(legend=False, ax=ax)  # ラインでガウシアンプロット
 ```
 
 
-![png](fit_lab_files/fit_lab_135_0.png)
-
-
-簡単に、データフレームの上にポイントだけ打ってみた。
-
-
-```python
-regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
-pd.DataFrame(regauss).T.plot(legend=False)
-```
-
-
-
-
-    <matplotlib.axes._subplots.AxesSubplot at 0xc696400>
-
-
-
-
-![png](fit_lab_files/fit_lab_137_1.png)
+![png](fit_lab_files/fit_lab_138_0.png)
 
 
 resultをガウス関数に当てはめてウェーブを描く
-
-
-```python
-plt_pnt_se
-```
-
-
-
-
-    213.580606    1.345153
-    220.590464    2.172055
-    222.439925    3.168310
-    219.661573    1.857087
-    257.369440    1.078391
-    223.559109    2.640695
-    219.109931    1.810723
-    220.155924    0.441109
-    282.278656    3.613840
-    226.628421    1.627713
-    dtype: float64
-
-
-
-
-```python
-def regauss(x, fitresult, axis=1):
-    """フィッティング結果のarrayをガウシアンに適用して、
-    ガウシアンの入ったarrayを返す"""
-    return np.apply_along_axis(lambda row: gauss(x, *row), axis, fitresult)
-```
 
 
 ```python
@@ -1756,7 +1750,7 @@ for nu in range(len(plt_pnt_se)):
 ```
 
 
-![png](fit_lab_files/fit_lab_141_0.png)
+![png](fit_lab_files/fit_lab_140_0.png)
 
 
 データフレームのインデックスごとに描画
@@ -1784,7 +1778,7 @@ for nu in range(len(df)):
     
 
 
-![png](fit_lab_files/fit_lab_143_1.png)
+![png](fit_lab_files/fit_lab_142_1.png)
 
 
 
@@ -1798,7 +1792,7 @@ for nu in range(len(df)):
 ```
 
 
-![png](fit_lab_files/fit_lab_144_0.png)
+![png](fit_lab_files/fit_lab_143_0.png)
 
 
 ほとんどフィッティングできていないのがお分かりだろうか
@@ -1826,24 +1820,25 @@ for nu in range(len(df)):
 
 
 ```python
-def fitcondition_a(array, a_high, a_low):
+def fitcondition_a(array, a_high):
     """a_high以上、a_low未満はNaN"""
     a = array.T[0]
+    nf = array.T[3]
     a[a > a_high] = np.nan
-    a[a < a_low] = np.nan
+    a[a < nf] = np.nan
     return a
 ```
 
 
 ```python
-fitcondition_a(result, a_high=df.values.max(), a_low=0)
+fitcondition_a(result, a_high=df.values.max())
 ```
 
 
 
 
-    array([ 0.22169173,  0.18287276,  2.08159926,         nan,  1.84757841,
-            2.10001609,  0.5369122 ,  0.28474413,  1.14160092,  1.12007172])
+    array([        nan,         nan,  2.08159926,         nan,  1.84757841,
+            2.10001609,         nan,  0.28474413,         nan,  1.12007172])
 
 
 
@@ -1907,7 +1902,7 @@ fitcondition_si(result, si_high=80, si_low=-np.inf)
 ```python
 def fitcondition(array, **kwargs):
     """fitconditionすべて"""
-    fitcondition_a(array, kwargs['a_high'], kwargs['a_low'])
+    fitcondition_a(array, kwargs['a_high'])
     fitcondition_mu(array, kwargs['mu_real'], kwargs['mu_tol'])
     fitcondition_si(array, kwargs['si_high'], kwargs['si_low'])
     return array
@@ -1921,63 +1916,63 @@ result
 
 
 
-    array([[  2.21691725e-01,   2.13580606e+02,   2.71176423e+01,
-              1.12346093e+00],
-           [  1.82872764e-01,   2.20590464e+02,   8.88599712e-01,
-              1.98918253e+00],
-           [  2.08159926e+00,   2.22439925e+02,   4.59234267e+00,
-              1.08671082e+00],
-           [             nan,   2.19661573e+02,   2.67285120e-01,
-              2.43258836e+00],
-           [  1.84757841e+00,              nan,              nan,
-             -7.69187238e-01],
-           [  2.10001609e+00,   2.23559109e+02,   3.64246222e+01,
-              5.40678934e-01],
-           [  5.36912197e-01,   2.19109931e+02,  -1.06405484e-01,
-              1.27381097e+00],
-           [  2.84744125e-01,   2.20155924e+02,  -1.66996800e-01,
-              1.56364664e-01],
-           [  1.14160092e+00,              nan,              nan,
-              2.47223917e+00],
-           [  1.12007172e+00,   2.26628421e+02,   3.30471036e+01,
-              5.07641118e-01]])
+    array([[  9.04614650e-02,   6.00872798e+02,  -2.23768295e-01,
+              1.43528468e+00],
+           [ -5.42000444e-01,   6.00801600e+02,   2.21217189e+01,
+              3.19934608e+00],
+           [ -5.09763551e+03,   6.58793959e+02,   6.75339722e+03,
+              5.09875778e+03],
+           [  2.28497377e-01,   5.99911484e+02,   9.41205360e-01,
+              1.29432143e+00],
+           [  1.09474474e+00,   5.63192507e+02,   3.14429182e+01,
+              1.24801765e+00],
+           [  9.50863816e-01,   5.83665214e+02,   5.50050522e+01,
+              1.78136877e+00],
+           [ -6.52217007e-01,   6.19842514e+02,   2.19248317e+01,
+              7.12951869e-01],
+           [ -8.64822886e-01,   6.00312267e+02,   2.43255493e-01,
+              5.40863430e-02],
+           [  5.81839087e+03,   5.58818403e+02,   6.76557794e+03,
+             -5.81474590e+03],
+           [  2.81763259e-01,   5.99812242e+02,   7.44834206e-01,
+              2.04531416e+00]])
 
 
 
 
 ```python
-fitcondition(result, a_high=df.values.max(), a_low=0,
+fitcondition(result, a_high=df.values.max(), a_low=noisefloor,
              mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
 result
 ```
 
-    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:4: RuntimeWarning: invalid value encountered in greater
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:6: RuntimeWarning: invalid value encountered in less
     C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
     
 
 
 
 
-    array([[  2.21691725e-01,   2.13580606e+02,   2.71176423e+01,
-              1.12346093e+00],
-           [  1.82872764e-01,   2.20590464e+02,   8.88599712e-01,
-              1.98918253e+00],
-           [  2.08159926e+00,   2.22439925e+02,   4.59234267e+00,
-              1.08671082e+00],
-           [             nan,   2.19661573e+02,   2.67285120e-01,
-              2.43258836e+00],
-           [  1.84757841e+00,              nan,              nan,
-             -7.69187238e-01],
-           [  2.10001609e+00,   2.23559109e+02,   3.64246222e+01,
-              5.40678934e-01],
-           [  5.36912197e-01,   2.19109931e+02,  -1.06405484e-01,
-              1.27381097e+00],
-           [  2.84744125e-01,   2.20155924e+02,  -1.66996800e-01,
-              1.56364664e-01],
-           [  1.14160092e+00,              nan,              nan,
-              2.47223917e+00],
-           [  1.12007172e+00,   2.26628421e+02,   3.30471036e+01,
-              5.07641118e-01]])
+    array([[             nan,   6.00872798e+02,  -2.23768295e-01,
+              1.43528468e+00],
+           [             nan,   6.00801600e+02,   2.21217189e+01,
+              3.19934608e+00],
+           [             nan,   6.58793959e+02,              nan,
+              5.09875778e+03],
+           [             nan,   5.99911484e+02,   9.41205360e-01,
+              1.29432143e+00],
+           [             nan,   5.63192507e+02,   3.14429182e+01,
+              1.24801765e+00],
+           [             nan,   5.83665214e+02,   5.50050522e+01,
+              1.78136877e+00],
+           [             nan,   6.19842514e+02,   2.19248317e+01,
+              7.12951869e-01],
+           [             nan,   6.00312267e+02,   2.43255493e-01,
+              5.40863430e-02],
+           [             nan,   5.58818403e+02,              nan,
+             -5.81474590e+03],
+           [             nan,   5.99812242e+02,   7.44834206e-01,
+              2.04531416e+00]])
 
 
 
@@ -1985,16 +1980,17 @@ result
 
 
 ```python
-defit??
-```
+def fitplot(df, result):
+    fig, ax = plt.subplots(len(df), sharex=True, figsize=(4, 18))
+    df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)  # オリジナルをプロット
+    pd.DataFrame(regauss(df.columns, result)).T.plot(
+        legend=False, subplots=True, ax=ax)  # resultをregaussでガウシアンに戻す
+    for nu in range(len(df)):
+        pl = defit(result)
+        pl = pd.Series(pl.T[1], index=pl.T[0])  # fitting結果をseries化
 
-
-```python
-def defit(array):
-    plt_pnt = np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
-                                  1, array)  # ポイントのプロットに必要な部分抜き出し
-    plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
-    return plt_pnt_se
+        x, y = pl.index[nu], pl.iloc[nu]
+        ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
 
@@ -2016,41 +2012,7 @@ fitplot(df, result)
 ```
 
 
-    ---------------------------------------------------------------------------
-
-    ValueError                                Traceback (most recent call last)
-
-    <ipython-input-120-8f2bb0ad9b5c> in <module>()
-    ----> 1 fitplot(df, result)
-    
-
-    <ipython-input-118-805ba982ce93> in fitplot(df, result)
-          2     fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
-          3     df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)  # オリジナルをプロット
-    ----> 4     regaussdf = regauss(df, result)  # resultをregaussでガウシアンに戻す
-          5     pd.DataFrame(regaussdf).T.plot(legend=False, subplots=True, ax=ax)  # ラインをプロット
-          6     for nu in range(len(plt_pnt_se)):
-    
-
-    <ipython-input-111-5fd08f44281b> in regauss(x, fitresult, axis)
-          2     """フィッティング結果のarrayをガウシアンに適用して、
-          3     ガウシアンの入ったarrayを返す"""
-    ----> 4     return np.apply_along_axis(lambda row: gauss(x, *row), axis, fitresult)
-    
-
-    C:\tools\Anaconda3\lib\site-packages\numpy\lib\shape_base.py in apply_along_axis(func1d, axis, arr, *args, **kwargs)
-        115         outshape[axis] = len(res)
-        116         outarr = zeros(outshape, asarray(res).dtype)
-    --> 117         outarr[tuple(i.tolist())] = res
-        118         k = 1
-        119         while k < Ntot:
-    
-
-    ValueError: could not broadcast input array from shape (10,1001) into shape (10)
-
-
-
-![png](fit_lab_files/fit_lab_165_1.png)
+![png](fit_lab_files/fit_lab_163_0.png)
 
 
 ___
@@ -2108,7 +2070,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_172_1.png)
+![png](fit_lab_files/fit_lab_170_1.png)
 
 
 

@@ -99,8 +99,7 @@ def regauss(x, fitresult, axis=1):
 #     return row[1], row[0] + row[3]
 def defit(array):
     plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0] + x[3]), 1, array)  # ポイントのプロットに必要な部分抜き出し
-    plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
-    return plt_pnt_se
+    return plt_pnt
 
 
 def fitplot(df, result):
@@ -110,6 +109,8 @@ def fitplot(df, result):
         legend=False, subplots=True, ax=ax)  # resultをregaussでガウシアンに戻す
     for nu in range(len(df)):
         pl = defit(result)
+        pl = pd.Series(pl.T[1], index=pl.T[0])  # fitting結果をseries化
+
         x, y = pl.index[nu], pl.iloc[nu]
         ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 
@@ -117,11 +118,12 @@ def fitplot(df, result):
 # __FITTING CONDITION__________________________
 
 
-def fitcondition_a(array, a_high, a_low):
+def fitcondition_a(array, a_high):
     """a_high以上、a_low未満はNaN"""
     a = array.T[0]
+    nf = array.T[3]
     a[a > a_high] = np.nan
-    a[a < a_low] = np.nan
+    a[a < nf] = np.nan
     return a
 
 
@@ -142,7 +144,7 @@ def fitcondition_si(array, si_high, si_low):
 
 def fitcondition(array, **kwargs):
     """fitconditionすべて"""
-    fitcondition_a(array, kwargs['a_high'], kwargs['a_low'])
+    fitcondition_a(array, kwargs['a_high'])
     fitcondition_mu(array, kwargs['mu_real'], kwargs['mu_tol'])
     fitcondition_si(array, kwargs['si_high'], kwargs['si_low'])
     return array
@@ -162,6 +164,7 @@ if __name__ == '__main__':
     # TEST2
     mu = 560
     result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
+    print(result)
     fitcondition(result, a_high=df.values.max(), a_low=0,
                  mu_real=mu, mu_tol=mu * 0.1, si_high=80, si_low=-np.inf)
     print(result)

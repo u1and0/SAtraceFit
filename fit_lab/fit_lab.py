@@ -442,11 +442,6 @@ df.T.plot()
 # 
 # 横軸の値、縦軸の値を返す関数。
 
-# In[58]:
-
-defit = lambda row: (row[1], row[0]+row[3])
-
-
 # In[38]:
 
 result.columns
@@ -456,7 +451,7 @@ result.columns
 
 # In[61]:
 
-plt_pnt = np.apply_along_axis(defit, 1, result); plt_pnt
+plt_pnt = np.apply_along_axis(lambda row: (row[1], row[0]+row[3]), 1, result); plt_pnt
 
 
 # In[96]:
@@ -534,14 +529,24 @@ def fit(series, a, mu, si):
 
 # In[5]:
 
-def defit(row):
+# def defit(row):
+#     """return fitting result as plot point"""
+#     return row[1], row[0]+row[3]
+
+
+# In[6]:
+
+def defit(array):
     """return fitting result as plot point"""
-    return row[1], row[0]+row[3]
+    return np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
+                                  1, array)  # ポイントのプロットに必要な部分抜き出し
+#     plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+#     return plt_pnt_se
 
 
 # ### choice関数
 
-# In[6]:
+# In[7]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -557,9 +562,19 @@ def choice(array, center, span):
     return array[x1:x2]
 
 
+# ### リガウス関数
+
+# In[34]:
+
+def regauss(x, fitresult, axis=1):
+    """フィッティング結果のarrayをガウシアンに適用して、
+    ガウシアンの入ったarrayを返す"""
+    return np.apply_along_axis(lambda row: gauss(x, *row), axis, fitresult)
+
+
 # ## データ
 
-# In[7]:
+# In[8]:
 
 def waves(seed: int=np.random.randint(100), rows=10):
     """ランダムノイズを発生させたウェーブを作成する
@@ -579,13 +594,13 @@ def waves(seed: int=np.random.randint(100), rows=10):
     return noisedf.sum(1)
 
 
-# In[8]:
+# In[9]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 df.index=pd.date_range('20160101', periods=len(df), freq='H')
 
 
-# In[9]:
+# In[10]:
 
 df.T.plot(legend=False)
 # 枠線
@@ -625,7 +640,7 @@ result
 # 
 # resultさえあれば何とかなるので、resultをreturnする関数にする。
 
-# In[31]:
+# In[25]:
 
 def fit_df(df, center, span, param):
     dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
@@ -634,25 +649,30 @@ def fit_df(df, center, span, param):
     return result
 
 
-# In[79]:
+# In[80]:
 
-mu = 220
+mu = 600
 result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 
 
 # ### 返ってきたresultで様々な表現
 
-# In[80]:
+# In[17]:
 
-plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0]+x[3]), 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt
+
+
+# In[18]:
+
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 plt_pnt_se
 
 
 # plt_pnt_seはポイントのプロットに必要な部分をdefit関数により抜き出したもの
 
-# In[81]:
+# In[19]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
@@ -663,17 +683,17 @@ fita
 
 # defit関数により戻したplt_pnt_seをseries化
 
-# In[82]:
+# In[20]:
 
 fita.apply(lambda x: x[0][0])
 
 
-# In[83]:
+# In[21]:
 
 fita.apply(lambda x: x[0][1]+ x[0][3])
 
 
-# In[84]:
+# In[22]:
 
 ase = fita.apply(lambda x: x[0][0])
 muse = fita.apply(lambda x: x[0][1]+ x[0][3])
@@ -688,37 +708,23 @@ fi = a_, mu_, si_, nf_ = result.T; mu_
 
 # ### フィッティング可視化
 
-# In[86]:
+# In[39]:
 
+fig, ax = plt.subplots()
 with plt.style.context(('seaborn-darkgrid')):
-    df.T.plot(cmap='gray', legend=False)
-    plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
-
-
-# 簡単に、データフレームの上にポイントだけ打ってみた。
-
-# In[87]:
-
-regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
-pd.DataFrame(regauss).T.plot(legend=False)
+    df.T.plot(cmap='gray', legend=False, ax=ax)
+    
+    plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0]+x[3]), 1, result)  
+    # ポイントのプロットに必要な部分抜き出し
+    plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+    plt_pnt_se.plot(style='D', mew=2, fillstyle='none', ax=ax)
+    
+    pd.DataFrame(regauss(df.columns, result)).T.plot(legend=False, ax=ax)  # ラインでガウシアンプロット
 
 
 # resultをガウス関数に当てはめてウェーブを描く
 
-# In[88]:
-
-plt_pnt_se
-
-
-# In[111]:
-
-def regauss(x, fitresult, axis=1):
-    """フィッティング結果のarrayをガウシアンに適用して、
-    ガウシアンの入ったarrayを返す"""
-    return np.apply_along_axis(lambda row: gauss(x, *row), axis, fitresult)
-
-
-# In[110]:
+# In[40]:
 
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
@@ -774,24 +780,25 @@ for nu in range(len(df)):
 
 # ### aのfitcondition
 
-# In[96]:
+# In[68]:
 
-def fitcondition_a(array, a_high, a_low):
+def fitcondition_a(array, a_high):
     """a_high以上、a_low未満はNaN"""
     a = array.T[0]
+    nf = array.T[3]
     a[a > a_high] = np.nan
-    a[a < a_low] = np.nan
+    a[a < nf] = np.nan
     return a
 
 
-# In[97]:
+# In[70]:
 
-fitcondition_a(result, a_high=df.values.max(), a_low=0)
+fitcondition_a(result, a_high=df.values.max())
 
 
 # ### muのfitcondition
 
-# In[98]:
+# In[45]:
 
 def fitcondition_mu(array, mu_real, mu_tol):
     """mu_realとmuの差がmu_tol超えたらNaN"""
@@ -800,14 +807,14 @@ def fitcondition_mu(array, mu_real, mu_tol):
     return mu
 
 
-# In[99]:
+# In[46]:
 
 fitcondition_mu(result, mu, mu*0.1)  # muの値の10%超えたらNaN
 
 
 # ### siのfitcondition
 
-# In[100]:
+# In[47]:
 
 def fitcondition_si(array, si_high, si_low):
     """si_realとsiの差がsi_high超えたらNaN"""
@@ -817,49 +824,50 @@ def fitcondition_si(array, si_high, si_low):
     return si
 
 
-# In[101]:
+# In[48]:
 
 fitcondition_si(result, si_high=80, si_low=-np.inf)
 
 
 # ### fitcondition総合
 
-# In[102]:
+# In[71]:
 
 def fitcondition(array, **kwargs):
     """fitconditionすべて"""
-    fitcondition_a(array, kwargs['a_high'], kwargs['a_low'])
+    fitcondition_a(array, kwargs['a_high'])
     fitcondition_mu(array, kwargs['mu_real'], kwargs['mu_tol'])
     fitcondition_si(array, kwargs['si_high'], kwargs['si_low'])
     return array
 
 
-# In[103]:
+# In[81]:
 
 result
 
 
-# In[104]:
+# In[82]:
 
-fitcondition(result, a_high=df.values.max(), a_low=0,
+fitcondition(result, a_high=df.values.max(), a_low=noisefloor,
              mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
 result
 
 
 # ### フィルタリング可視化
 
-# In[114]:
+# In[74]:
 
-get_ipython().magic('pinfo2 defit')
+def fitplot(df, result):
+    fig, ax = plt.subplots(len(df), sharex=True, figsize=(4, 18))
+    df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)  # オリジナルをプロット
+    pd.DataFrame(regauss(df.columns, result)).T.plot(
+        legend=False, subplots=True, ax=ax)  # resultをregaussでガウシアンに戻す
+    for nu in range(len(df)):
+        pl = defit(result)
+        pl = pd.Series(pl.T[1], index=pl.T[0])  # fitting結果をseries化
 
-
-# In[116]:
-
-def defit(array):
-    plt_pnt = np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
-                                  1, array)  # ポイントのプロットに必要な部分抜き出し
-    plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
-    return plt_pnt_se
+        x, y = pl.index[nu], pl.iloc[nu]
+        ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 
 
 # In[ ]:
@@ -875,7 +883,7 @@ def fitplot(df, result):
         ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 
 
-# In[120]:
+# In[83]:
 
 fitplot(df, result)
 
