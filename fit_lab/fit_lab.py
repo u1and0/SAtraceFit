@@ -504,20 +504,35 @@ def gauss(x, a, mu, si, nf):
 param = a, mu, si = 5, 300, 3
 
 
-# ### フィッティング関数
+# ### フィット関数
 
-# In[22]:
+# In[66]:
 
 def fit(series, a, mu, si):
-    """fitting function"""
+    """fitting function
+    シリーズに対してガウシアンフィッティングを行う
+    引数:
+        a: 最大値
+        mu: 位置
+        si: 線幅
+    戻り値:
+        cf: フィッティング結果(エラーが起きたときはnp.nanのタプル)"""
+    errcount = 0
     x, y =  series.index, series.values
     nf = scoreatpercentile(series, 25)
-    return curve_fit(gauss, x, y, p0=(a, mu, si, nf))
+    cfshape = (4,)
+    try:
+        cf = curve_fit(gauss, x, y, p0=(a, mu, si, nf))
+    except Exception as e:
+        errcount += 1
+        print('error', errcount, ':', e)  # エラー数, エラーメッセージの表示
+        cf = np.full(cfshape, np.nan), np.nan  # エラー起きたらnan返す
+    return cf
 
 
 # ### デフィット関数
 
-# In[5]:
+# In[7]:
 
 def defit(row):
     """return fitting result as plot point"""
@@ -526,7 +541,7 @@ def defit(row):
 
 # ### choice関数
 
-# In[6]:
+# In[8]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -544,7 +559,7 @@ def choice(array, center, span):
 
 # ## データ
 
-# In[45]:
+# In[9]:
 
 def waves(seed: int=np.random.randint(100), rows=10):
     """ランダムノイズを発生させたウェーブを作成する
@@ -564,75 +579,115 @@ def waves(seed: int=np.random.randint(100), rows=10):
     return noisedf.sum(1)
 
 
-# In[48]:
+# In[10]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 df.index=pd.date_range('20160101', periods=len(df), freq='H')
 
 
-# In[51]:
-
-df.index
-
-
-# In[49]:
+# In[13]:
 
 df.T.plot(legend=False)
+# 枠線
 w1, w2, h1, h2 = 150, 300, -.5, 4.5
-plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')  # 枠線
+plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 
 # 赤枠内をフィッティング
 
 # ## フィッティング処理
 
-# In[52]:
+# In[92]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
-try:
-	fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
-except RuntimeError as e:
-    print(e)
+fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
     
 # フィッティング結果の整理
-# result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
-# plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
-# plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 
 
-# In[54]:
+# In[93]:
 
-dfe
-
-
-# In[53]:
-
-fita
+result
 
 
-# ## フィッティング可視化
-
-# In[108]:
-
-fi = a_, mu_, si_, nf_ = result.T; mu_
-
-
-# In[88]:
+# In[94]:
 
 plt_pnt_se
 
 
-# In[102]:
+# In[95]:
 
-ma, mi = df.values.max(), df.values.min()
-plt_pnt_se[plt_pnt_se[plt_pnt_se<ma]>mi]
+fita
 
 
-# In[87]:
+# In[74]:
 
-# df.T.plot(cmap='gray')
+fita.apply(lambda x: x[0][0])
+
+
+# In[76]:
+
+fita.apply(lambda x: x[0][1]+ x[0][3])
+
+
+# In[90]:
+
+ase = fita.apply(lambda x: x[0][0])
+muse = fita.apply(lambda x: x[0][1]+ x[0][3])
+amudf = pd.DataFrame([ase, muse]).T
+amudf
+
+
+# In[96]:
+
+fi = a_, mu_, si_, nf_ = result.T; mu_
+
+
+# ## フィッティング可視化
+
+# In[72]:
+
+df.T.plot(cmap='gray')
 plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+
+
+# ## データフレームへのフィットを関数化
+# 
+# resultさえあれば何とかなるので、resultをreturnする関数にする。
+
+# In[103]:
+
+def fit_df(df, center, span):
+    param = a, mu, si = df[center].max(), center, 1
+    ch = (center, span)  # dfからcenter,spanで取り出す
+    dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
+    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+
+    # フィッティング結果の整理
+    result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+    return result
+
+
+# In[104]:
+
+result = fit_df(df, 220, 200)
+result
+
+
+# In[105]:
+
+result = fit_df(df, 490, 200)
+result
+
+
+# In[92]:
+
+plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 
 
 # ___
