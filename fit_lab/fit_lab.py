@@ -661,11 +661,9 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 # In[103]:
 
-def fit_df(df, center, span):
-    param = a, mu, si = df[center].max(), center, 1
-    ch = (center, span)  # dfからcenter,spanで取り出す
-    dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
-    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
+def fit_df(df, center, span, param):
+    dfe = df.apply(choice,axis=1, args=center, span)  # dfからcenter,spanで取り出す
+    fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
 
     # フィッティング結果の整理
     result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
