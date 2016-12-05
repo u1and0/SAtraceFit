@@ -659,30 +659,23 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 # 
 # resultさえあれば何とかなるので、resultをreturnする関数にする。
 
-# In[103]:
+# In[108]:
 
 def fit_df(df, center, span, param):
-    dfe = df.apply(choice,axis=1, args=center, span)  # dfからcenter,spanで取り出す
+    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
     fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
-
-    # フィッティング結果の整理
     result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
     return result
 
 
-# In[104]:
+# In[113]:
 
-result = fit_df(df, 220, 200)
+mu = 200
+result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 
 
-# In[105]:
-
-result = fit_df(df, 490, 200)
-result
-
-
-# In[92]:
+# In[114]:
 
 plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化

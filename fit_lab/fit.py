@@ -76,8 +76,18 @@ def waves(seed: int=np.random.randint(100), rows=10):
     return noisedf.sum(1)
 
 
-def fit_df(df, center, span, param):
-    dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
+def fit_df(df, center: float, span: float, param: tuple):
+    """pandas.DataFrameに対してガウシアンフィッティング
+    引数:
+        center, span: 抜き出す中心周波数, 幅
+        param: a, mu, siの初期値
+            a: 最大値
+            mu: 位置
+            si: 線幅
+    戻り値:
+        result: フィッティング結果のarray(np.array型)
+            要素数: 0, 1, 2, 3 = a, mu, si nf(ノイズフロア) """
+    dfe = df.apply(choice, axis=1, args=(center, span))  # dfからcenter,spanで取り出す
     fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
     result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
     return result

@@ -30446,14 +30446,12 @@ EAgE4xQhxAUCgUAgGKf8fz5AEugBFTmVAAAAAElFTkSuQmCC
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[103]:</div>
+<div class="prompt input_prompt">In&nbsp;[108]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fit_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
-    <span class="n">dfe</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">center</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span>  <span class="c1"># dfからcenter,spanで取り出す</span>
+    <span class="n">dfe</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">span</span><span class="p">))</span>  <span class="c1"># dfからcenter,spanで取り出す</span>
     <span class="n">fita</span> <span class="o">=</span> <span class="n">dfe</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fit</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>  <span class="c1"># フィッティング # param = a, mu, si</span>
-
-    <span class="c1"># フィッティング結果の整理</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fita</span><span class="p">])</span>  <span class="c1"># タプルの第一要素だけを取り出しarray化</span>
     <span class="k">return</span> <span class="n">result</span>
 </pre></div>
@@ -30465,109 +30463,12 @@ EAgE4xQhxAUCgUAgGKf8fz5AEugBFTmVAAAAAElFTkSuQmCC
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[104]:</div>
+<div class="prompt input_prompt">In&nbsp;[113]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">fit_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mu</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fit_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">mu</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">mu</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">mu</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="n">result</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[104]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([[  2.21691725e-01,   2.13580606e+02,   2.71176423e+01,
-          1.12346093e+00],
-       [  1.82872764e-01,   2.20590464e+02,   8.88599712e-01,
-          1.98918253e+00],
-       [  2.08159926e+00,   2.22439925e+02,   4.59234267e+00,
-          1.08671082e+00],
-       [ -5.75501049e-01,   2.19661573e+02,   2.67285120e-01,
-          2.43258836e+00],
-       [  1.84757841e+00,   2.57369440e+02,   1.19921676e+02,
-         -7.69187238e-01],
-       [  2.10001609e+00,   2.23559109e+02,   3.64246222e+01,
-          5.40678934e-01],
-       [  5.36912197e-01,   2.19109931e+02,  -1.06405484e-01,
-          1.27381097e+00],
-       [  2.84744125e-01,   2.20155924e+02,  -1.66996800e-01,
-          1.56364664e-01],
-       [  1.14160092e+00,   2.82278656e+02,   8.91448299e+01,
-          2.47223917e+00],
-       [  1.12007172e+00,   2.26628421e+02,   3.30471036e+01,
-          5.07641118e-01]])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[105]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">fit_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mi">490</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-<span class="n">result</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[105]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>array([[  6.09632590e-01,   4.52668105e+02,   2.48124575e+01,
-          1.80484274e+00],
-       [  4.77719367e-01,   4.95913415e+02,   1.23812102e+00,
-          2.86529818e+00],
-       [  1.89850907e+00,   4.39608833e+02,   7.03684270e+01,
-          1.20519337e+00],
-       [ -5.44771364e+02,   6.12078520e+02,  -5.80921013e+03,
-          5.46253682e+02],
-       [ -2.04193375e+00,   4.31513618e+02,   6.49819855e+01,
-          2.47084422e+00],
-       [ -3.80628207e-02,   4.86058973e+02,  -8.13098381e-02,
-          1.74054884e+00],
-       [ -1.10854882e+00,   5.30669962e+02,   4.00563208e+01,
-          1.65257657e+00],
-       [ -2.28949421e-01,   4.89262561e+02,  -1.18327723e-01,
-          2.71266524e-01],
-       [ -1.16329706e-01,   4.88604118e+02,   1.23922372e+00,
-          3.95875001e+00],
-       [ -1.65863898e+00,   3.88161377e+02,   1.11774843e+02,
-          2.62324782e+00]])</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[92]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt_pnt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">defit</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>  <span class="c1"># ポイントのプロットに必要な部分抜き出し</span>
-<span class="n">plt_pnt_se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">plt_pnt</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">plt_pnt</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># fitting結果をseries化</span>
 </pre></div>
 
 </div>
@@ -30579,12 +30480,55 @@ EAgE4xQhxAUCgUAgGKf8fz5AEugBFTmVAAAAAElFTkSuQmCC
 
 
 <div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>error 1 : Optimal parameters not found: Number of calls to function has reached maxfev = 1000.
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
+  category=OptimizeWarning)
 </pre>
 </div>
 </div>
 
+<div class="output_area"><div class="prompt output_prompt">Out[113]:</div>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>array([[  5.71788825e-01,   1.99912836e+02,   5.94827054e-01,
+          1.13795713e+00],
+       [  4.34347315e-03,   2.01023783e+02,  -5.67345393e-04,
+          1.93911341e+00],
+       [ -4.41838149e-01,   2.00467127e+02,   3.13324952e-01,
+          1.07208714e+00],
+       [ -3.55605509e-01,   2.00664052e+02,   6.53013301e-01,
+          2.49266598e+00],
+       [  7.60012182e-01,   2.40107815e+02,   4.62099298e+01,
+          3.74405375e-01],
+       [  2.00338350e+00,   2.23743692e+02,   3.44917731e+01,
+          6.50741092e-01],
+       [  1.90775776e-01,   2.02348593e+02,   2.17699530e+00,
+          1.29057518e+00],
+       [ -7.66207994e+03,   2.28443443e+02,   7.90516183e+03,
+          7.66204865e+03],
+       [  2.18149253e-01,   2.00426789e+02,   3.34782035e-01,
+          3.16452589e+00],
+       [  1.21276284e+00,   2.26425910e+02,   3.61800881e+01,
+          4.02177934e-01]])</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[114]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt_pnt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">defit</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>  <span class="c1"># ポイントのプロットに必要な部分抜き出し</span>
+<span class="n">plt_pnt_se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">plt_pnt</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">plt_pnt</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># fitting結果をseries化</span>
+</pre></div>
+
+</div>
 </div>
 </div>
 
