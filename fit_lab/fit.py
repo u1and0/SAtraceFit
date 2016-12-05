@@ -39,18 +39,18 @@ def fit(series, a, mu, si):
     return cf
 
 
-def choice(array, center, span):
+def choice(df, center, span):
     """特定の範囲を抜き出す
-    引数: 
+    引数:
         array: 抜き出し対象のarrayっぽいの(arraylike)
         center: 抜き出し中央(float)
         span: 抜き出しスパン(float)
     戻り値:
         rarray:
     """
-    x1 = int(center - span / 2)
-    x2 = int(center + span / 2)
-    return array[x1:x2]
+    x1 = center - span / 2
+    x2 = center + span / 2
+    return df.ix[:, x1:x2]
 
 
 def waves(seed: int=np.random.randint(100), rows=10):
@@ -82,7 +82,7 @@ def fit_df(df, center: float, span: float, param: tuple):
     戻り値:
         result: フィッティング結果のarray(np.array型)
             要素数: 0, 1, 2, 3 = a, mu, si nf(ノイズフロア) """
-    dfe = df.apply(choice, axis=1, args=(center, span))  # dfからcenter,spanで取り出す
+    dfe = choice(df, center, span)  # dfからcenter,spanで取り出す
     fita = dfe.apply(fit, axis=1, args=param)  # フィッティング # param = a, mu, si
     result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
     return result
@@ -102,11 +102,13 @@ def defit(array):
     return plt_pnt
 
 
-def fitplot(df, result):
-    fig, ax = plt.subplots(len(df), sharex=True, figsize=(4, 18))
-    df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)  # オリジナルをプロット
+def fitplot(df, result, subplots=True):
+    if subplots:
+        fig, ax = plt.subplots(len(df), sharex=True, figsize=(4, 18))
+    df.T.plot(color='gray', lw=.5, legend=False, subplots=subplots,
+              ax=ax if subplots else None)  # オリジナルをプロット
     pd.DataFrame(regauss(df.columns, result)).T.plot(
-        legend=False, subplots=True, ax=ax)  # resultをregaussでガウシアンに戻す
+        legend=False, subplots=subplots, ax=ax if subplots else None)  # resultをregaussでガウシアンに戻す
     for nu in range(len(df)):
         pl = defit(result)
         pl = pd.Series(pl.T[1], index=pl.T[0])  # fitting結果をseries化
@@ -122,7 +124,7 @@ def fitcondition_a(array, a_high):
     """a_high以上、a_low未満はNaN"""
     a = array.T[0]
     nf = array.T[3]
-    a[a > a_high] = np.nan
+    a[a+nf > a_high] = np.nan
     a[a < nf] = np.nan
     return a
 
@@ -136,7 +138,7 @@ def fitcondition_mu(array, mu_real, mu_tol):
 
 def fitcondition_si(array, si_high, si_low):
     """si_realとsiの差がsi_high超えたらNaN"""
-    si = array.T[2]
+    si = abs(array.T[2])
     si[si > si_high] = np.nan
     si[si < si_low] = np.nan
     return si
@@ -165,8 +167,8 @@ if __name__ == '__main__':
     mu = 560
     result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
     print(result)
-    fitcondition(result, a_high=df.values.max(), a_low=0,
-                 mu_real=mu, mu_tol=mu * 0.1, si_high=80, si_low=-np.inf)
+    fitcondition(result, a_high=df.values.max(), mu_real=mu, mu_tol=mu * 0.1,
+                 si_high=80, si_low=-np.inf)
     print(result)
 
     fitplot(df, result)
