@@ -474,7 +474,7 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 # ## モジュール
 
-# In[1]:
+# In[7]:
 
 from scipy.optimize import curve_fit
 from scipy.stats import scoreatpercentile
@@ -485,7 +485,7 @@ r = np.random
 
 # ### ガウス関数
 
-# In[2]:
+# In[8]:
 
 def gauss(x, a, mu, si, nf):
     """
@@ -499,14 +499,14 @@ def gauss(x, a, mu, si, nf):
 
 # ## パラメータ
 
-# In[3]:
+# In[12]:
 
 param = a, mu, si = 5, 300, 3
 
 
 # ### フィット関数
 
-# In[66]:
+# In[1]:
 
 def fit(series, a, mu, si):
     """fitting function
@@ -532,7 +532,7 @@ def fit(series, a, mu, si):
 
 # ### デフィット関数
 
-# In[7]:
+# In[2]:
 
 def defit(row):
     """return fitting result as plot point"""
@@ -541,7 +541,7 @@ def defit(row):
 
 # ### choice関数
 
-# In[8]:
+# In[3]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -559,7 +559,7 @@ def choice(array, center, span):
 
 # ## データ
 
-# In[9]:
+# In[4]:
 
 def waves(seed: int=np.random.randint(100), rows=10):
     """ランダムノイズを発生させたウェーブを作成する
@@ -579,13 +579,13 @@ def waves(seed: int=np.random.randint(100), rows=10):
     return noisedf.sum(1)
 
 
-# In[10]:
+# In[9]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 df.index=pd.date_range('20160101', periods=len(df), freq='H')
 
 
-# In[13]:
+# In[10]:
 
 df.T.plot(legend=False)
 # 枠線
@@ -597,7 +597,7 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 # ## フィッティング処理
 
-# In[92]:
+# In[13]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
@@ -609,7 +609,7 @@ plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロット�
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 
 
-# In[93]:
+# In[14]:
 
 result
 
@@ -621,31 +621,33 @@ result
 # 
 # `array[ [a, mu, si, nf],[a, mu, si, nf],[a, mu, si, nf],...]`
 
-# In[191]:
+# ### 返ってきたresultで様々な表現
+
+# In[15]:
 
 plt_pnt_se
 
 
 # plt_pnt_seはポイントのプロットに必要な部分をdefit関数により抜き出したもの
 
-# In[95]:
+# In[16]:
 
 fita
 
 
 # defit関数により戻したplt_pnt_seをseries化
 
-# In[74]:
+# In[17]:
 
 fita.apply(lambda x: x[0][0])
 
 
-# In[76]:
+# In[18]:
 
 fita.apply(lambda x: x[0][1]+ x[0][3])
 
 
-# In[90]:
+# In[19]:
 
 ase = fita.apply(lambda x: x[0][0])
 muse = fita.apply(lambda x: x[0][1]+ x[0][3])
@@ -653,48 +655,91 @@ amudf = pd.DataFrame([ase, muse]).T
 amudf
 
 
-# In[96]:
+# In[20]:
 
 fi = a_, mu_, si_, nf_ = result.T; mu_
 
 
-# ## フィッティング可視化
+# ### フィッティング可視化
 
-# In[72]:
+# In[81]:
 
-df.T.plot(cmap='gray')
-plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
-
-
-# In[165]:
-
-plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
-plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+with plt.style.context(('seaborn-darkgrid')):
+    df.T.plot(cmap='gray', legend=False)
+    plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 
-# In[246]:
+# 簡単に、データフレームの上にポイントだけ打ってみた。
+
+# In[48]:
+
+regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+pd.DataFrame(regauss).T.plot(legend=False)
+
+
+# resultをガウス関数に当てはめてウェーブを描く
+
+# In[33]:
+
+plt_pnt_se
+
+
+# In[77]:
+
+regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+
+fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
+df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
+pd.DataFrame(regauss).T.plot(legend=False, subplots=True, ax=ax)
+for nu in range(len(plt_pnt_se)):
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
+
+
+# データフレームのインデックスごとに描画
+
+# In[39]:
 
 df.T.plot(cmap='gray', legend=False)
-plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
-for nu in [0,2,3,4,5,6,7,8,9]:
+for nu in range(len(df)):
     pd.Series(gauss(df.columns, *result[nu])).plot()
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    print(x,y)
+    plt.plot(x, y, 'D', mew=2, fillstyle='none')
 
 
-# In[227]:
-
-result_df = pd.DataFrame(result, columns=['a', 'mu', 'si', 'nf'])
-result_df['x'] = [np.array(df.columns) for i in range(10)]
-
-
-# In[241]:
+# In[43]:
 
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 for nu in range(len(df)):
     df.iloc[nu].plot(cmap='gray', legend=False, ax=ax[nu])
     pd.Series(gauss(df.columns, *result[nu])).plot(ax=ax[nu])
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 
 
-# ## データフレームへのフィットを関数化
+# ほとんどフィッティングできていないのがお分かりだろうか
+# 
+# フィルターをかけることでこの中から不要なフィッティング結果を削除する。
+
+# ## フィルタリング
+
+# 具体的に
+# 
+# * 処理
+#     * フィッティング取れていないと思ったものは`np.nan`にする
+# * 判定
+#     * 逆さまになっている(a < 0)
+#     * 大きさが小さい(a < ?)
+#     * 大きさがとんでもない(a >> Series.max())
+#     * 位置がでたらめ(abs(mu-result[1]) > 1)
+#     * 幅が広すぎ(abs(si - result[2]) > 100)
+#     * 幅が狭すぎ(1 < abs(si - result[2]))
+#     
+# 課題として、大きい/小さい、広い/狭い、位置が動きすぎの判定はどれだけのさじ加減か。
+# 機械学習できたらな...
+
+# ### データフレームへのフィットを関数化
 # 
 # resultさえあれば何とかなるので、resultをreturnする関数にする。
 
@@ -713,26 +758,6 @@ mu = 780
 result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 
-
-# In[141]:
-
-choice(df.iloc[1], 200, 200)
-
-
-# In[133]:
-
-regauss = np.apply_along_axis(lambda x: gauss(, *x), 1, result)
-pd.DataFrame(regauss)
-
-
-# ## resultからエラーをNaNにする
-# fit関数でエラーが出てメッセージが現れていてもNaNで返ってこず、明らかに値の大きすぎるものが返ってくることがある。
-# 
-# エラー条件:
-
-# 
-
-# ___
 
 # ___
 

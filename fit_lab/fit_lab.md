@@ -1374,7 +1374,7 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 
 
-    [<matplotlib.lines.Line2D at 0xc32e940>]
+    [<matplotlib.lines.Line2D at 0xb7859e8>]
 
 
 
@@ -1439,6 +1439,8 @@ result
 
 `array[ [a, mu, si, nf],[a, mu, si, nf],[a, mu, si, nf],...]`
 
+### 返ってきたresultで様々な表現
+
 
 ```python
 plt_pnt_se
@@ -1447,16 +1449,16 @@ plt_pnt_se
 
 
 
-    780.512039    1.652931
-    862.139087    0.756497
-    781.671029    1.963156
-    779.529277    0.749000
-    779.531319    1.000100
-    779.561434    0.065564
-    783.230322    2.105016
-    777.949314    2.097634
-    743.991978    2.790259
-    713.420777    2.116724
+     288.736148    0.963191
+     311.584775    2.534266
+     282.022999    1.667766
+    NaN                 NaN
+     257.369098    1.078380
+     309.939505    0.562953
+     304.536318    1.074673
+     322.392036    0.334537
+     282.278675    3.613840
+     301.482594    0.659467
     dtype: float64
 
 
@@ -1622,48 +1624,105 @@ fi = a_, mu_, si_, nf_ = result.T; mu_
 
 
 
-## フィッティング可視化
+### フィッティング可視化
 
 
 ```python
-df.T.plot(cmap='gray')
-plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+with plt.style.context(('seaborn-darkgrid')):
+    df.T.plot(cmap='gray', legend=False)
+    plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
+```
+
+
+![png](fit_lab_files/fit_lab_132_0.png)
+
+
+簡単に、データフレームの上にポイントだけ打ってみた。
+
+
+```python
+regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+pd.DataFrame(regauss).T.plot(legend=False)
 ```
 
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0xdb94a58>
+    <matplotlib.axes._subplots.AxesSubplot at 0xfb1bdd8>
 
 
 
 
-![png](fit_lab_files/fit_lab_131_1.png)
+![png](fit_lab_files/fit_lab_134_1.png)
+
+
+resultをガウス関数に当てはめてウェーブを描く
+
+
+```python
+plt_pnt_se
+```
+
+
+
+
+     288.736148    0.963191
+     311.584775    2.534266
+     282.022999    1.667766
+    NaN                 NaN
+     257.369098    1.078380
+     309.939505    0.562953
+     304.536318    1.074673
+     322.392036    0.334537
+     282.278675    3.613840
+     301.482594    0.659467
+    dtype: float64
+
 
 
 
 ```python
-plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
-plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+regauss = np.apply_along_axis(lambda x: gauss(df.columns, *x), 1, result)
+
+fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
+df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
+pd.DataFrame(regauss).T.plot(legend=False, subplots=True, ax=ax)
+for nu in range(len(plt_pnt_se)):
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
+
+
+![png](fit_lab_files/fit_lab_137_0.png)
+
+
+データフレームのインデックスごとに描画
 
 
 ```python
 df.T.plot(cmap='gray', legend=False)
-plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
-for nu in [0,2,3,4,5,6,7,8,9]:
+for nu in range(len(df)):
     pd.Series(gauss(df.columns, *result[nu])).plot()
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    print(x,y)
+    plt.plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
+    288.736147632 0.963191000992
+    311.584774633 2.53426576687
+    282.022999068 1.66776588931
+    nan nan
+    257.36909834 1.07838001504
+    309.939505307 0.562953176723
+    304.536318147 1.07467285419
+    322.392035815 0.334536504881
+    282.278675355 3.61384008251
+    301.482593897 0.659467096638
+    
 
-![png](fit_lab_files/fit_lab_133_0.png)
 
+![png](fit_lab_files/fit_lab_139_1.png)
 
-
-```python
-result_df = pd.DataFrame(result, columns=['a', 'mu', 'si', 'nf'])
-result_df['x'] = [np.array(df.columns) for i in range(10)]
-```
 
 
 ```python
@@ -1671,13 +1730,36 @@ fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 for nu in range(len(df)):
     df.iloc[nu].plot(cmap='gray', legend=False, ax=ax[nu])
     pd.Series(gauss(df.columns, *result[nu])).plot(ax=ax[nu])
+    x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
+    ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
 
-![png](fit_lab_files/fit_lab_135_0.png)
+![png](fit_lab_files/fit_lab_140_0.png)
 
 
-## データフレームへのフィットを関数化
+ほとんどフィッティングできていないのがお分かりだろうか
+
+フィルターをかけることでこの中から不要なフィッティング結果を削除する。
+
+## フィルタリング
+
+具体的に
+
+* 処理
+    * フィッティング取れていないと思ったものは`np.nan`にする
+* 判定
+    * 逆さまになっている(a < 0)
+    * 大きさが小さい(a < ?)
+    * 大きさがとんでもない(a >> Series.max())
+    * 位置がでたらめ(abs(mu-result[1]) > 1)
+    * 幅が広すぎ(abs(si - result[2]) > 100)
+    * 幅が狭すぎ(1 < abs(si - result[2]))
+    
+課題として、大きい/小さい、広い/狭い、位置が動きすぎの判定はどれだけのさじ加減か。
+機械学習できたらな...
+
+### データフレームへのフィットを関数化
 
 resultさえあれば何とかなるので、resultをreturnする関数にする。
 
@@ -1726,373 +1808,6 @@ result
               1.53888500e+00]])
 
 
-
-
-```python
-choice(df.iloc[1], 200, 200)
-```
-
-
-
-
-    100    2.194612
-    101    1.902864
-    102    2.036521
-    103    1.807899
-    104    2.181988
-    105    2.000748
-    106    2.141441
-    107    1.843097
-    108    1.981759
-    109    1.883204
-    110    2.000174
-    111    1.747573
-    112    2.066951
-    113    1.678163
-    114    1.805811
-    115    1.892687
-    116    1.879163
-    117    2.179470
-    118    1.834508
-    119    2.242259
-    120    2.027459
-    121    1.978060
-    122    1.976952
-    123    1.997405
-    124    1.958410
-    125    1.830374
-    126    1.835913
-    127    1.906383
-    128    2.014884
-    129    2.012979
-             ...   
-    270    2.158423
-    271    1.892581
-    272    1.836323
-    273    1.968737
-    274    1.959935
-    275    1.958485
-    276    1.984213
-    277    1.887646
-    278    2.041031
-    279    2.103917
-    280    1.724490
-    281    2.087511
-    282    2.137659
-    283    2.043337
-    284    2.167191
-    285    2.078500
-    286    1.992308
-    287    2.070302
-    288    1.869311
-    289    2.083349
-    290    2.237345
-    291    2.106148
-    292    1.936724
-    293    2.273421
-    294    2.488673
-    295    2.180622
-    296    2.038268
-    297    2.472714
-    298    2.365252
-    299    2.636044
-    Name: 2016-01-01 01:00:00, dtype: float64
-
-
-
-
-```python
-regauss = np.apply_along_axis(lambda x: gauss(, *x), 1, result)
-pd.DataFrame(regauss)
-```
-
-
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>0</th>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>6</th>
-      <th>7</th>
-      <th>8</th>
-      <th>9</th>
-      <th>...</th>
-      <th>991</th>
-      <th>992</th>
-      <th>993</th>
-      <th>994</th>
-      <th>995</th>
-      <th>996</th>
-      <th>997</th>
-      <th>998</th>
-      <th>999</th>
-      <th>1000</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>5.553152</td>
-      <td>5.541438</td>
-      <td>5.529738</td>
-      <td>5.518053</td>
-      <td>5.506383</td>
-      <td>5.494728</td>
-      <td>5.483087</td>
-      <td>5.471460</td>
-      <td>5.459849</td>
-      <td>5.448252</td>
-      <td>...</td>
-      <td>1.177708</td>
-      <td>1.180635</td>
-      <td>1.183576</td>
-      <td>1.186533</td>
-      <td>1.189504</td>
-      <td>1.192490</td>
-      <td>1.195490</td>
-      <td>1.198506</td>
-      <td>1.201536</td>
-      <td>1.204581</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>3.269982</td>
-      <td>...</td>
-      <td>3.269651</td>
-      <td>3.269677</td>
-      <td>3.269701</td>
-      <td>3.269723</td>
-      <td>3.269744</td>
-      <td>3.269763</td>
-      <td>3.269781</td>
-      <td>3.269797</td>
-      <td>3.269812</td>
-      <td>3.269826</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3.045657</td>
-      <td>3.045654</td>
-      <td>3.045651</td>
-      <td>3.045647</td>
-      <td>3.045644</td>
-      <td>3.045640</td>
-      <td>3.045636</td>
-      <td>3.045632</td>
-      <td>3.045629</td>
-      <td>3.045624</td>
-      <td>...</td>
-      <td>2.865331</td>
-      <td>2.867924</td>
-      <td>2.870488</td>
-      <td>2.873022</td>
-      <td>2.875527</td>
-      <td>2.878003</td>
-      <td>2.880450</td>
-      <td>2.882869</td>
-      <td>2.885260</td>
-      <td>2.887623</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>...</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-      <td>0.956129</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>...</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-      <td>1.161680</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>...</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-      <td>1.837458</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>13.444289</td>
-      <td>13.434978</td>
-      <td>13.425612</td>
-      <td>13.416190</td>
-      <td>13.406713</td>
-      <td>13.397179</td>
-      <td>13.387590</td>
-      <td>13.377945</td>
-      <td>13.368243</td>
-      <td>13.358485</td>
-      <td>...</td>
-      <td>6.993806</td>
-      <td>7.022838</td>
-      <td>7.051846</td>
-      <td>7.080831</td>
-      <td>7.109792</td>
-      <td>7.138728</td>
-      <td>7.167639</td>
-      <td>7.196524</td>
-      <td>7.225382</td>
-      <td>7.254214</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>1.754531</td>
-      <td>...</td>
-      <td>1.754046</td>
-      <td>1.754070</td>
-      <td>1.754092</td>
-      <td>1.754114</td>
-      <td>1.754134</td>
-      <td>1.754154</td>
-      <td>1.754173</td>
-      <td>1.754190</td>
-      <td>1.754207</td>
-      <td>1.754224</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>...</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-      <td>3.035368</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>...</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-      <td>2.035114</td>
-    </tr>
-  </tbody>
-</table>
-<p>10 rows × 1001 columns</p>
-</div>
-
-
-
-## resultからエラーをNaNにする
-fit関数でエラーが出てメッセージが現れていてもNaNで返ってこず、明らかに値の大きすぎるものが返ってくることがある。
-
-エラー条件:
-
-
-
-___
 
 ___
 
@@ -2149,7 +1864,7 @@ plt.plot(f(data, *fitp))
 
 
 
-![png](fit_lab_files/fit_lab_150_1.png)
+![png](fit_lab_files/fit_lab_153_1.png)
 
 
 
