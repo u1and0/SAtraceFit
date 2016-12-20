@@ -469,7 +469,7 @@ plt_pnt_se.plot(style='D', mew=2, fillstyle='none')
 
 # ## モジュール
 
-# In[1]:
+# In[52]:
 
 from scipy.optimize import curve_fit
 from scipy.stats import scoreatpercentile
@@ -480,7 +480,7 @@ r = np.random
 
 # ### ガウス関数
 
-# In[2]:
+# In[53]:
 
 def gauss(x, a, mu, si, nf):
     """
@@ -494,14 +494,14 @@ def gauss(x, a, mu, si, nf):
 
 # ## パラメータ
 
-# In[3]:
+# In[54]:
 
 param = a, mu, si = 5, 300, 3
 
 
 # ### フィット関数
 
-# In[4]:
+# In[55]:
 
 def fit(series, a, mu, si):
     """fitting function
@@ -527,14 +527,14 @@ def fit(series, a, mu, si):
 
 # ### デフィット関数
 
-# In[5]:
+# In[56]:
 
 # def defit(row):
 #     """return fitting result as plot point"""
 #     return row[1], row[0]+row[3]
 
 
-# In[6]:
+# In[57]:
 
 def defit(array):
     """return fitting result as plot point"""
@@ -546,7 +546,7 @@ def defit(array):
 
 # ### choice関数
 
-# In[7]:
+# In[58]:
 
 def choice(array, center, span):
     """特定の範囲を抜き出す
@@ -564,7 +564,7 @@ def choice(array, center, span):
 
 # ### リガウス関数
 
-# In[34]:
+# In[59]:
 
 def regauss(x, fitresult, axis=1):
     """フィッティング結果のarrayをガウシアンに適用して、
@@ -574,7 +574,7 @@ def regauss(x, fitresult, axis=1):
 
 # ## データ
 
-# In[8]:
+# In[60]:
 
 def waves(seed: int=np.random.randint(100), rows=10):
     """ランダムノイズを発生させたウェーブを作成する
@@ -594,13 +594,13 @@ def waves(seed: int=np.random.randint(100), rows=10):
     return noisedf.sum(1)
 
 
-# In[9]:
+# In[61]:
 
 df = pd.DataFrame([waves(i) for i in range(10)]); df
 df.index=pd.date_range('20160101', periods=len(df), freq='H')
 
 
-# In[10]:
+# In[62]:
 
 df.T.plot(legend=False)
 # 枠線
@@ -612,7 +612,7 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 # ## フィッティング処理
 
-# In[29]:
+# In[63]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
@@ -624,7 +624,7 @@ plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロット�
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 
 
-# In[30]:
+# In[ ]:
 
 result
 
@@ -640,7 +640,7 @@ result
 # 
 # resultさえあれば何とかなるので、resultをreturnする関数にする。
 
-# In[25]:
+# In[ ]:
 
 def fit_df(df, center, span, param):
     dfe = df.apply(choice,axis=1, args=(center, span))  # dfからcenter,spanで取り出す
@@ -649,7 +649,7 @@ def fit_df(df, center, span, param):
     return result
 
 
-# In[80]:
+# In[ ]:
 
 mu = 600
 result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
@@ -658,13 +658,13 @@ result
 
 # ### 返ってきたresultで様々な表現
 
-# In[17]:
+# In[ ]:
 
 plt_pnt = np.apply_along_axis(lambda x: (x[1], x[0]+x[3]), 1, result)  # ポイントのプロットに必要な部分抜き出し
 plt_pnt
 
 
-# In[18]:
+# In[ ]:
 
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 plt_pnt_se
@@ -672,7 +672,7 @@ plt_pnt_se
 
 # plt_pnt_seはポイントのプロットに必要な部分をdefit関数により抜き出したもの
 
-# In[19]:
+# In[ ]:
 
 ch = (220, 200)  # 中央値220でスパン200で取り出したい
 dfe = df.apply(choice,axis=1, args=ch)  # 抜き出し
@@ -683,17 +683,17 @@ fita
 
 # defit関数により戻したplt_pnt_seをseries化
 
-# In[20]:
+# In[ ]:
 
 fita.apply(lambda x: x[0][0])
 
 
-# In[21]:
+# In[ ]:
 
 fita.apply(lambda x: x[0][1]+ x[0][3])
 
 
-# In[22]:
+# In[ ]:
 
 ase = fita.apply(lambda x: x[0][0])
 muse = fita.apply(lambda x: x[0][1]+ x[0][3])
@@ -701,14 +701,14 @@ amudf = pd.DataFrame([ase, muse]).T
 amudf
 
 
-# In[85]:
+# In[ ]:
 
 fi = a_, mu_, si_, nf_ = result.T; mu_
 
 
 # ### フィッティング可視化
 
-# In[39]:
+# In[ ]:
 
 fig, ax = plt.subplots()
 with plt.style.context(('seaborn-darkgrid')):
@@ -724,7 +724,7 @@ with plt.style.context(('seaborn-darkgrid')):
 
 # resultをガウス関数に当てはめてウェーブを描く
 
-# In[40]:
+# In[ ]:
 
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 df.T.plot(color='gray', lw=.5, legend=False, subplots=True, ax=ax)
@@ -737,7 +737,7 @@ for nu in range(len(plt_pnt_se)):
 
 # データフレームのインデックスごとに描画
 
-# In[91]:
+# In[ ]:
 
 df.T.plot(lw=.5, cmap='gray', legend=False)
 for nu in range(len(df)):
@@ -747,7 +747,7 @@ for nu in range(len(df)):
     plt.plot(x, y, 'D', mew=2, fillstyle='none')
 
 
-# In[92]:
+# In[ ]:
 
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
 for nu in range(len(df)):
@@ -780,7 +780,7 @@ for nu in range(len(df)):
 
 # ### aのfitcondition
 
-# In[68]:
+# In[ ]:
 
 def fitcondition_a(array, a_high):
     """a_high以上、a_low未満はNaN"""
@@ -791,14 +791,14 @@ def fitcondition_a(array, a_high):
     return a
 
 
-# In[70]:
+# In[ ]:
 
 fitcondition_a(result, a_high=df.values.max())
 
 
 # ### muのfitcondition
 
-# In[45]:
+# In[ ]:
 
 def fitcondition_mu(array, mu_real, mu_tol):
     """mu_realとmuの差がmu_tol超えたらNaN"""
@@ -807,14 +807,14 @@ def fitcondition_mu(array, mu_real, mu_tol):
     return mu
 
 
-# In[46]:
+# In[ ]:
 
 fitcondition_mu(result, mu, mu*0.1)  # muの値の10%超えたらNaN
 
 
 # ### siのfitcondition
 
-# In[47]:
+# In[ ]:
 
 def fitcondition_si(array, si_high, si_low):
     """si_realとsiの差がsi_high超えたらNaN"""
@@ -824,14 +824,14 @@ def fitcondition_si(array, si_high, si_low):
     return si
 
 
-# In[48]:
+# In[64]:
 
 fitcondition_si(result, si_high=80, si_low=-np.inf)
 
 
 # ### fitcondition総合
 
-# In[71]:
+# In[65]:
 
 def fitcondition(array, **kwargs):
     """fitconditionすべて"""
@@ -841,21 +841,33 @@ def fitcondition(array, **kwargs):
     return array
 
 
-# In[81]:
+# In[66]:
 
 result
 
 
-# In[82]:
+# In[80]:
 
-fitcondition(result, a_high=df.values.max(), a_low=noisefloor,
+import sys
+sys.path.append('../../SAtraceView/')
+import plottxt as pt
+
+
+# In[ ]:
+
+
+
+
+# In[84]:
+
+fitcondition(result, a_high=df.values.max(), a_low=df.noisefloororor(1),
              mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
 result
 
 
 # ### フィルタリング可視化
 
-# In[74]:
+# In[68]:
 
 def fitplot(df, result):
     fig, ax = plt.subplots(len(df), sharex=True, figsize=(4, 18))
@@ -883,52 +895,7 @@ def fitplot(df, result):
         ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 
 
-# In[83]:
+# In[69]:
 
 fitplot(df, result)
-
-
-# ___
-
-# In[2]:
-
-import sys
-sys.path.append('../')
-
-
-# In[4]:
-
-from fitclass import *
-
-
-# In[5]:
-
-# giving initial parameters
-mu = Parameter(7)
-sigma = Parameter(3)
-height = Parameter(5)
-
-
-# In[13]:
-
-# define your function:
-def f(x, h=height(), mu=mu(), si=sigma()): return h * np.exp(-((x-mu)/si)**2)
-
-
-# In[16]:
-
-# fit! (given that data is an array with the data to fit)
-data = 10*np.exp(-np.linspace(0, 10, 100)**2) + np.random.rand(100)
-fitp, _ = fit(f, [mu, sigma, height], data); fitp
-
-
-# In[21]:
-
-plt.plot(data)
-plt.plot(f(data, *fitp))
-
-
-# In[ ]:
-
-
 

@@ -1389,7 +1389,7 @@ plt.plot((w1,w1, w2, w2, w1), (h1, h2, h2, h1, h1), 'r--')
 
 
 
-    [<matplotlib.lines.Line2D at 0xb73f4e0>]
+    [<matplotlib.lines.Line2D at 0xdffe320>]
 
 
 
@@ -1417,35 +1417,48 @@ plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseri
     
 
 
+    ---------------------------------------------------------------------------
+
+    ValueError                                Traceback (most recent call last)
+
+    <ipython-input-63-c02d53284f8a> in <module>()
+          5 # フィッティング結果の整理
+          6 result = np.array([i[0] for i in fita])  # タプルの第一要素だけを取り出しarray化
+    ----> 7 plt_pnt = np.apply_along_axis(defit, 1, result)  # ポイントのプロットに必要な部分抜き出し
+          8 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+    
+
+    C:\tools\Anaconda3\lib\site-packages\numpy\lib\shape_base.py in apply_along_axis(func1d, axis, arr, *args, **kwargs)
+         89     outshape = asarray(arr.shape).take(indlist)
+         90     i.put(indlist, ind)
+    ---> 91     res = func1d(arr[tuple(i.tolist())], *args, **kwargs)
+         92     #  if res is a number, then we have a smaller output array
+         93     if isscalar(res):
+    
+
+    <ipython-input-57-3363e0ff9124> in defit(array)
+          2     """return fitting result as plot point"""
+          3     return np.apply_along_axis(lambda row: (row[1], row[0]+row[3]),
+    ----> 4                                   1, array)  # ポイントのプロットに必要な部分抜き出し
+          5 #     plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
+          6 #     return plt_pnt_se
+    
+
+    C:\tools\Anaconda3\lib\site-packages\numpy\lib\shape_base.py in apply_along_axis(func1d, axis, arr, *args, **kwargs)
+         81     if (axis >= nd):
+         82         raise ValueError("axis must be less than arr.ndim; axis=%d, rank=%d."
+    ---> 83             % (axis, nd))
+         84     ind = [0]*(nd-1)
+         85     i = zeros(nd, 'O')
+    
+
+    ValueError: axis must be less than arr.ndim; axis=1, rank=1.
+
+
+
 ```python
 result
 ```
-
-
-
-
-    array([[ -2.66132842e-01,   2.88736148e+02,   9.15963390e+00,
-              1.22932384e+00],
-           [  6.29053800e-01,   3.11584775e+02,   1.57575658e+01,
-              1.90521197e+00],
-           [  2.25524792e+00,   2.82022999e+02,   1.16582536e+02,
-             -5.87482031e-01],
-           [             nan,              nan,              nan,
-                         nan],
-           [  1.84837107e+00,   2.57369098e+02,   1.19955217e+02,
-             -7.69991058e-01],
-           [ -1.12784752e+00,   3.09939505e+02,   2.05845982e+01,
-              1.69080069e+00],
-           [ -2.75390973e-01,   3.04536318e+02,   3.17605280e+01,
-              1.35006383e+00],
-           [  1.88870239e-01,   3.22392036e+02,   1.21034501e+01,
-              1.45666266e-01],
-           [  1.14160133e+00,   2.82278675e+02,   8.91448753e+01,
-              2.47223875e+00],
-           [ -3.80732172e-01,   3.01482594e+02,   1.72303744e+01,
-              1.04019927e+00]])
-
-
 
 フィッティング結果resultはarray.
 タプルの第一要素だけを取り出しarray化したもの。
@@ -1474,32 +1487,6 @@ result = fit_df(df, center=mu, span=200, param=(df[mu].max(), mu, 1))
 result
 ```
 
-
-
-
-    array([[  9.04614650e-02,   6.00872798e+02,  -2.23768295e-01,
-              1.43528468e+00],
-           [ -5.42000444e-01,   6.00801600e+02,   2.21217189e+01,
-              3.19934608e+00],
-           [ -5.09763551e+03,   6.58793959e+02,   6.75339722e+03,
-              5.09875778e+03],
-           [  2.28497377e-01,   5.99911484e+02,   9.41205360e-01,
-              1.29432143e+00],
-           [  1.09474474e+00,   5.63192507e+02,   3.14429182e+01,
-              1.24801765e+00],
-           [  9.50863816e-01,   5.83665214e+02,   5.50050522e+01,
-              1.78136877e+00],
-           [ -6.52217007e-01,   6.19842514e+02,   2.19248317e+01,
-              7.12951869e-01],
-           [ -8.64822886e-01,   6.00312267e+02,   2.43255493e-01,
-              5.40863430e-02],
-           [  5.81839087e+03,   5.58818403e+02,   6.76557794e+03,
-             -5.81474590e+03],
-           [  2.81763259e-01,   5.99812242e+02,   7.44834206e-01,
-              2.04531416e+00]])
-
-
-
 ### 返ってきたresultで様々な表現
 
 
@@ -1509,43 +1496,10 @@ plt_pnt
 ```
 
 
-
-
-    array([[ 213.58060554,    1.34515266],
-           [ 220.59046389,    2.1720553 ],
-           [ 222.43992503,    3.16831008],
-           [ 219.66157289,    1.85708731],
-           [ 257.36943998,    1.07839117],
-           [ 223.55910904,    2.64069503],
-           [ 219.10993057,    1.81072316],
-           [ 220.15592395,    0.44110879],
-           [ 282.27865555,    3.6138401 ],
-           [ 226.62842067,    1.62771284]])
-
-
-
-
 ```python
 plt_pnt_se = pd.Series(plt_pnt.T[1], index=plt_pnt.T[0])  # fitting結果をseries化
 plt_pnt_se
 ```
-
-
-
-
-    213.580606    1.345153
-    220.590464    2.172055
-    222.439925    3.168310
-    219.661573    1.857087
-    257.369440    1.078391
-    223.559109    2.640695
-    219.109931    1.810723
-    220.155924    0.441109
-    282.278656    3.613840
-    226.628421    1.627713
-    dtype: float64
-
-
 
 plt_pnt_seはポイントのプロットに必要な部分をdefit関数により抜き出したもの
 
@@ -1558,27 +1512,6 @@ fita = dfe.apply(fit, axis=1, args=param)  # フィッティング
 fita
 ```
 
-    C:\tools\Anaconda3\lib\site-packages\scipy\optimize\minpack.py:715: OptimizeWarning: Covariance of the parameters could not be estimated
-      category=OptimizeWarning)
-    
-
-
-
-
-    2016-01-01 00:00:00    ([0.221690672943, 213.580488158, 27.1208233524...
-    2016-01-01 01:00:00    ([0.182837882718, 220.590773451, 0.88893858950...
-    2016-01-01 02:00:00    ([2.08159841168, 222.439929952, 4.59234679185,...
-    2016-01-01 03:00:00    ([-0.599273196879, 219.657527327, 0.2639297643...
-    2016-01-01 04:00:00    ([1.84821490434, 257.369180184, 119.948620612,...
-    2016-01-01 05:00:00    ([2.10001496382, 223.55910331, 36.4245546125, ...
-    2016-01-01 06:00:00    ([-0.115082890904, 219.504196564, 0.0011172805...
-    2016-01-01 07:00:00    ([0.425635251809, 220.140523187, -0.1085459189...
-    2016-01-01 08:00:00    ([1.14160086337, 282.278652916, 89.1448232556,...
-    2016-01-01 09:00:00    ([1.1200718093, 226.628402467, 33.0471191404, ...
-    Freq: H, dtype: object
-
-
-
 defit関数により戻したplt_pnt_seをseries化
 
 
@@ -1587,43 +1520,9 @@ fita.apply(lambda x: x[0][0])
 ```
 
 
-
-
-    2016-01-01 00:00:00    0.221691
-    2016-01-01 01:00:00    0.182838
-    2016-01-01 02:00:00    2.081598
-    2016-01-01 03:00:00   -0.599273
-    2016-01-01 04:00:00    1.848215
-    2016-01-01 05:00:00    2.100015
-    2016-01-01 06:00:00   -0.115083
-    2016-01-01 07:00:00    0.425635
-    2016-01-01 08:00:00    1.141601
-    2016-01-01 09:00:00    1.120072
-    Freq: H, dtype: float64
-
-
-
-
 ```python
 fita.apply(lambda x: x[0][1]+ x[0][3])
 ```
-
-
-
-
-    2016-01-01 00:00:00    214.703941
-    2016-01-01 01:00:00    222.579956
-    2016-01-01 02:00:00    223.526641
-    2016-01-01 03:00:00    222.090116
-    2016-01-01 04:00:00    256.599347
-    2016-01-01 05:00:00    224.099784
-    2016-01-01 06:00:00    220.779582
-    2016-01-01 07:00:00    220.296888
-    2016-01-01 08:00:00    284.750892
-    2016-01-01 09:00:00    227.136043
-    Freq: H, dtype: float64
-
-
 
 
 ```python
@@ -1634,87 +1533,9 @@ amudf
 ```
 
 
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>0</th>
-      <th>1</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2016-01-01 00:00:00</th>
-      <td>0.221691</td>
-      <td>214.703941</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 01:00:00</th>
-      <td>0.182838</td>
-      <td>222.579956</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 02:00:00</th>
-      <td>2.081598</td>
-      <td>223.526641</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 03:00:00</th>
-      <td>-0.599273</td>
-      <td>222.090116</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 04:00:00</th>
-      <td>1.848215</td>
-      <td>256.599347</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 05:00:00</th>
-      <td>2.100015</td>
-      <td>224.099784</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 06:00:00</th>
-      <td>-0.115083</td>
-      <td>220.779582</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 07:00:00</th>
-      <td>0.425635</td>
-      <td>220.296888</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 08:00:00</th>
-      <td>1.141601</td>
-      <td>284.750892</td>
-    </tr>
-    <tr>
-      <th>2016-01-01 09:00:00</th>
-      <td>1.120072</td>
-      <td>227.136043</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
 ```python
 fi = a_, mu_, si_, nf_ = result.T; mu_
 ```
-
-
-
-
-    array([ 213.58060554,  220.59046389,  222.43992503,  219.66157289,
-            257.36943998,  223.55910904,  219.10993057,  220.15592395,
-            282.27865555,  226.62842067])
-
-
 
 ### フィッティング可視化
 
@@ -1732,10 +1553,6 @@ with plt.style.context(('seaborn-darkgrid')):
     pd.DataFrame(regauss(df.columns, result)).T.plot(legend=False, ax=ax)  # ラインでガウシアンプロット
 ```
 
-
-![png](fit_lab_files/fit_lab_138_0.png)
-
-
 resultをガウス関数に当てはめてウェーブを描く
 
 
@@ -1749,10 +1566,6 @@ for nu in range(len(plt_pnt_se)):
     ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
-
-![png](fit_lab_files/fit_lab_140_0.png)
-
-
 データフレームのインデックスごとに描画
 
 
@@ -1765,22 +1578,6 @@ for nu in range(len(df)):
     plt.plot(x, y, 'D', mew=2, fillstyle='none')
 ```
 
-    213.580605538 1.34515265913
-    220.59046389 2.17205529893
-    222.439925034 3.16831007531
-    219.66157289 1.85708731459
-    257.369439978 1.0783911683
-    223.559109042 2.64069502599
-    219.109930572 1.81072316438
-    220.155923946 0.441108789599
-    282.278655555 3.61384009745
-    226.628420666 1.6277128406
-    
-
-
-![png](fit_lab_files/fit_lab_142_1.png)
-
-
 
 ```python
 fig, ax = plt.subplots(10, sharex=True, figsize=(4,18))
@@ -1790,10 +1587,6 @@ for nu in range(len(df)):
     x,y=plt_pnt_se.index[nu], plt_pnt_se.iloc[nu]
     ax[nu].plot(x, y, 'D', mew=2, fillstyle='none')
 ```
-
-
-![png](fit_lab_files/fit_lab_143_0.png)
-
 
 ほとんどフィッティングできていないのがお分かりだろうか
 
@@ -1834,14 +1627,6 @@ def fitcondition_a(array, a_high):
 fitcondition_a(result, a_high=df.values.max())
 ```
 
-
-
-
-    array([        nan,         nan,  2.08159926,         nan,  1.84757841,
-            2.10001609,         nan,  0.28474413,         nan,  1.12007172])
-
-
-
 ### muのfitcondition
 
 
@@ -1857,15 +1642,6 @@ def fitcondition_mu(array, mu_real, mu_tol):
 ```python
 fitcondition_mu(result, mu, mu*0.1)  # muの値の10%超えたらNaN
 ```
-
-
-
-
-    array([ 213.58060554,  220.59046389,  222.43992503,  219.66157289,
-                     nan,  223.55910904,  219.10993057,  220.15592395,
-                     nan,  226.62842067])
-
-
 
 ### siのfitcondition
 
@@ -1884,15 +1660,16 @@ def fitcondition_si(array, si_high, si_low):
 fitcondition_si(result, si_high=80, si_low=-np.inf)
 ```
 
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:4: RuntimeWarning: invalid value encountered in greater
     C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
     
 
 
 
 
-    array([ 27.11764231,   0.88859971,   4.59234267,   0.26728512,
-                    nan,  36.42462223,  -0.10640548,  -0.1669968 ,
-                    nan,  33.04710357])
+    array([  9.1596339 ,  15.75756576,          nan,          nan,
+                    nan,  20.5845982 ,  31.76052798,  12.1034501 ,
+                    nan,  17.23037441])
 
 
 
@@ -1916,63 +1693,77 @@ result
 
 
 
-    array([[  9.04614650e-02,   6.00872798e+02,  -2.23768295e-01,
-              1.43528468e+00],
-           [ -5.42000444e-01,   6.00801600e+02,   2.21217189e+01,
-              3.19934608e+00],
-           [ -5.09763551e+03,   6.58793959e+02,   6.75339722e+03,
-              5.09875778e+03],
-           [  2.28497377e-01,   5.99911484e+02,   9.41205360e-01,
-              1.29432143e+00],
-           [  1.09474474e+00,   5.63192507e+02,   3.14429182e+01,
-              1.24801765e+00],
-           [  9.50863816e-01,   5.83665214e+02,   5.50050522e+01,
-              1.78136877e+00],
-           [ -6.52217007e-01,   6.19842514e+02,   2.19248317e+01,
-              7.12951869e-01],
-           [ -8.64822886e-01,   6.00312267e+02,   2.43255493e-01,
-              5.40863430e-02],
-           [  5.81839087e+03,   5.58818403e+02,   6.76557794e+03,
-             -5.81474590e+03],
-           [  2.81763259e-01,   5.99812242e+02,   7.44834206e-01,
-              2.04531416e+00]])
+    array([[ -2.66132842e-01,   2.88736148e+02,   9.15963390e+00,
+              1.22932384e+00],
+           [  6.29053800e-01,   3.11584775e+02,   1.57575658e+01,
+              1.90521197e+00],
+           [  2.25524792e+00,   2.82022999e+02,              nan,
+             -5.87482031e-01],
+           [             nan,              nan,              nan,
+                         nan],
+           [  1.84837107e+00,   2.57369098e+02,              nan,
+             -7.69991058e-01],
+           [ -1.12784752e+00,   3.09939505e+02,   2.05845982e+01,
+              1.69080069e+00],
+           [ -2.75390973e-01,   3.04536318e+02,   3.17605280e+01,
+              1.35006383e+00],
+           [  1.88870239e-01,   3.22392036e+02,   1.21034501e+01,
+              1.45666266e-01],
+           [  1.14160133e+00,   2.82278675e+02,              nan,
+              2.47223875e+00],
+           [ -3.80732172e-01,   3.01482594e+02,   1.72303744e+01,
+              1.04019927e+00]])
 
 
 
 
 ```python
-fitcondition(result, a_high=df.values.max(), a_low=noisefloor,
+import sys
+sys.path.append('../../SAtraceView/')
+import plottxt as pt
+```
+
+
+```python
+
+```
+
+
+```python
+fitcondition(result, a_high=df.values.max(), a_low=df.noisefloororor(1),
              mu_real=mu, mu_tol=mu*0.1, si_high=80, si_low=-np.inf)
 result
 ```
 
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in greater
     C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:6: RuntimeWarning: invalid value encountered in less
+    C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:4: RuntimeWarning: invalid value encountered in greater
     C:\tools\Anaconda3\lib\site-packages\ipykernel\__main__.py:5: RuntimeWarning: invalid value encountered in less
     
 
 
 
 
-    array([[             nan,   6.00872798e+02,  -2.23768295e-01,
-              1.43528468e+00],
-           [             nan,   6.00801600e+02,   2.21217189e+01,
-              3.19934608e+00],
-           [             nan,   6.58793959e+02,              nan,
-              5.09875778e+03],
-           [             nan,   5.99911484e+02,   9.41205360e-01,
-              1.29432143e+00],
-           [             nan,   5.63192507e+02,   3.14429182e+01,
-              1.24801765e+00],
-           [             nan,   5.83665214e+02,   5.50050522e+01,
-              1.78136877e+00],
-           [             nan,   6.19842514e+02,   2.19248317e+01,
-              7.12951869e-01],
-           [             nan,   6.00312267e+02,   2.43255493e-01,
-              5.40863430e-02],
-           [             nan,   5.58818403e+02,              nan,
-             -5.81474590e+03],
-           [             nan,   5.99812242e+02,   7.44834206e-01,
-              2.04531416e+00]])
+    array([[             nan,   2.88736148e+02,   9.15963390e+00,
+              1.22932384e+00],
+           [             nan,   3.11584775e+02,   1.57575658e+01,
+              1.90521197e+00],
+           [  2.25524792e+00,   2.82022999e+02,              nan,
+             -5.87482031e-01],
+           [             nan,              nan,              nan,
+                         nan],
+           [  1.84837107e+00,              nan,              nan,
+             -7.69991058e-01],
+           [             nan,   3.09939505e+02,   2.05845982e+01,
+              1.69080069e+00],
+           [             nan,   3.04536318e+02,   3.17605280e+01,
+              1.35006383e+00],
+           [  1.88870239e-01,   3.22392036e+02,   1.21034501e+01,
+              1.45666266e-01],
+           [             nan,   2.82278675e+02,              nan,
+              2.47223875e+00],
+           [             nan,   3.01482594e+02,   1.72303744e+01,
+              1.04019927e+00]])
 
 
 
@@ -2012,68 +1803,5 @@ fitplot(df, result)
 ```
 
 
-![png](fit_lab_files/fit_lab_163_0.png)
+![png](fit_lab_files/fit_lab_165_0.png)
 
-
-___
-
-
-```python
-import sys
-sys.path.append('../')
-```
-
-
-```python
-from fitclass import *
-```
-
-
-```python
-# giving initial parameters
-mu = Parameter(7)
-sigma = Parameter(3)
-height = Parameter(5)
-```
-
-
-```python
-# define your function:
-def f(x, h=height(), mu=mu(), si=sigma()): return h * np.exp(-((x-mu)/si)**2)
-```
-
-
-```python
-# fit! (given that data is an array with the data to fit)
-data = 10*np.exp(-np.linspace(0, 10, 100)**2) + np.random.rand(100)
-fitp, _ = fit(f, [mu, sigma, height], data); fitp
-```
-
-
-
-
-    array([ -1.89549379,  12.09140583,  11.17214325])
-
-
-
-
-```python
-plt.plot(data)
-plt.plot(f(data, *fitp))
-```
-
-
-
-
-    [<matplotlib.lines.Line2D at 0xc1785f8>]
-
-
-
-
-![png](fit_lab_files/fit_lab_170_1.png)
-
-
-
-```python
-
-```
